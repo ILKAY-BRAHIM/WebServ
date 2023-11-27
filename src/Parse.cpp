@@ -297,6 +297,7 @@ void Parse::fill_server(vectstr_t vector)
 				if (!location.path.empty())
 				{
 					fill_locations(vector, i, location);
+					if (vector[i+1] == "}")
 					server.locations.push_back (location);
 				}
 			}
