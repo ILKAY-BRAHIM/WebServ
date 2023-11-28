@@ -64,4 +64,6 @@ typedef struct s_server
 	void		clear();
 }	t_server;
 
+void    printServers(std::vector<t_server> servers);
+
 #endif

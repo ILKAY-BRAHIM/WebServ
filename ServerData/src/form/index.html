@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/x-icon" href="../assets/logo.png">
+    <link rel="stylesheet" href="style.css">
+    <title>Webserv</title>
+</head>
+<body>
+    <h1>Hello world</h1>
+
+    <form action="/submit_endpoint" method="get">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="message">Message:</label><br>
+        <textarea id="message" name="message" rows="4" cols="50" required></textarea><br><br>
+        <label for="pdfUpload">Upload PDF:</label>
+        <input type="file" id="pdfUpload" name="pdfUpload" required><br><br>
+        <input type="submit" value="Submit">
+
+    </form>
+</body>
+</html>
+
+<!-- delete form test not compla -->
+
+<!-- <h1>Delete Data</h1>
+
+<button class="delete-button" onclick="deleteData()">Delete</button>
+
+<script>
+    function deleteData() {
+        const dataToDelete = {
+            // Include any data you want to send for deletion
+            id: 1,
+            file: "file.txt",
+            // Other relevant data...
+        };
+
+        fetch('/delete_endpoint', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+                // Add any other headers if needed
+            },
+            body: JSON.stringify(dataToDelete) // Convert data to JSON string
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // If expecting a JSON response
+        })
+        .then(data => {
+            // Handle successful deletion response
+            console.log('Delete successful:', data);
+        })
+        .catch(error => {
+            // Handle errors
+            console.error('There was a problem with the delete request:', error);
+        });
+    }
+</script> -->
