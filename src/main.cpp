@@ -9,6 +9,6 @@ int main (int ac, char **av)
 	if (!servers.size())
 		return (1);
 	//continue above this line
-
+	
 
 }
