@@ -1,5 +1,4 @@
 #include "Parse.hpp"
-#include "RequestResponce.hpp"
 
 int main (int ac, char **av)
 {
@@ -10,8 +9,6 @@ int main (int ac, char **av)
 	if (!servers.size())
 		return (1);
 	//continue above this line
-	
-	// printServers(servers);
 
-	// get_request(servers);
+
 }

@@ -298,7 +298,7 @@ void Parse::fill_server(vectstr_t vector)
 				{
 					fill_locations(vector, i, location);
 					if (vector[i+1] == "}")
-					server.locations.push_back (location);
+						server.locations.push_back (location);
 				}
 			}
 		}
@@ -308,12 +308,23 @@ void Parse::fill_server(vectstr_t vector)
 	}
 }
 
-bool is_comment(std::string &line) //needs an upgrade
+bool is_comment(std::string &line, std::string &file_count) //needs an upgrade
 {
-	size_t i = 0;
-	size_t size = line.size();
+	size_t	i;
+	size_t	size;
+	int		saved;
+
+	i = 0;
+	size = line.size();
 	while (i < size && Parse::is_space(line[i]))
 		i++;
+	saved = line.find('#');
+	if (saved != -1 && line[i] != '#')
+	{
+		line.insert (saved, " ");
+		file_count += line.substr(i, saved) + ' ';
+		return ((line[i] != '#'));
+	}
 	return ((line[i] == '#'));
 }
 
@@ -329,7 +340,7 @@ Parse::Parse(char *file_name)
 		throw Parse::FileError();
 	while (std::getline(file_in, line))
 	{
-		if (is_comment(line))
+		if (is_comment(line, file_cont))
 			continue ;
 		file_cont += line + ' ';
 	}
