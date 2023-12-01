@@ -1,10 +1,8 @@
-#include "Parse.hpp"
-#include "RequestResponce.hpp"
-#include "Server.hpp"
+#include "Server_.hpp"
 
 Server::Server(std::vector<t_server> servers)
 {
-    this->servers = servers;
+    this->server = servers;
 }
 
 Server::Server(const Server &other)

@@ -1,6 +1,7 @@
 NAME = server
 
-SRC = $(addprefix src/, Parse.cpp main.cpp server.cpp)
+SRC = $(addprefix src/, Parse.cpp main.cpp server.cpp) \
+	  $(addprefix src/The_server/, Server_.cpp) \
 
 INCLUDE_DIR = inc/
 
@@ -18,6 +19,9 @@ $(OBJ_DIR) :
 	mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o : src/%.cpp
+	$(CC) $(CPPFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/%.o : src/The_server/%.cpp
 	$(CC) $(CPPFLAGS) -c $< -o $@
 
 $(NAME) : $(OBJ) $(INCLUDE_DIR)
