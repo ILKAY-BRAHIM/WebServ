@@ -1,6 +1,7 @@
 NAME = server
 
-SRC = $(addprefix src/, Parse.cpp main.cpp server.cpp printServers.cpp request.cpp) \
+SRC = $(addprefix src/, printServers.cpp request.cpp main.cpp) \
+      $(addprefix src/parsing/, Parse.cpp server.cpp) \
 	  $(addprefix src/The_server/, Server_.cpp) \
 		#zido hna 
 
