@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <exception>
+#include <cstdlib>
 #include "server.h"
 
 class Parse

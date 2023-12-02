@@ -1,29 +1,34 @@
 NAME = server
 
-SRC = $(addprefix src/, Parse.cpp main.cpp server.cpp printServers.cpp request.cpp fillServer.cpp) \
+SRC = $(addprefix src/, Parse.cpp main.cpp server.cpp printServers.cpp request.cpp) \
 	  $(addprefix src/The_server/, Server_.cpp) \
+		#zido hna 
 
+INCLUDE_DIR = inc/ # zido hna b / f lakhr
 
-INCLUDE_DIR = inc/
+# dakxi lakhor ma t9isohx
 
 OBJ_DIR = obj
 
-OBJ = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC:.cpp=.o)))
+OBJ = $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(SRC:.cpp=.o))
 
 CC = c++ 
 
-CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g -I$(INCLUDE_DIR)
+SRC_DIR = src
+
+CPPFLAGS = -Wall -Wextra -Werror -std=c++98  -I$(INCLUDE_DIR)
 
 all : $(OBJ_DIR) $(NAME)
 
 $(OBJ_DIR) :
 	mkdir -p $(OBJ_DIR)
+	@mkdir -p $(dir $(OBJ))
 
-$(OBJ_DIR)/%.o : src/%.cpp
+$(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp 
 	$(CC) $(CPPFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o : src/The_server/%.cpp
-	$(CC) $(CPPFLAGS) -c $< -o $@
+#$(OBJ_DIR)/%.o : src/The_server/%.cpp
+#	$(CC) $(CPPFLAGS) -c $< -o $@
 
 $(NAME) : $(OBJ) $(INCLUDE_DIR)
 	$(CC) $(CPPFLAGS) $(OBJ) -o $(NAME)

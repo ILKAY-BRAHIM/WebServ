@@ -231,6 +231,26 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 		throw Parse::ServerError(std::string("not allowed or defined keyword -> " + vector[i]).c_str());
 }
 
+	template <typename T>
+void fill_listen_port(T &vector, int &i, std::vector<int> &port)
+{
+	int size = vector.size ();
+	if (++i < size && semi_colone(vector[i]) && Parse::isNumber(vector[i].substr(0, vector[i].size() - 1)))
+	{
+		port.push_back(atoi(vector[i].substr(0, vector[i].size() - 1).c_str()));
+		if (min_det)
+		{
+			size = port.size() - 1;
+			std::cout << "port " << size << ": " << port[size] << std::endl;
+		}
+	}
+	else
+	{
+		std::cout << vector[i] << "\n";
+		throw Parse::ServerError("needs a \';\'");
+	}
+}
+
 void Parse::fill_server(vectstr_t vector)
 {
 	t_server	server;
@@ -263,7 +283,23 @@ void Parse::fill_server(vectstr_t vector)
 				if (vector[i] == "server_name")
 					fill_parts(vector, i, server.name, "name : ");
 				else if (vector[i] == "listen")
-					fill_parts(vector, i, server.port, "port : ");
+				{/*					int size = vector.size ();
+					if (++i < size && semi_colone(vector[i]) && Parse::isNumber(vector[i].substr(0, vector[i].size() - 1)))
+					{
+						server.port.push_back(atoi(vector[i].substr(0, vector[i].size() - 1).c_str()));
+						if (min_det)
+						{
+							size = server.port.size() - 1;
+							std::cout << "port " << size << ": " << server.port[size] << std::endl;
+						}
+					}
+					else
+					{
+						std::cout << vector[i] << "\n";
+						throw Parse::ServerError("needs a \';\'");
+					}*/
+					fill_listen_port(vector, i, server.port);
+				}
 				else if (vector[i] == "host")
 					fill_parts(vector, i, server.host, "host : ");
 				else if (vector[i] == "root")
@@ -284,6 +320,8 @@ void Parse::fill_server(vectstr_t vector)
 					else 
 						throw Parse::ServerError("check error_page");
 				}
+				else if (vector[i] == "redirect")
+					fill_parts(vector, i, server.redirect, "redirect : ");
 				else if (vector[i] == "location")
 				{
 					location.clear();

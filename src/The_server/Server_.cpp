@@ -21,47 +21,53 @@ void Server::start_server()
 {
     int server_fd;
     int opt = 1;
-    // int addrlen = sizeof(this->address);
 
     FD_ZERO(&this->master_set);
-    for (unsigned long i = 0; i < server.size(); i++)
+            int index = 0;
+    for (unsigned long i = 0; i < this->server.size(); i++)
     {
-        if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+        std::vector<int>::iterator it = server[i].port.begin();
+        for(; it !=  server[i].port.end(); it++)
         {
-            std::cout << "socket failed" << std::endl;
-            return;
-        }
-        if(setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
-        {
-            std::perror("setsockopt");
-            return;
-        }
-        if (ioctl(server_fd, FIONBIO, (char *)&opt) < 0)
-        {
-            perror("ioctl");
-            exit(EXIT_FAILURE);
-        }
-        this->address.sin_family = AF_INET;
-        this->address.sin_addr.s_addr = INADDR_ANY;
-        this->address.sin_port = htons(atoi(server[i].port.c_str()));
-        memset(address.sin_zero, '\0', sizeof this->address.sin_zero);
+            std::cout << *it << std::endl;
+            if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+            {
+                std::cout << "socket failed" << std::endl;
+                return;
+            }
+            if(setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+            {
+                std::perror("setsockopt");
+                return;
+            }
+            if (ioctl(server_fd, FIONBIO, (char *)&opt) < 0)
+            {
+                perror("ioctl");
+                exit(EXIT_FAILURE);
+            }
+            this->address.sin_family = AF_INET;
+            this->address.sin_addr.s_addr = INADDR_ANY;
+            this->address.sin_port = htons(*it);
+            memset(address.sin_zero, '\0', sizeof this->address.sin_zero);
 
-        if (bind(server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
-        {
-            std::cout << "bind failed" << std::endl;
-            return;
-        }
-        if (listen(server_fd, 3) < 0)
-        {
-            std::cout << "listen" << std::endl;
-            return;
-        }
+            if (bind(server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
+            {
+                std::cout << "bind failed" << std::endl;
+                return;
+            }
+            if (listen(server_fd, 3) < 0)
+            {
+                std::cout << "listen" << std::endl;
+                return;
+            }
 
-        std::cout << "Server is running on port " << server[i].port << std::endl;
+            std::cout << "Server is running on port " << *it << std::endl;
 
-        this->fds.push_back(server_fd);
-        std::cout << "fds: " << this->fds[i] << std::endl;
-        FD_SET(fds[i], &this->master_set);
+            this->fds.push_back(server_fd);
+            std::cout << "fds: " << this->fds[index] << std::endl;
+            FD_SET(fds[index], &this->master_set);
+            index++;
+        }
     }
     return;
 }
@@ -69,9 +75,10 @@ void Server::start_server()
 void Server::run()
 {
     int max_fd = this->fds.back();
+    int addrlen = sizeof(this->address);
     timeout.tv_sec  = 1 * 60;
     timeout.tv_usec = 0;
-    int addrlen = sizeof(this->address);
+    
 
     while(1)
     {
@@ -93,7 +100,7 @@ void Server::run()
             if (FD_ISSET(i, &this->working_set))
             {
                 activity--;
-                int y = find(this->fds.begin(), this->fds.end()-1, i) - this->fds.begin();
+                int y = find(this->fds.begin(), this->fds.end(), i) - this->fds.begin();
                 int server_fd = this->fds[y];
                 if (i == server_fd)
                 {

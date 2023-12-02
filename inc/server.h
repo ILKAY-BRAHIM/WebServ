@@ -53,10 +53,11 @@ typedef struct s_location
 typedef struct s_server
 {
 	std::string 						name;
-	std::string							port;
+	std::vector<int>					port;
 	std::string 						host;
 	std::string 						root;
 	std::vector<std::string>			allow_methods;
+	std::string							redirect;
 	std::string 						index;
 	std::pair<std::string, std::string> error_page;
 	std::vector<t_location>				locations;

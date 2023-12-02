@@ -31,6 +31,7 @@ class Server
         struct timeval      timeout;
         fd_set master_set, working_set;
         std::vector<int> fds;
+        int addrlen;
         Server();
     public:
         Server(std::vector<t_server> server);

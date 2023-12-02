@@ -6,7 +6,7 @@ void    printServers(std::vector<t_server> servers)
     {
         std::cout << "-------------------------SERVER-------------------------" << std::endl;
         !(servers[i].name.empty()) && std::cout << "Name : " << servers[i].name << std::endl;
-        !(servers[i].port.empty()) && std::cout << "Port: " << servers[i].port << std::endl;
+        // !(servers[i].port.empty()) && std::cout << "Port: " << servers[i].port << std::endl;
         !(servers[i].host.empty()) && std::cout << "Host: " << servers[i].host << std::endl;
         !(servers[i].root.empty()) && std::cout << "Root: " << servers[i].root << std::endl;
         !(servers[i].index.empty()) && std::cout << "Index: " << servers[i].index << std::endl;
