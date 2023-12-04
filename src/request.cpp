@@ -58,36 +58,6 @@ request parseRequest(char *buffer)
 }
 
 
-void sendResponse(std::vector<t_server> servers , request req, int k)
-{
-    (void)servers;
-    std::cout << "-------------------------RESPONSE-------------------------" << std::endl;
-    if (req.path == "/")
-    {
-        std::string p = servers[0].root + "/" + servers[0].index;
-        printf("path : %s\n", p.c_str());
-        int fd = open(p.c_str(), O_RDONLY);
-        if (fd == -1)
-        {
-            std::cout << "Error : open file" << std::endl;
-            return ;
-        }
-        char g[400000];
-        read( fd , g, 400000);
-        int size = strlen(g);
-        std::string hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: "+ std::to_string(size) +"\r\n\n" + g;
-        write(k , hello.c_str() , hello.length());
-        // write(1 , hello.c_str() , hello.length());
-    }
-    // pause();
-    // else
-    // {
-        
-    // }
-}
-
-
-
 int get_request(std::vector<t_server> servers)
 {
     (void)servers;
@@ -125,7 +95,7 @@ int get_request(std::vector<t_server> servers)
     }
 
     
-    while(1)
+    while(1) 
     {
         printf("\n+++++++ Waiting for new connection ++++++++\n\n");
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
@@ -138,8 +108,11 @@ int get_request(std::vector<t_server> servers)
         valread = read( new_socket , requestt, 30000);
         printf("-------------------------REQUEST-------------------------\n");
         printf("%s\n", requestt);
-        request req = parseRequest(requestt);
-        sendResponse(servers, req, new_socket);
+        if (requestt[strlen(requestt) - 1] == '\n')
+            std::cout << "End of file" << std::endl;
+        pause();
+        // request req = parseRequest(requestt);
+        // sendResponse(servers, req, new_socket);
         // sleep(2);
         close(new_socket);
     }

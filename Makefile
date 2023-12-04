@@ -1,6 +1,6 @@
 NAME = server
 
-SRC = $(addprefix src/, Parse.cpp main.cpp server.cpp printServers.cpp request.cpp fillServer.cpp )
+SRC = $(addprefix src/, Parse.cpp main.cpp server.cpp printServers.cpp request.cpp fillServer.cpp respose.cpp)
 
 INCLUDE_DIR = inc/
 

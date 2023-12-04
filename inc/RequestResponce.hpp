@@ -16,6 +16,7 @@
 # include "Parse.hpp"
 # include <sys/stat.h>
 # include <sys/types.h>
+# include <utility>
 
 # define PORT 80
 
@@ -32,6 +33,6 @@ int get_request(std::vector<t_server> servers);
 std::vector<t_server> fillServer(void);
 void    printServers(std::vector<t_server> servers);
 void    print_new_request(request req);
-void sendResponse(std::vector<t_server> servers , request req, int k);
+void    sendResponse(std::vector<t_server> servers , request req, int k);
 
 #endif

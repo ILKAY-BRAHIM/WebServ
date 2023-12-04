@@ -13,5 +13,5 @@ int main (int ac, char **av)
 	
 	// printServers(servers);
 
-	// get_request(servers);
+	get_request(servers);
 }
