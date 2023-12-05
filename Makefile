@@ -7,6 +7,8 @@ SRC = $(addprefix src/, printServers.cpp request.cpp main.cpp) \
 
 INCLUDE_DIR = inc/ # zido hna b / f lakhr
 
+INCLUDES = inc/*.h inc/*.hpp #will be updated to a wildcard after
+
 # dakxi lakhor ma t9isohx
 
 OBJ_DIR = obj
@@ -31,7 +33,7 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp
 #$(OBJ_DIR)/%.o : src/The_server/%.cpp
 #	$(CC) $(CPPFLAGS) -c $< -o $@
 
-$(NAME) : $(OBJ) $(INCLUDE_DIR)
+$(NAME) : $(OBJ) $(INCLUDES)
 	$(CC) $(CPPFLAGS) $(OBJ) -o $(NAME)
 
 clean : 
