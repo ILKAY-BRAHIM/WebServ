@@ -251,7 +251,7 @@ void fill_listen_port(T &vector, int &i, std::vector<int> &port)
 	}
 }
 
-void Parse::fill_server(vectstr_t vector)
+void Parse::fill_server()
 {
 	t_server	server;
 	t_location	location;
@@ -283,21 +283,7 @@ void Parse::fill_server(vectstr_t vector)
 				if (vector[i] == "server_name")
 					fill_parts(vector, i, server.name, "name : ");
 				else if (vector[i] == "listen")
-				{/*					int size = vector.size ();
-					if (++i < size && semi_colone(vector[i]) && Parse::isNumber(vector[i].substr(0, vector[i].size() - 1)))
-					{
-						server.port.push_back(atoi(vector[i].substr(0, vector[i].size() - 1).c_str()));
-						if (min_det)
-						{
-							size = server.port.size() - 1;
-							std::cout << "port " << size << ": " << server.port[size] << std::endl;
-						}
-					}
-					else
-					{
-						std::cout << vector[i] << "\n";
-						throw Parse::ServerError("needs a \';\'");
-					}*/
+				{
 					fill_listen_port(vector, i, server.port);
 				}
 				else if (vector[i] == "host")
@@ -366,31 +352,41 @@ bool is_comment(std::string &line, std::string &file_count) //needs an upgrade
 	return ((line[i] == '#'));
 }
 
-Parse::Parse(char *file_name)
+void Parse::pass_comment(std::ifstream &file_in, std::string &file_cont, std::string &line)
 {
-	std::string file_cont;
-	std::string line;
-
-	if (file_name == NULL)
-		throw  Parse::FileNameIsNull();
-	std::ifstream file_in(file_name);
-	if (!file_in.is_open())
-		throw Parse::FileError();
 	while (std::getline(file_in, line))
 	{
 		if (is_comment(line, file_cont))
 			continue ;
 		file_cont += line + ' ';
 	}
-	if (min_det)
-		std::cout << file_cont + '\n' + "data is good\n-------\n";
-	int i = 0;
-	int size = file_cont.size();
+}
+
+void Parse::fast_check(std::ifstream &file_in, char **file_name)
+{
+	if ((*file_name) == NULL)
+		throw Parse::FileNameIsNull();
+	file_in.open((*file_name));
+	if (!file_in.is_open())
+		throw Parse::FileError();
+}
+
+void Parse::fill_data_in_vector(std::string &file_cont)
+{
+	int i;
+	int j;
+	bool in;
+	int begin;
+	int size;
+
+	i = 0;
+	j = 0;
+	in = false;
+	size = file_cont.size();
 	if (size == 0)
 		throw Parse::FileIsEmpty();
-	int j = 0;
-	bool in = false;
-	int begin;
+	if (min_det)
+		std::cout << file_cont + '\n' + "data is good\n-------\n";
 	while (i < size)
 	{
 		while (is_space(file_cont[i]))
@@ -409,7 +405,18 @@ Parse::Parse(char *file_name)
 		}
 		i++;
 	}
-	fill_server(vector);
+}
+
+Parse::Parse(char *file_name)
+{
+	std::string file_cont;
+	std::string line;
+	std::ifstream file_in;
+
+	fast_check(file_in, &file_name);
+	pass_comment(file_in, file_cont, line);
+	fill_data_in_vector(file_cont);
+	fill_server();
 }
 
 bool Parse::is_space(char c)
@@ -442,5 +449,3 @@ std::vector<t_server> Parse::read_parse(int ac, char **av)
 
 Parse::~Parse()
 {}
-
-
