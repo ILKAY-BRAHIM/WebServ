@@ -1,62 +1,7 @@
 // Server side C program to demonstrate HTTP Server programming
 
-#include "RequestResponce.hpp"
-
-void    print_new_request(request req)
-{
-    std::cout << "Method: " << req.method << std::endl;
-    std::cout << "Path: " << req.path << std::endl;
-    std::cout << "HttpVertion: " << req.httpVertion << std::endl;
-    std::cout << "Headers: " << std::endl;
-    for (std::map<std::string, std::string>::iterator it=req.headers.begin(); it!=req.headers.end(); ++it)
-        std::cout << it->first << " => " << it->second << '\n';
-    std::cout << "Body: " << req.body << std::endl;
-}
-
-void    getHeader(request &req, std::string line)
-{
-    std::istringstream ss(line);
-    std::string value;
-
-    std::getline(ss, line, ':');
-    std::getline(ss, value, '\r');
-    value.erase(value.begin());
-    req.headers[line] = value;
-}
-
-request parseRequest(char *buffer)
-{
-    request req;
-    std::string line;
-    std::string value(buffer);
-    std::istringstream ss(value);
-    std::getline(ss, line, '\n');
-    
-    //get start line :
-    std::istringstream st(line);
-    std::getline(st, line, ' ');
-    req.method = line;
-    std::getline(st, line, ' ');
-    req.path = line;
-    std::getline(st, line, ' ');
-    req.httpVertion = line;
-
-    while (std::getline(ss, line, '\n'))
-    {
-        if (line.find(':') != std::string::npos)
-            getHeader(req, line);
-        else
-            break;
-    }
-    while (std::getline(ss, line, '\n'))
-    {
-        req.body += line;
-        req.body += "\n";
-    }
-    // print_new_request(req);
-    return (req);
-}
-
+// #include "RequestResponce.hpp"
+#include "response.hpp"
 
 int get_request(std::vector<t_server> servers)
 {
@@ -108,10 +53,13 @@ int get_request(std::vector<t_server> servers)
         valread = read( new_socket , requestt, 30000);
         printf("-------------------------REQUEST-------------------------\n");
         printf("%s\n", requestt);
-        if (requestt[strlen(requestt) - 1] == '\n')
-            std::cout << "End of file" << std::endl;
-        pause();
+
+        Response resp(servers);
+        // resp.generateResponse(requestt);
+        
+
         // request req = parseRequest(requestt);
+
         // sendResponse(servers, req, new_socket);
         // sleep(2);
         close(new_socket);

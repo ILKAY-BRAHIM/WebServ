@@ -1,0 +1,56 @@
+
+-------------------------GET : REQUEST-------------------------
+Start line: GET / HTTP/1.1
+
+Headers:    Host: localhost
+            User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+            Accept-Language: en-GB,en;q=0.5
+            Accept-Encoding: gzip, deflate, br
+            Connection: keep-alive
+            Upgrade-Insecure-Requests: 1
+            Sec-Fetch-Dest: document
+            Sec-Fetch-Mode: navigate
+            Sec-Fetch-Site: none
+            Sec-Fetch-User: ?1
+
+
+-------------------------POST : REQUEST-------------------------
+Start line: POST /submit_endpoint HTTP/1.1
+
+Headers:    Host: localhost
+            User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+            Accept-Language: en-GB,en;q=0.5
+            Accept-Encoding: gzip, deflate, br
+            Content-Type: application/x-www-form-urlencoded
+            Content-Length: 191
+            Origin: http://localhost
+            Connection: keep-alive
+            Referer: http://localhost/
+            Upgrade-Insecure-Requests: 1
+            Sec-Fetch-Dest: document
+            Sec-Fetch-Mode: navigate
+            Sec-Fetch-Site: same-origin
+            Sec-Fetch-User: ?1
+
+Body:       name=dsg&email=hsjhd%40hgs.js&message=sACDS&pdfUpload=HTTP_Server__Everything_you_need_to_know_to_Build_a_simple_HTTP_server_from_scratch___by_Skrew_Everything___From_The_Scratch___Medium.pdf
+
+-------------------------DELETE : REQUEST-------------------------
+Start line: DELETE /delete_endpoint HTTP/1.1
+
+Headers:    Host: localhost
+            User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0
+            Accept: */*
+            Accept-Language: en-GB,en;q=0.5
+            Accept-Encoding: gzip, deflate, br
+            Referer: http://localhost/  
+            Content-Type: application/json
+            Content-Length: 8
+            Origin: http://localhost
+            Connection: keep-alive
+            Sec-Fetch-Dest: empty
+            Sec-Fetch-Mode: cors
+            Sec-Fetch-Site: same-origin
+
+Body:       {"id":1}
