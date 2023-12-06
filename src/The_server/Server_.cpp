@@ -78,6 +78,8 @@ void Server::run()
     int addrlen = sizeof(this->address);
     timeout.tv_sec  = 1 * 60;
     timeout.tv_usec = 0;
+    unsigned long ress;
+    ress = 0;
     
 
     while(1)
@@ -104,9 +106,12 @@ void Server::run()
                 int server_fd = this->fds[y];
                 if (i == server_fd)
                 {
-                    while(1)
-                    {
+                    // while(1)
+                    // {
+                        std::cout << "new connection" << std::endl;
                         int new_socket = accept(server_fd, (struct sockaddr *)&this->address, (socklen_t*)&addrlen);
+                        // serv.insert(std::pair<int, servers>(new_socket, ""));
+                        // serv.push_back(std::map<int, Servers>(new_socket, servers()));
                         if (new_socket  < 0)
                         {
                             if (errno != EWOULDBLOCK)
@@ -114,21 +119,103 @@ void Server::run()
                                 perror("In accept");
                                 exit(1);
                             }
-                            break;
+                            // break;
                         }
                         FD_SET(new_socket, &master_set);
                         if (new_socket > max_fd)
                             max_fd = new_socket;
-                    }
+                    // }
                 }
                 else
                 {
                     int close_conn = 0;
-                    std::string buffer_str = "";
+                    std::string buffer_str;
                     char buffer[2];
-                    while(1)
-                    {
+                    // while(1)
+                    // {
                         int a = recv(i, buffer, 1, 0);
+                        buffer_str = buffer;
+                        // std::cout << "buffer: " << buffer_str << std::endl;
+                        std::map<int, Servers>::iterator it = serv.begin();
+                        int check = 1;
+                        for (; it != serv.end(); it++)
+                        {
+                            if (it->first == i)
+                            {
+                                it->second.collect_req(buffer_str);
+                                check = 0;
+                                break;
+                            }
+
+                        }
+                        if (check)
+                            serv.insert(std::pair<int, Servers>(i, Servers(buffer_str)));
+                        // std::cout << "size: " << serv.size() << std::endl;
+                        for (it = serv.begin(); it != serv.end();)
+                        {
+                            // std::cout << "fd->: " << it->first << std::endl;
+                            // std::cout << "request->: " << it->second.get_request() << std::endl;
+                            if (it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
+                            {
+                                // std::cout << "find" << std::endl;
+                                // std::cout << "request: " << it->second.get_request() << std::endl;
+                                // std::cout << "fd: " << it->first << std::endl;
+                                // parse(it->second.get_request(), it->first);
+                                // test_cgi(it->second.get_request(), it->first);
+                                // it->second.get_request() = "";
+                                // serv.erase(it);
+
+
+                                std::cout << "hiiiiiiiiiiii" << std::endl;
+                                std::ifstream file("/Users/bchifour/Desktop/WEBSERV/src/The_server/fill.txt");
+                                if (!file.is_open())
+                                {
+                                    // std::cout << "file not open" << std::endl;
+                                    std::perror("file not open");
+                                    return;
+                                }
+                                std::string hello;
+                                std::string line;
+                                while (getline(file, line))
+                                {
+                                    hello += line;
+                                }
+                                file.close();
+
+
+                                std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>"+hello + "</h1></body></html>";
+
+
+
+
+                                unsigned long h;
+                                if (ress == 0)
+                                      h = send(it->first, res.c_str(), res.length(), 0);
+                                else
+                                      h = send(it->first, res.c_str() + ress, res.length() - ress, 0);
+                                ress += h;
+                                std::cout << "hello: " << res.length() << " chank "<< h << " total "<< ress <<" fd " << it->first << " size " << serv.size() <<std::endl;
+                                if (ress == res.length())
+                                {
+
+                                    close(it->first);
+                                    FD_CLR(it->first, &master_set);
+                                    if (it->first == max_fd)
+                                    {
+                                        while (FD_ISSET(max_fd, &master_set) == 0)
+                                            max_fd -= 1;
+                                    }
+                                    serv.erase(it);
+                                }
+                                if(serv.empty())
+                                    break;
+                            }
+                            else
+                                it++;
+
+                        
+                        }
+
                         if (a < 0)
                         {
                             if (errno != EWOULDBLOCK)
@@ -142,33 +229,33 @@ void Server::run()
                                 close_conn = 1;
                             }
                             close_conn = 1;
-                            break;
+                            // break;
                         }
                         if (a == 0)
                         {
                             printf("  Connection closed\n");
-                            close_conn = 1;
-                            break;
+                            // break;
                         }
-                        buffer_str += buffer;
-                    }
+                            // close_conn = 1;
+                        // buffer_str += buffer;
+                    // }
 
-                    std::cout << "buffer: " << buffer_str << std::endl;
+                    // std::cout  << buffer;
                     // char *h = (char *)buffer_str.c_str();
                     // const char *g = hello.c_str();
                     // parse(h, i);
                     // test_cgi(h, i);
-                    buffer_str = "";
-                    if (close_conn )
-                    {
-                        close(i);
-                        FD_CLR(i, &master_set);
-                        if (i == max_fd)
-                        {
-                            while (FD_ISSET(max_fd, &master_set) == 0)
-                                max_fd -= 1;
-                        }
-                    }
+                    // buffer_str = "";
+                    // if (a )
+                    // {
+                    //     close(i);
+                    //     FD_CLR(i, &master_set);
+                    //     if (i == max_fd)
+                    //     {
+                    //         while (FD_ISSET(max_fd, &master_set) == 0)
+                    //             max_fd -= 1;
+                    //     }
+                    // }
                 }
             }
         }

@@ -2,7 +2,7 @@ NAME = server
 
 SRC = $(addprefix src/, printServers.cpp request.cpp main.cpp) \
       $(addprefix src/parsing/, Parse.cpp server.cpp) \
-	  $(addprefix src/The_server/, Server_.cpp) \
+	  $(addprefix src/The_server/, Server_.cpp servers.cpp) \
 		#zido hna 
 
 INCLUDE_DIR = inc/ # zido hna b / f lakhr
