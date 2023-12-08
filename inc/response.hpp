@@ -84,3 +84,18 @@ class Response
 
 
 int get_request(std::vector<t_server> servers);
+
+// template <typename T>
+// std::string get_index(T& location, std::string url)
+// {
+//     if ((location.index).length()== 0)
+//         return "";
+//     typename std::vector<T>::iterator it = location.index.begin();
+//     while (it != location.index.end())
+//     {
+//         if (*it == url)
+//             return (*it);
+//         it++;
+//     }
+//     return "";
+// }

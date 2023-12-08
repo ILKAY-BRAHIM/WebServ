@@ -62,7 +62,6 @@ Response::Response(std::vector<t_server> servS)
 
 void	Response::checkMethode() // ->status_code & ->server 
 {
-    std::cout << "req =>" << this->req.method << std::endl;
     if (!(this->req.method == "GET" || this->req.method == "POST" || this->req.method == "DELETE"))
         throw (501);
     if (this->req.httpVertion != "HTTP/1.1")
@@ -95,18 +94,53 @@ int     Response::getLocation(std::string url)
     return (0);
 }
 
+std::string get_index(t_server& location, std::string path, std::string url)
+{
+    (void) url;
+    std::string fullPath;
+    if (location.index.size() == 0)
+        return "";
+    std::vector<std::string >::iterator it = location.index.begin();
+    while (it != location.index.end())
+    {
+        fullPath = path + (*it);
+        if (access((fullPath).c_str(), F_OK | R_OK) == 0)
+            return (*it);
+        it++;
+    }
+    return "";
+}
+
 void    Response::isDirectory(std::string path, std::string url)
 {
     std::cout << "Is directory" << std::endl;
+    std::string index_;
     (void)path;
     // check if the directory in the log
+    url.erase(url.end() - 1);
     if (getLocation(url))
     {
-        std::cout << "location : " << this->location.path << std::endl;
-        // if (this->location.index.length() != 0)
-        // {
-        //     ;
-        // }
+        if (this->location.index.size() != 0) //this->location.index.length() != 0
+        {
+            std::cout << "url " << url << std::endl;
+            // index_ = get_index(this->location, path, url);
+            // if (index_.length() != 0)
+            //     generateBody(path + url + index_);
+            // else
+            //     generateError(403);
+        //     std::cout << "index => " << index_;
+        }
+        else
+        {
+            index_ = get_index(this->server, path, url);
+            if (index_.length() != 0)
+            {
+                //     generateBody(path + url + index_);
+                std::cout << "index => " << path << url << index_ << std::endl;
+            }
+            else
+                std::cout << "not exist" << std::endl;
+        }
         // else if (this->server.index.length() != 0)
         // {
         //     // if there is in this location a file with the name in the index if there is 
@@ -290,7 +324,6 @@ Message*    Response::generateResponse(std::string req)
     Message *mes = new Message();
     
     fillServer(req);
-    
     this->respMessage.http_version = "HTTP/1.1";
 	try
 	{
