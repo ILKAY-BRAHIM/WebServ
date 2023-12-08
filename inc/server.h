@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-# define min_det	0
+# define min_det	1
 # ifndef COLOR
 # define COLOR
 #  define RED	"\033[0;31m"
@@ -58,7 +58,7 @@ typedef struct s_server
 	std::string 						root;
 	std::vector<std::string>			allow_methods;
 	std::string							redirect;
-	std::string 						index;
+	std::vector<std::string> 			index;
 	std::pair<std::string, std::string> error_page;
 	std::vector<t_location>				locations;
 	//method

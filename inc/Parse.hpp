@@ -25,6 +25,7 @@ class Parse
 		void						fill_parts(vectstr_t vector, int &i, std::string &to_fill, std::string msg);
 		void						fill_server();
 		void						handle_location(vectstr_t vector, int &i, t_location &location);
+		void						fill_indexs(vectstr_t vector, int &i, vectstr_t &to_fill, std::string msg);
 		void						fill_locations(vectstr_t vector, int &i, t_location &location);
 		void						fill_cgi(vectstr_t vector, int &i, vectstr_t &in, std::string msg);
 		void						fill_methods(vectstr_t vector, int &i, t_location &location);
