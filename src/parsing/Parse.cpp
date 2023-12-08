@@ -90,6 +90,23 @@ void Parse::fill_parts(vectstr_t vector, int &i, std::string &to_fill, std::stri
 		throw Parse::ServerError("needs a \';\'");
 }
 
+
+void Parse::fill_indexs(vectstr_t vector, int &i, vectstr_t &to_fill, std::string msg)
+{
+	int size = vector.size ();
+	size_t j = to_fill.size();
+	while (++i < size && !semi_colone(vector[i]))
+		to_fill.push_back(vector[i]);
+	if (semi_colone(vector[i]))
+		to_fill.push_back(vector[i].substr(0, vector[i].size() - 1));
+	if (min_det)
+	{
+		while (j < to_fill.size())
+			std::cout << msg + to_fill[j++] + "\n";
+	}
+}
+
+
 void Parse::pass_comment(vectstr_t vector, int &i)
 {
 	if (min_det)
@@ -292,7 +309,7 @@ void Parse::fill_server()
 					fill_parts(vector, i, server.root, "root : ");
 				else if (vector[i] == "index")
 				{
-					fill_parts(vector, i, server.index, "index : ");
+					fill_indexs(vector, i, server.index, "index : ");
 				}
 				else if (vector[i] == "error_page" && i + 2 < size)
 				{
