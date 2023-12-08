@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-# define min_det	1
+# define min_det	0
 # ifndef COLOR
 # define COLOR
 #  define RED	"\033[0;31m"
@@ -16,7 +16,7 @@ typedef struct s_location
 	std::string 				root;					//root dir location
 	std::string 				alias;					//define remplacement 
 	//for specefied url
-	std::string 				index;					//set default file
+	std::vector<std::string>	index;					//set default file
 	std::string 				proxy_pass;				//forwards requests to a 
 	//specified backend server 
 	std::string 				rewrite;				//modifies the requested 
