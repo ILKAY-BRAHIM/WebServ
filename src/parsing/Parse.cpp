@@ -211,7 +211,7 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 	else if (vector[i] == "alias")
 		fill_parts(vector, i, location.alias, "alias : ");
 	else if (vector[i] == "index")
-		fill_parts(vector, i, location.index, "index : ");
+		fill_indexs(vector, i, location.index, "index : ");
 	else if (vector[i] == "proxy_pass")
 		fill_parts(vector, i, location.proxy_pass, "proxy_pass : ");
 	else if (vector[i] == "rewrite")
