@@ -18,8 +18,16 @@
 # include <sys/types.h>
 # include <utility>
 # include "Message.hpp"
+# include <unistd.h>
 
+// class   Message ;
 # define PORT 81
+
+# define ISDIR 0
+# define ISFILE 1
+# define NOTFONDE 2
+
+class Message;
 
 typedef struct t_response
 {
@@ -52,17 +60,21 @@ class Response
     private :
         std::vector<t_server> servS;
         t_server    server;
+        t_location  location;
         resp		respMessage;
 		request		req;
         std::string resp;
-        void    fillServer(char *req);
+        void    fillServer(std::string req);
 		void	checkMethode();
 		void	urlRegenerate();
+        void    generateBody(std::string path);
+        void    isDirectory(std::string path, std::string url);
+        int     getLocation(std::string url);
         // void    readPath();
     public :
         Response();
         Response(std::vector<t_server> servS);
-        Message*	generateResponse(std::string &req);
+        Message*	generateResponse(std::string req);
         // char **getEnv();
         // std::string getResponse();
         // Response(const Response &copy);
@@ -70,18 +82,5 @@ class Response
         ~Response();
 };
 
-// class   Message
-// {
-//     private :
-//         char **env;
-//         int status;
-//         char *mess;
-//     public :
-//         Message();
-//         Message(char *req);
-//         std::string getResponse();
-//         char **getEnv();
-//         ~Message();
-// };
 
 int get_request(std::vector<t_server> servers);

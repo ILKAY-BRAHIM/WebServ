@@ -55,7 +55,8 @@ int get_request(std::vector<t_server> servers)
         printf("%s\n", requestt);
 
         Response resp(servers);
-        // resp.generateResponse(requestt);
+        std::string r(requestt);
+        resp.generateResponse(r);
         
 
         // request req = parseRequest(requestt);

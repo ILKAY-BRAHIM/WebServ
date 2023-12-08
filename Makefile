@@ -4,7 +4,6 @@ SRC = $(addprefix src/,  main.cpp) \
       $(addprefix src/parsing/, Parse.cpp server.cpp) \
 	  $(addprefix src/The_server/, Server_.cpp) \
 	  $(addprefix src/Response/, request.cpp response.cpp Message.cpp)
-		#zido hna 
 
 INCLUDE_DIR = inc/ # zido hna b / f lakhr
 

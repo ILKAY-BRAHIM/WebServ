@@ -12,15 +12,15 @@ int main (int ac, char **av)
 	if (!servers.size())
 		return (1);
 	
-	Response resp(servers);
-	std::string h("hello");
-	Message *mes = resp.generateResponse(h);
-	std::cout << mes->getResponse() << std::endl;
+	// Response resp(servers);
+	// std::string h("hello");
+	// Message *mes = resp.generateResponse(h);
+	// std::cout << mes->getResponse() << std::endl;
 	//continue above this line
 	// printServers(servers);
 	// Server serv(servers);
 	// serv.start_server();
 	// serv.run();
 
-	// get_request(servers);
+	get_request(servers);
 }

@@ -1,5 +1,6 @@
 
 #include "response.hpp"
+#include <sys/stat.h>
 
 void    print_new_request(request req)
 {
@@ -23,7 +24,7 @@ void    getHeader(request &req, std::string line)
     req.headers[line] = value;
 }
 
-request parseRequest(char *buffer)
+request parseRequest(std::string buffer)
 {
     request req;
     std::string line;
@@ -39,9 +40,6 @@ request parseRequest(char *buffer)
     req.path = line;
     std::getline(st, line, '\r');
     req.httpVertion = line;
-    // size_t found = req.httpVertion.find('\r');
-    // if (found != std::string::npos)
-    //     req.httpVertion.erase(found, 1);
     while (std::getline(ss, line, '\n'))
     {
         if (line.find(':') != std::string::npos)
@@ -49,12 +47,6 @@ request parseRequest(char *buffer)
         else
             break;
     }
-    // while (std::getline(ss, line, '\n'))
-    // {
-    //     req.body += line;
-    //     req.body += "\n";
-    // }
-    // print_new_request(req);
     return (req);
 }
 
@@ -66,40 +58,173 @@ Response::Response(std::vector<t_server> servS)
     this->servS = servS;
 }
 
-
-
 // Response::Response(const Response& copy){};
 
 void	Response::checkMethode() // ->status_code & ->server 
 {
+    std::cout << "req =>" << this->req.method << std::endl;
     if (!(this->req.method == "GET" || this->req.method == "POST" || this->req.method == "DELETE"))
         throw (501);
     if (this->req.httpVertion != "HTTP/1.1")
         throw (505);
     this->respMessage.statusCode = 200; // is possible to chage
-	this->respMessage.Server = "WebServer"; 
+	this->respMessage.Server = "Not nginx/0.0.0 (macOS)";
 }
+
+void    redirect()
+{
+    // most send a response with redirect code status
+    std::cout << "redirection function" << std::endl;
+
+    return ;
+}
+
+int     Response::getLocation(std::string url)
+{
+    std::vector<t_location>::iterator it = this->server.locations.begin();
+
+    while (it != this->server.locations.end())
+    {
+        if (url == it->path)
+        {
+            this->location = *it;
+            return (1);
+        }
+        it++;
+    }
+    return (0);
+}
+
+void    Response::isDirectory(std::string path, std::string url)
+{
+    std::cout << "Is directory" << std::endl;
+    (void)path;
+    // check if the directory in the log
+    if (getLocation(url))
+    {
+        std::cout << "location : " << this->location.path << std::endl;
+        // if (this->location.index.length() != 0)
+        // {
+        //     ;
+        // }
+        // else if (this->server.index.length() != 0)
+        // {
+        //     // if there is in this location a file with the name in the index if there is 
+        //     ;
+        // }
+        // else
+        // {
+        //     // if there is a file whit Index.html in this directory
+        //     ;
+
+        // }
+    }
+    // else if (url == "/")
+    // {
+    //     // the roor condition
+    //     ;
+    // }
+    // else
+    // {
+    //     // forbidden error;
+    //     ;
+    // }
+
+    // check if there is an autoindex
+    // check if there is an index
+    // generate body || send an error
+    return ;
+}
+
+void    generateError(int er)
+{
+    (void)er;
+    // generate error body
+    std::cout << "Error function" << std::endl;
+    return ;
+}
+
+void    Response::generateBody(std::string path)
+{
+    // check permition & read & generate body 
+    int fd = open(path.c_str(), O_RDONLY);
+    int   bufferSize = 100;
+    char* buffer = new char [bufferSize];
+
+    if (fd == -1)
+    {
+        generateError(403);
+        return ;
+    }
+    
+    while (read(fd, buffer, bufferSize))
+    {
+        this->respMessage.body += buffer;
+    }
+    this->respMessage.body += "\r\n\r\n";
+    std::cout << this->respMessage.body;
+
+    close (fd);
+    delete[] buffer;
+    return ;
+}
+
 
 void	Response::urlRegenerate() // ->status_code & ->Location 
 {
 	//get Path
 	std::string parameters;
 	std::string path;
+    std::string url;
 	size_t found = this->req.path.find('?');
 	if (found != std::string::npos)
 	{
 		parameters = req.path.substr(found);
-		path = req.path.substr(0, found);
+		url = req.path.substr(0, found);
 	}
 	else
-		path = req.path;
+		url = req.path;
+    path = this->server.root + url;
+    
+    if (access(path.c_str(), F_OK) == 0)
+    {
+        struct stat fileStat;
+        if (!(stat(path.c_str(), &fileStat) == 0))
+        {
+            std::cerr << "Error" << std::endl;
+            exit(1);
+        }
+        if (S_ISDIR(fileStat.st_mode))
+        {
+            if (*(path.end() - 1) != '/')
+                redirect();
+            else
+                isDirectory(path, url);
+        }
+        else if (S_ISREG(fileStat.st_mode))
+        {
+            generateBody(path);
+        }
+    }   
+    else
+    {
+        generateError(404);
+    }
+    // else if ((this->req.headers).find("Referer") != this->req.headers.end())
+    // {
+        
+    //     {
+            
+    //     }
+
+    // }
+    // GET / HTTP/1.1
+    // GET /index.html HTTP/1.1
+    // GET /index.html/ HTTP/1.1
+
+
 
 	// check Path
-    if ((this->req.headers).find("Referer") == this->req.headers.end())
-    {
-        path = this->server.root + path;
-        std::cout << "path : " << path << std::endl;
-    }
 
 
     // pause();
@@ -107,7 +232,7 @@ void	Response::urlRegenerate() // ->status_code & ->Location
     // std::cout << "Parameters : " << parameters << std::endl;
     // std::cout << "Path : " << path << std::endl;
 
-
+    pause();
 	//encode parameters
 }
 
@@ -116,7 +241,7 @@ void	Response::urlRegenerate() // ->status_code & ->Location
 
 // }
 
-void    Response::fillServer(char *req)
+void    Response::fillServer(std::string req)
 {
     std::string	port;
     std::string	server;
@@ -160,25 +285,24 @@ void    Response::fillServer(char *req)
 	}
 }
 
-Message*    Response::generateResponse(std::string &req)
+Message*    Response::generateResponse(std::string req)
 {
-    (void)req;
     Message *mes = new Message();
-
-    // fillServer(req);
-
-    // this->respMessage.http_version = "HTTP/1.1";
-	// try
-	// {
-	// 	checkMethode();
-    //     urlRegenerate();
-    //     // readPath();
-	// }
-	// catch(int m)
-	// {
-	// 	std::cout << "status Code : " << m << std::endl;
-	// 	exit(1);
-	// }
+    
+    fillServer(req);
+    
+    this->respMessage.http_version = "HTTP/1.1";
+	try
+	{
+		checkMethode();
+        urlRegenerate();
+        // readPath();
+	}
+	catch(int m)
+	{
+		std::cout << "status Code : " << m << std::endl;
+		exit(1);
+	}
 
     // http version
     // method type allowed & type component
@@ -225,13 +349,13 @@ Response::~Response(){};
 
 
 
-int pathCheck(std::string root)
-{
-    struct stat sb;
-    if (stat(root.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
-        return (1);
-    return (0);
-}
+// int pathCheck(std::string root)
+// {
+//     struct stat sb;
+//     if (stat(root.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+//         return (1);
+//     return (0);
+// }
 
 // generate a generat_StartLine that check the server & the location & the path ;
 // retune a file descriptor to the there is a body or -1 if error
