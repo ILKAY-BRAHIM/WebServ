@@ -202,6 +202,41 @@ void Parse::fill_cgi(vectstr_t vector, int &i, vectstr_t &in, std::string msg)
 	}
 }
 
+void Parse::collect_in_type(vectstr_t vector, int &i, map_vectstr_t &the_map, std::string name)
+{
+	size_t n = 0;
+	size_t size = vector.size ();
+	std::string first;
+	vectstr_t tmp_vect;
+
+	first = vector[i].substr(name.size() + 1, vector[i].size());
+	while (++n < size && !semi_colone(vector[++i]))
+		tmp_vect.push_back (vector[i]);
+	if (semi_colone (vector[i]))
+		tmp_vect.push_back (vector[i].substr(0, vector[i].size() - 1));
+	the_map.insert(std::make_pair(first, tmp_vect));
+	if (min_det)
+	{
+		std::cout << "\t" << name << "> " << first << " < ";
+		size_t lo = 0;
+		while (lo < tmp_vect.size())
+		{
+			std::cout << tmp_vect[lo++] << " ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+void Parse::fill_types(vectstr_t vector, int &i, t_types type)
+{
+	if (vector[i].substr(0, 5) == "text/")
+		collect_in_type(vector, i, type.text, "text");
+	else if (vector[i].substr(0, 6) == "image/")
+		collect_in_type(vector, i, type.image, "image");
+	else if (vector[i].substr(0, 12) == "application/")
+		collect_in_type(vector, i, type.image, "application");
+}
+
 void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 {
 	if (vector[i] == "{")
@@ -272,6 +307,7 @@ void Parse::fill_server()
 {
 	t_server	server;
 	t_location	location;
+	t_types		type;
 	int			i = 0;
 	int			lock = 0;
 	int			size = vector.size();
@@ -332,14 +368,35 @@ void Parse::fill_server()
 					if (min_det)
 						std::cout << "_____" << "inside location with " << location.path << std::endl;
 				}
+				else if (vector[i] == "types")
+				{
+					type.on = true;
+					if (min_det)
+						std::cout << "_____" << "inside type" << std::endl;
+				}
 			}
-			else if (lock == 2)
+			else if (i + 1 < size && lock == 2)
 			{
 				if (!location.path.empty())
 				{
 					fill_locations(vector, i, location);
 					if (vector[i+1] == "}")
+					{
 						server.locations.push_back (location);
+						if (min_det)
+							std::cout << "_____" << "out of location\n" << std::endl;
+					}
+				}
+				else if (type.on)
+				{
+					fill_types(vector, i, type);
+					if ( vector[i+1] == "}")
+					{
+						server.types.push_back (type);
+						type.clear();
+						if (min_det)
+							std::cout << "_____" << "out of type\n" << std::endl;
+					}
 				}
 			}
 		}
@@ -456,6 +513,7 @@ std::vector<t_server> Parse::read_parse(int ac, char **av)
 	{
 		Parse a(av[1]);
 		servers = a.get_servers();
+		exit(1);
 	}
 	catch (std::exception &e)
 	{

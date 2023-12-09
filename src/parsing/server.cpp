@@ -35,3 +35,11 @@ void t_server::clear()
 	error_page = std::make_pair("", ""); 
 	locations.clear();
 }
+
+void t_types::clear()
+{
+	on = false;
+	text.clear();
+	image.clear();
+	application.clear();
+}

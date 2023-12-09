@@ -2,6 +2,7 @@
 #define SERVER_H
 #include <iostream>
 #include <vector>
+#include <map>
 
 # define min_det	0
 # ifndef COLOR
@@ -9,6 +10,15 @@
 #  define RED	"\033[0;31m"
 #  define WHITE	"\033[0;37m"
 # endif
+
+typedef struct s_types
+{
+	bool												on;
+	std::map<std::string, std::vector<std::string> >	text;
+	std::map<std::string, std::vector<std::string> >	application;
+	std::map<std::string, std::vector<std::string> >	image;
+	void	clear();
+}				t_types;
 
 typedef struct s_location
 {
@@ -61,6 +71,7 @@ typedef struct s_server
 	std::vector<std::string> 			index;
 	std::pair<std::string, std::string> error_page;
 	std::vector<t_location>				locations;
+	std::vector<t_types>				types;
 	//method
 	void		clear();
 }	t_server;
