@@ -513,7 +513,6 @@ std::vector<t_server> Parse::read_parse(int ac, char **av)
 	{
 		Parse a(av[1]);
 		servers = a.get_servers();
-		exit(1);
 	}
 	catch (std::exception &e)
 	{
