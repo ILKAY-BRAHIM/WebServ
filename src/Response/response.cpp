@@ -145,7 +145,7 @@ int     Response::getLocation(std::string url)
 
 void     Response::generateBodyError(int error)
 {
-
+    (void) error;
     // <html>
     // <head><title>403 Forbidden</title></head>
     // <body>
