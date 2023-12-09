@@ -18,8 +18,16 @@
 # include <sys/types.h>
 # include <utility>
 # include "Message.hpp"
+# include <unistd.h>
 
+// class   Message ;
 # define PORT 81
+
+# define ISDIR 0
+# define ISFILE 1
+# define NOTFONDE 2
+
+class Message;
 
 typedef struct t_response
 {
@@ -52,17 +60,22 @@ class Response
     private :
         std::vector<t_server> servS;
         t_server    server;
+        t_location  location;
         resp		respMessage;
 		request		req;
         std::string resp;
-        void    fillServer(char *req);
+        void    fillServer(std::string req);
 		void	checkMethode();
 		void	urlRegenerate();
+        void    generateBody(std::string path);
+        void    isDirectory(std::string path, std::string url);
+        int     getLocation(std::string url);
+        std::string generateMessage();
         // void    readPath();
     public :
         Response();
         Response(std::vector<t_server> servS);
-        Message*	generateResponse(std::string &req);
+        Message*	generateResponse(std::string req);
         // char **getEnv();
         // std::string getResponse();
         // Response(const Response &copy);
@@ -70,18 +83,30 @@ class Response
         ~Response();
 };
 
-// class   Message
-// {
-//     private :
-//         char **env;
-//         int status;
-//         char *mess;
-//     public :
-//         Message();
-//         Message(char *req);
-//         std::string getResponse();
-//         char **getEnv();
-//         ~Message();
-// };
 
 int get_request(std::vector<t_server> servers);
+
+template <typename T>
+std::string get_index(T& location, std::string path, int noIndex)
+{
+    std::string fullPath;
+    if (noIndex)
+    {
+        fullPath = path + "index.html";
+        if (access((fullPath).c_str(), F_OK | R_OK) == 0)
+            return ("index.html");
+        else
+            return "";
+    }
+    if (location.index.size() == 0)
+        return "";
+    std::vector<std::string >::iterator it = location.index.begin();
+    while (it != location.index.end())
+    {
+        fullPath = path + (*it);
+        if (access((fullPath).c_str(), F_OK | R_OK) == 0)
+            return (*it);
+        it++;
+    }
+    return "";
+}
