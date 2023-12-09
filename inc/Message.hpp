@@ -52,10 +52,10 @@ class   Message
     private :
         // char **env;
         // int status;
-        // std::string mess;
+        std::string mess;
     public :
         Message();
-        // void    setResponse();
+        void    setResponse(std::string mess);
         // void    setenv(request req);
         // void    setStatus();
         std::string getResponse();

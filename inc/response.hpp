@@ -26,23 +26,24 @@
 # define ISDIR 0
 # define ISFILE 1
 # define NOTFONDE 2
+# define CRLF "\r\n"
 
 class Message;
 
 typedef struct t_response
 {
     std::string http_version;
-    int			statusCode;
+    std::string	statusCode;
     std::string Access_Controle_Allow_Origin;
     std::string Cache_Control;
     std::string Content_Type;
     std::string Content_Lenght;
     std::string ETag;
     std::string Last_Modified;
-    std::string Location;
+    std::string Location; //+
     std::string Set_Cookie;
     std::string Server;
-	std::string query_String;
+	std::string query_String; //+
     std::string body;
 }       resp;
 
@@ -70,8 +71,10 @@ class Response
         void    generateBody(std::string path);
         void    isDirectory(std::string path, std::string url);
         int     getLocation(std::string url);
+        void     generateBodyError(int error);
         std::string generateMessage();
         // void    readPath();
+        void        redirect(std::string path);
     public :
         Response();
         Response(std::vector<t_server> servS);

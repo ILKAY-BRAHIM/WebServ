@@ -60,12 +60,52 @@ Response::Response(std::vector<t_server> servS)
 
 // Response::Response(const Response& copy){};
 
-void    generateError(int er)
+std::string generateStatusCode(int status)
 {
-    (void)er;
-    // generate error body
-    std::cout << "Error function" << std::endl;
-    return ;
+    std::string message;
+
+    if (status >= 200 && status < 300)
+    {
+        switch(status) {
+        case 200:
+            message =  std::to_string(status) + " OK";
+            break;
+        case 201:
+            message =  std::to_string(status) + " Created";
+        }
+    }
+    else if (status >= 300 && status < 400)
+    {
+        switch(status) {
+        case 301:
+            message =  std::to_string(status) + " Moved Permanently";
+            break;
+        case 302:
+            message =  std::to_string(status) + " Found";
+        }
+    }
+    else if(status >= 400 && status < 500)
+    {
+        switch(status) {
+        case 400:
+            message = std::to_string(status) + " Bad Request";
+        case 403:
+            message =  std::to_string(status) + " Forbidden";
+            break;
+        case 404:
+            message =  std::to_string(status) + " Not Found";
+        case 405:
+            message =  std::to_string(status) + " Method Not Allowed";
+        }
+    }
+    else if (status >= 500 && status < 600)
+    {
+        switch(status) {
+        case 502:
+            message =  std::to_string(status) + " Bad Gateway";
+        }
+    }
+    return (message);
 }
 
 void	Response::checkMethode() // ->status_code & ->server 
@@ -74,15 +114,16 @@ void	Response::checkMethode() // ->status_code & ->server
         throw (501);
     if (this->req.httpVertion != "HTTP/1.1")
         throw (505);
-    this->respMessage.statusCode = 200; // is possible to chage
+    this->respMessage.statusCode = "200 OK"; // is possible to chage
 	this->respMessage.Server = "Not nginx/0.0.0 (macOS)";
 }
 
-void    redirect()
+void    Response::redirect(std::string path)
 {
     // most send a response with redirect code status
     std::cout << "redirection function" << std::endl;
-
+    this->respMessage.statusCode = generateStatusCode(302);
+    this->respMessage.Location = path + '/';
     return ;
 }
 
@@ -102,6 +143,27 @@ int     Response::getLocation(std::string url)
     return (0);
 }
 
+void     Response::generateBodyError(int error)
+{
+
+    // <html>
+    // <head><title>403 Forbidden</title></head>
+    // <body>
+    // <center><h1>403 Forbidden</h1></center>
+    // <hr><center>nginx/1.18.0 (Ubuntu)</center>
+    // </body>
+    // </html>
+    // this->respMessage.Content_Type = "text/html"
+    // this->respMessage.body += "<html>\n";
+    // this->respMessage.body += ("<head><title>" + generateStatusCode(error) + "</title></head>\n");
+    // this->respMessage.body += "<body>\n";
+    // this->respMessage.body += ("<center><h1>" + generateStatusCode(error) + "</h1></center>\n");
+    // this->respMessage.body += ("<hr><center>" + this->respMessage.Server + "</center>\n");
+    // this->respMessage.body += "</body>\n";
+    // this->respMessage.body += "</html>";
+
+}
+
 void    Response::isDirectory(std::string path, std::string url)
 {
     std::cout << "Is directory" << std::endl;
@@ -112,7 +174,7 @@ void    Response::isDirectory(std::string path, std::string url)
         url.erase(url.end() - 1);
     if (getLocation(url))
     {
-        if (this->location.index.size() != 0) //this->location.index.length() != 0
+        if (this->location.index.size() != 0)
             index_ = get_index(this->location, path, 0);
         else 
         {
@@ -124,7 +186,7 @@ void    Response::isDirectory(std::string path, std::string url)
         if (index_.length() != 0)
             generateBody(path + index_);
         else
-            generateError(403);
+            throw (403);
     }
     else if (url == "/")
     {
@@ -132,11 +194,11 @@ void    Response::isDirectory(std::string path, std::string url)
         if (index_.length() != 0)
             generateBody(path + index_);
         else
-            generateError(403);
+            throw (403);
     }
     else
     {
-        generateError(403);
+        throw (403);
     }
 
     // check if there is an autoindex
@@ -144,31 +206,62 @@ void    Response::isDirectory(std::string path, std::string url)
     return ;
 }
 
-// std::string get_extention(std::string path)
-// {
+std::string get_extension(std::string path)
+{
+    std::string::iterator it = path.end() - 1;
+    std::string extension;
 
-// }
+    while (it != path.begin() && *it != '/')
+    {
+        if (*it != '.')
+        {
+            extension = *it + extension;
+            it--;
+        }
+        else
+        {
+            extension = '.' + extension;
+            break;
+        }
+    }
+    if (*extension.begin() == '.')
+    {
+        extension.erase(extension.begin());
+        return extension;
+    }
+    return "";
+}
 
 void    Response::generateBody(std::string path)
 {
     // check permition & read & generate body 
+    std::string ext = get_extension(path);
+    ssize_t     bytesRead;
+    if (ext.size() != 0)
+    {
+        if (ext == "html" || ext == "css" || ext == "js")
+            this->respMessage.Content_Type = "text/" + ext;
+        else if (ext == "png" || ext == "jpeg" || ext == "jpg")
+            this->respMessage.Content_Type = "image/" + ext;
+        else
+            this->respMessage.Content_Type = "application/octet-stream";
+    }
     int fd = open(path.c_str(), O_RDONLY);
     int   bufferSize = 1000;
     char* buffer = new char [bufferSize];
 
     if (fd == -1)
     {
-        generateError(403);
+        throw (403);
         return ;
     }
     
-    while (read(fd, buffer, bufferSize) != 0)
-    {
-        this->respMessage.body += std::string(buffer);
-    }
-    std::cout << this->respMessage.body << std::endl;
+    while ((bytesRead = read(fd, buffer, bufferSize)) > 0)
+        this->respMessage.body.append(buffer, bytesRead);
+    this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
     close (fd);
     delete[] buffer;
+    this->respMessage.statusCode = generateStatusCode(200);
     return ;
 }
 
@@ -200,7 +293,7 @@ void	Response::urlRegenerate() // ->status_code & ->Location
         if (S_ISDIR(fileStat.st_mode))
         {
             if (*(path.end() - 1) != '/')
-                redirect();
+                redirect(url);
             else
                 isDirectory(path, url);
         }
@@ -211,7 +304,7 @@ void	Response::urlRegenerate() // ->status_code & ->Location
     }   
     else
     {
-        generateError(404);
+        throw (404);
     }
     // else if ((this->req.headers).find("Referer") != this->req.headers.end())
     // {
@@ -288,11 +381,40 @@ void    Response::fillServer(std::string req)
 	}
 }
 
+
 std::string Response::generateMessage()
 {
     std::string mess;
+
+    mess += this->respMessage.http_version;
+    mess += ' ';
+    mess += this->respMessage.statusCode;
+    mess += CRLF;
+    if (this->respMessage.Content_Type.size() != 0)
+    {
+        mess += "Content-Type: ";
+        mess += this->respMessage.Content_Type;
+        mess += CRLF;
+    }
+    if (this->respMessage.Content_Lenght.size() != 0)
+    {
+        mess += "Content-Lenght: ";
+        mess += this->respMessage.Content_Lenght;
+        mess += CRLF;
+    }
+    if (this->respMessage.Location.size() != 0)
+    {
+        mess += "Location: ";
+        mess += this->respMessage.Location;
+        mess += CRLF;
+    }
+    // add other headrs 
+    mess += CRLF;
+    if (this->respMessage.body.size() != 0)
+        mess += this->respMessage.body;
     return mess;
 }
+
 
 Message*    Response::generateResponse(std::string req)
 {
@@ -307,10 +429,11 @@ Message*    Response::generateResponse(std::string req)
 	}
 	catch(int m)
 	{
-		std::cout << "status Code : " << m << std::endl;
-		exit(1);
+		this->respMessage.statusCode = generateStatusCode(m);
+		// exit(1);
 	}
     
+    mes->setResponse(generateMessage());
     // http version
     // method type allowed & type component
     // url syntax & sources permission 
