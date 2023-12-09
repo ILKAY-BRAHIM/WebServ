@@ -60,6 +60,14 @@ Response::Response(std::vector<t_server> servS)
 
 // Response::Response(const Response& copy){};
 
+void    generateError(int er)
+{
+    (void)er;
+    // generate error body
+    std::cout << "Error function" << std::endl;
+    return ;
+}
+
 void	Response::checkMethode() // ->status_code & ->server 
 {
     if (!(this->req.method == "GET" || this->req.method == "POST" || this->req.method == "DELETE"))
@@ -94,95 +102,58 @@ int     Response::getLocation(std::string url)
     return (0);
 }
 
-std::string get_index(t_server& location, std::string path, std::string url)
-{
-    (void) url;
-    std::string fullPath;
-    if (location.index.size() == 0)
-        return "";
-    std::vector<std::string >::iterator it = location.index.begin();
-    while (it != location.index.end())
-    {
-        fullPath = path + (*it);
-        if (access((fullPath).c_str(), F_OK | R_OK) == 0)
-            return (*it);
-        it++;
-    }
-    return "";
-}
-
 void    Response::isDirectory(std::string path, std::string url)
 {
     std::cout << "Is directory" << std::endl;
     std::string index_;
     (void)path;
     // check if the directory in the log
-    url.erase(url.end() - 1);
+    if (url != "/")
+        url.erase(url.end() - 1);
     if (getLocation(url))
     {
         if (this->location.index.size() != 0) //this->location.index.length() != 0
+            index_ = get_index(this->location, path, 0);
+        else 
         {
-            std::cout << "url " << url << std::endl;
-            // index_ = get_index(this->location, path, url);
-            // if (index_.length() != 0)
-            //     generateBody(path + url + index_);
-            // else
-            //     generateError(403);
-        //     std::cout << "index => " << index_;
+            if (this->server.index.size() != 0)
+                index_ = get_index(this->server, path, 0);
+            else 
+                index_ = get_index(this->server, path, 1);
         }
+        if (index_.length() != 0)
+            generateBody(path + index_);
         else
-        {
-            index_ = get_index(this->server, path, url);
-            if (index_.length() != 0)
-            {
-                //     generateBody(path + url + index_);
-                std::cout << "index => " << path << url << index_ << std::endl;
-            }
-            else
-                std::cout << "not exist" << std::endl;
-        }
-        // else if (this->server.index.length() != 0)
-        // {
-        //     // if there is in this location a file with the name in the index if there is 
-        //     ;
-        // }
-        // else
-        // {
-        //     // if there is a file whit Index.html in this directory
-        //     ;
-
-        // }
+            generateError(403);
     }
-    // else if (url == "/")
-    // {
-    //     // the roor condition
-    //     ;
-    // }
-    // else
-    // {
-    //     // forbidden error;
-    //     ;
-    // }
+    else if (url == "/")
+    {
+        index_ = get_index(this->server, path, 1);
+        if (index_.length() != 0)
+            generateBody(path + index_);
+        else
+            generateError(403);
+    }
+    else
+    {
+        generateError(403);
+    }
 
     // check if there is an autoindex
-    // check if there is an index
     // generate body || send an error
     return ;
 }
 
-void    generateError(int er)
-{
-    (void)er;
-    // generate error body
-    std::cout << "Error function" << std::endl;
-    return ;
-}
+// std::string get_extention(std::string path)
+// {
+
+// }
 
 void    Response::generateBody(std::string path)
 {
     // check permition & read & generate body 
     int fd = open(path.c_str(), O_RDONLY);
-    int   bufferSize = 100;
+    int   bufferSize = 1000;
     char* buffer = new char [bufferSize];
 
     if (fd == -1)
@@ -191,13 +162,11 @@ void    Response::generateBody(std::string path)
         return ;
     }
     
-    while (read(fd, buffer, bufferSize))
+    while (read(fd, buffer, bufferSize) != 0)
     {
-        this->respMessage.body += buffer;
+        this->respMessage.body += std::string(buffer);
     }
-    this->respMessage.body += "\r\n\r\n";
-    std::cout << this->respMessage.body;
-
+    std::cout << this->respMessage.body << std::endl;
     close (fd);
     delete[] buffer;
     return ;
@@ -266,7 +235,7 @@ void	Response::urlRegenerate() // ->status_code & ->Location
     // std::cout << "Parameters : " << parameters << std::endl;
     // std::cout << "Path : " << path << std::endl;
 
-    pause();
+    // pause();
 	//encode parameters
 }
 
@@ -319,6 +288,12 @@ void    Response::fillServer(std::string req)
 	}
 }
 
+std::string Response::generateMessage()
+{
+    std::string mess;
+    return mess;
+}
+
 Message*    Response::generateResponse(std::string req)
 {
     Message *mes = new Message();
@@ -329,14 +304,13 @@ Message*    Response::generateResponse(std::string req)
 	{
 		checkMethode();
         urlRegenerate();
-        // readPath();
 	}
 	catch(int m)
 	{
 		std::cout << "status Code : " << m << std::endl;
 		exit(1);
 	}
-
+    
     // http version
     // method type allowed & type component
     // url syntax & sources permission 

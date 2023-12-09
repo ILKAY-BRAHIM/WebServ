@@ -70,6 +70,7 @@ class Response
         void    generateBody(std::string path);
         void    isDirectory(std::string path, std::string url);
         int     getLocation(std::string url);
+        std::string generateMessage();
         // void    readPath();
     public :
         Response();
@@ -85,17 +86,27 @@ class Response
 
 int get_request(std::vector<t_server> servers);
 
-// template <typename T>
-// std::string get_index(T& location, std::string url)
-// {
-//     if ((location.index).length()== 0)
-//         return "";
-//     typename std::vector<T>::iterator it = location.index.begin();
-//     while (it != location.index.end())
-//     {
-//         if (*it == url)
-//             return (*it);
-//         it++;
-//     }
-//     return "";
-// }
+template <typename T>
+std::string get_index(T& location, std::string path, int noIndex)
+{
+    std::string fullPath;
+    if (noIndex)
+    {
+        fullPath = path + "index.html";
+        if (access((fullPath).c_str(), F_OK | R_OK) == 0)
+            return ("index.html");
+        else
+            return "";
+    }
+    if (location.index.size() == 0)
+        return "";
+    std::vector<std::string >::iterator it = location.index.begin();
+    while (it != location.index.end())
+    {
+        fullPath = path + (*it);
+        if (access((fullPath).c_str(), F_OK | R_OK) == 0)
+            return (*it);
+        it++;
+    }
+    return "";
+}
