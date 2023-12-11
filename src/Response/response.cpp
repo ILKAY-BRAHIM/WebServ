@@ -88,12 +88,14 @@ std::string generateStatusCode(int status)
     {
         switch(status) {
         case 400:
-            message = std::to_string(status) + " Bad Request";
+            message =  std::to_string(status) + " Bad Request";
+            break;
         case 403:
             message =  std::to_string(status) + " Forbidden";
             break;
         case 404:
             message =  std::to_string(status) + " Not Found";
+            break;
         case 405:
             message =  std::to_string(status) + " Method Not Allowed";
         }
@@ -103,6 +105,9 @@ std::string generateStatusCode(int status)
         switch(status) {
         case 502:
             message =  std::to_string(status) + " Bad Gateway";
+            break;
+        case 505:
+            message =  std::to_string(status) + " HTTP Version Not Supported";
         }
     }
     return (message);
@@ -111,9 +116,15 @@ std::string generateStatusCode(int status)
 void	Response::checkMethode() // ->status_code & ->server 
 {
     if (!(this->req.method == "GET" || this->req.method == "POST" || this->req.method == "DELETE"))
+    {
+        generateBodyError(501);
         throw (501);
+    }
     if (this->req.httpVertion != "HTTP/1.1")
+    {
+        generateBodyError(505);
         throw (505);
+    }
     this->respMessage.statusCode = "200 OK"; // is possible to chage
 	this->respMessage.Server = "Not nginx/0.0.0 (macOS)";
 }
@@ -145,22 +156,16 @@ int     Response::getLocation(std::string url)
 
 void     Response::generateBodyError(int error)
 {
-    (void) error;
-    // <html>
-    // <head><title>403 Forbidden</title></head>
-    // <body>
-    // <center><h1>403 Forbidden</h1></center>
-    // <hr><center>nginx/1.18.0 (Ubuntu)</center>
-    // </body>
-    // </html>
-    // this->respMessage.Content_Type = "text/html"
-    // this->respMessage.body += "<html>\n";
-    // this->respMessage.body += ("<head><title>" + generateStatusCode(error) + "</title></head>\n");
-    // this->respMessage.body += "<body>\n";
-    // this->respMessage.body += ("<center><h1>" + generateStatusCode(error) + "</h1></center>\n");
-    // this->respMessage.body += ("<hr><center>" + this->respMessage.Server + "</center>\n");
-    // this->respMessage.body += "</body>\n";
-    // this->respMessage.body += "</html>";
+    this->respMessage.Content_Type = "text/html";
+    this->respMessage.body += "<!DOCTYPE html>\n<html lang=\"en\">\n";
+    this->respMessage.body += "<html>\n";
+    this->respMessage.body += ("<head><title>" + generateStatusCode(error) + "</title></head>\n");
+    this->respMessage.body += "<body>\n";
+    this->respMessage.body += ("<center><h1>" + generateStatusCode(error) + "</h1></center>\n");
+    this->respMessage.body += ("<hr><center>" + this->respMessage.Server + "</center>\n");
+    this->respMessage.body += "</body>\n";
+    this->respMessage.body += "</html>";
+    this->respMessage.Content_Lenght = std::to_string(this->respMessage.body.length());
 
 }
 
@@ -186,7 +191,10 @@ void    Response::isDirectory(std::string path, std::string url)
         if (index_.length() != 0)
             generateBody(path + index_);
         else
+        {
+            generateBodyError(403);
             throw (403);
+        }
     }
     else if (url == "/")
     {
@@ -194,10 +202,15 @@ void    Response::isDirectory(std::string path, std::string url)
         if (index_.length() != 0)
             generateBody(path + index_);
         else
+        {
+            generateBodyError(403);
             throw (403);
+        }
+
     }
     else
     {
+        generateBodyError(403);
         throw (403);
     }
 
@@ -252,6 +265,7 @@ void    Response::generateBody(std::string path)
 
     if (fd == -1)
     {
+        generateBodyError(403);
         throw (403);
         return ;
     }
@@ -304,6 +318,7 @@ void	Response::urlRegenerate() // ->status_code & ->Location
     }   
     else
     {
+        generateBodyError(404);
         throw (404);
     }
     // else if ((this->req.headers).find("Referer") != this->req.headers.end())
@@ -331,11 +346,6 @@ void	Response::urlRegenerate() // ->status_code & ->Location
     // pause();
 	//encode parameters
 }
-
-// void	Response::readPath() // ->content_linght & ->content_type & ->last_modification & ->status_code
-// {
-
-// }
 
 void    Response::fillServer(std::string req)
 {
@@ -409,6 +419,7 @@ std::string Response::generateMessage()
         mess += CRLF;
     }
     // add other headrs 
+    //  ...
     mess += CRLF;
     if (this->respMessage.body.size() != 0)
         mess += this->respMessage.body;
@@ -430,6 +441,7 @@ Message*    Response::generateResponse(std::string req)
 	catch(int m)
 	{
 		this->respMessage.statusCode = generateStatusCode(m);
+        std::cout << this->respMessage.statusCode << std::endl;
 		// exit(1);
 	}
     
@@ -437,7 +449,7 @@ Message*    Response::generateResponse(std::string req)
     // http version
     // method type allowed & type component
     // url syntax & sources permission 
-
+    std::cout << mes->getResponse() << std::endl;
     return (mes);
 
 }
