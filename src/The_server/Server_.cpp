@@ -485,35 +485,28 @@ void Server::run()
                         std::cout << "\033[92msend " << it->second.get_total() << " bytes to client " << it->first << " total of data is " << it->second.get_responce().length() << " bytes\033[39m" <<std::endl;
                         if (it->second.get_total() == it->second.get_responce().length())
                         {
-                            // close(it->first);
+                            close(it->first);
                             FD_CLR(it->first, &this->write_set1);
-                            FD_SET(it->first, &this->master_set);
-                            // if (it->first == max_fd)
-                            // {
-                            //     while (FD_ISSET(max_fd, &this->master_set) == 0)
-                            //         max_fd -= 1;
-                            // }
-                            it->second.set_total(0);
-                            if(this->timeout_client.empty())
-                                this->timeout_client.insert(std::pair<int, Servers>(it->first, it->second));
-                            else
+                            // FD_SET(it->first, &this->master_set);
+                            if (it->first == max_fd)
                             {
-                                if (timeout_client.find(it->first) == timeout_client.end())
-                                    this->timeout_client.insert(std::pair<int, Servers>(it->first, it->second));
-                                else
-                                {
-                                    std::map<int, Servers>::iterator itt = this->timeout_client.find(it->first);
-                                    this->timeout_client.erase(itt);
-                                    this->timeout_client.insert(std::pair<int, Servers>(it->first, it->second));
-                                }
-                                // else
-                                // {
-                                //     std::vector<std::pair<int, Servers> >::iterator itt = std::find(this->timeout_client.begin(), this->timeout_client.end(), std::pair<int, Servers>(it->first, it->second));
-                                //     this->timeout_client.erase(itt);
-                                //     this->timeout_client.push_back(std::pair<int, Servers>(it->first, it->second));
-                                // }
-                            
+                                while (FD_ISSET(max_fd, &this->master_set) == 0)
+                                    max_fd -= 1;
                             }
+                            it->second.set_total(0);
+                            // if(this->timeout_client.empty())
+                            //     this->timeout_client.insert(std::pair<int, Servers>(it->first, it->second));
+                            // else
+                            // {
+                            //     if (timeout_client.find(it->first) == timeout_client.end())
+                            //         this->timeout_client.insert(std::pair<int, Servers>(it->first, it->second));
+                            //     else
+                            //     {
+                            //         std::map<int, Servers>::iterator itt = this->timeout_client.find(it->first);
+                            //         this->timeout_client.erase(itt);
+                            //         this->timeout_client.insert(std::pair<int, Servers>(it->first, it->second));
+                            //     }
+                            // }
                             this->msg.erase(it);
                         }
                         if(this->msg.empty())
