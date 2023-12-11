@@ -232,13 +232,13 @@ void Parse::fill_types(vectstr_t vector, int &i, t_types type)
 	if (vector[i].substr(0, 5) == "text/")
 		collect_in_type(vector, i, type.text, "text");
 	else if (vector[i].substr(0, 12) == "application/")
-		collect_in_type(vector, i, type.image, "application");
+		collect_in_type(vector, i, type.application, "application");
 	else if (vector[i].substr(0, 6) == "image/")
 		collect_in_type(vector, i, type.image, "image");
 	else if (vector[i].substr(0, 6) == "video/")
-		collect_in_type(vector, i, type.image, "video");
+		collect_in_type(vector, i, type.video, "video");
 	else if (vector[i].substr(0, 6) == "audio/")
-		collect_in_type(vector, i, type.image, "audio");
+		collect_in_type(vector, i, type.audio, "audio");
 }
 
 void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)

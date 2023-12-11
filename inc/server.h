@@ -13,10 +13,13 @@
 
 typedef struct s_types
 {
-	bool												on;
-	std::map<std::string, std::vector<std::string> >	text;
-	std::map<std::string, std::vector<std::string> >	application;
-	std::map<std::string, std::vector<std::string> >	image;
+	typedef std::map<std::string, std::vector<std::string> >	mapper_t;
+	bool		on;
+	mapper_t	text;
+	mapper_t	application;
+	mapper_t	image;
+	mapper_t	video;
+	mapper_t	audio;
 	void	clear();
 }				t_types;
 
