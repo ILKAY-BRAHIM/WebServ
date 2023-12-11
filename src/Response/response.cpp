@@ -449,6 +449,10 @@ std::string Response::generateMessage()
     return mess;
 }
 
+void    Response::clearResponse()
+{
+    ;
+}
 
 Message*    Response::generateResponse(std::string req)
 {
@@ -469,6 +473,7 @@ Message*    Response::generateResponse(std::string req)
 	}
     
     mes->setResponse(generateMessage());
+    void    clearResponse();
     // http version
     // method type allowed & type component
     // url syntax & sources permission 
