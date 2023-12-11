@@ -41,5 +41,8 @@ void t_types::clear()
 	on = false;
 	text.clear();
 	image.clear();
+	video.clear();
+	audio.clear();
 	application.clear();
+
 }
