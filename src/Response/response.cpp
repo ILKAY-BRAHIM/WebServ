@@ -132,7 +132,7 @@ void	Response::checkMethode() // ->status_code & ->server
 void    Response::redirect(std::string path)
 {
     // most send a response with redirect code status
-    std::cout << "redirection function" << std::endl;
+    // std::cout << "redirection function" << std::endl;
     this->respMessage.statusCode = generateStatusCode(302);
     this->respMessage.Location = path + '/';
     return ;
@@ -171,7 +171,7 @@ void     Response::generateBodyError(int error)
 
 void    Response::isDirectory(std::string path, std::string url)
 {
-    std::cout << "Is directory" << std::endl;
+    // std::cout << "Is directory" << std::endl;
     std::string index_;
     (void)path;
     // check if the directory in the log
@@ -245,11 +245,32 @@ std::string get_extension(std::string path)
     return "";
 }
 
+// std::string getType(std::vector<t_types> types, std::string ext)
+// {
+//     std::vector<t_types>::iterator it = types.begin();
+//     while (it != types.end())
+//     {
+//         std::map<std::string, std::vector<std::string> >::iterator type = it->text.begin();
+//         while (type != it->text.end())
+//         {
+//             std::vector<std::string>::iterator extension = type->second.begin();
+//             while (extension != type->second.end())
+//             {
+
+//             }
+//         }
+
+//         // std::map<std::string, std::vector<std::string> >::iterator jj = it->text.begin();
+//         pause();
+//     }
+// }
+
 void    Response::generateBody(std::string path)
 {
     // check permition & read & generate body 
     std::string ext = get_extension(path);
     ssize_t     bytesRead;
+
     if (ext.size() != 0)
     {
         if (ext == "html" || ext == "css" || ext == "js")
@@ -259,6 +280,8 @@ void    Response::generateBody(std::string path)
         else
             this->respMessage.Content_Type = "application/octet-stream";
     }
+    else
+        this->respMessage.Content_Type = "application/octet-stream";
     int fd = open(path.c_str(), O_RDONLY);
     int   bufferSize = 1000;
     char* buffer = new char [bufferSize];
@@ -441,7 +464,7 @@ Message*    Response::generateResponse(std::string req)
 	catch(int m)
 	{
 		this->respMessage.statusCode = generateStatusCode(m);
-        std::cout << this->respMessage.statusCode << std::endl;
+        // std::cout << this->respMessage.statusCode << std::endl;
 		// exit(1);
 	}
     
@@ -449,7 +472,7 @@ Message*    Response::generateResponse(std::string req)
     // http version
     // method type allowed & type component
     // url syntax & sources permission 
-    std::cout << mes->getResponse() << std::endl;
+    // std::cout << mes->getResponse() << std::endl;
     return (mes);
 
 }

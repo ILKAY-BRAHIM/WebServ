@@ -51,8 +51,8 @@ int get_request(std::vector<t_server> servers)
         
         char requestt[30000] = {0};
         valread = read( new_socket , requestt, 30000);
-        printf("-------------------------REQUEST-------------------------\n");
-        printf("%s\n", requestt);
+        // printf("-------------------------REQUEST-------------------------\n");
+        // printf("%s\n", requestt);
 
         Response resp(servers);
         std::string r(requestt);
