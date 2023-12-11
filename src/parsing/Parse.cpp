@@ -209,7 +209,7 @@ void Parse::collect_in_type(vectstr_t vector, int &i, map_vectstr_t &the_map, st
 	std::string first;
 	vectstr_t tmp_vect;
 
-	first = vector[i].substr(name.size() + 1, vector[i].size());
+	first = vector[i]/*.substr(name.size() + 1, vector[i].size())*/;
 	while (++n < size && !semi_colone(vector[++i]))
 		tmp_vect.push_back (vector[i]);
 	if (semi_colone (vector[i]))
@@ -227,7 +227,7 @@ void Parse::collect_in_type(vectstr_t vector, int &i, map_vectstr_t &the_map, st
 	}
 }
 
-void Parse::fill_types(vectstr_t vector, int &i, t_types type)
+void Parse::fill_types(vectstr_t vector, int &i, t_types &type)
 {
 	if (vector[i].substr(0, 5) == "text/")
 		collect_in_type(vector, i, type.text, "text");
