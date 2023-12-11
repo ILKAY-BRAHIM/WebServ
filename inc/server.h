@@ -2,6 +2,7 @@
 #define SERVER_H
 #include <iostream>
 #include <vector>
+#include <map>
 
 # define min_det	0
 # ifndef COLOR
@@ -10,13 +11,25 @@
 #  define WHITE	"\033[0;37m"
 # endif
 
+typedef struct s_types
+{
+	typedef std::map<std::string, std::vector<std::string> >	mapper_t;
+	bool		on;
+	mapper_t	text;
+	mapper_t	application;
+	mapper_t	image;
+	mapper_t	video;
+	mapper_t	audio;
+	void	clear();
+}				t_types;
+
 typedef struct s_location
 {
 	std::string					path;					//path after location key
 	std::string 				root;					//root dir location
 	std::string 				alias;					//define remplacement 
 	//for specefied url
-	std::string 				index;					//set default file
+	std::vector<std::string>	index;					//set default file
 	std::string 				proxy_pass;				//forwards requests to a 
 	//specified backend server 
 	std::string 				rewrite;				//modifies the requested 
@@ -58,9 +71,10 @@ typedef struct s_server
 	std::string 						root;
 	std::vector<std::string>			allow_methods;
 	std::string							redirect;
-	std::string 						index;
+	std::vector<std::string> 			index;
 	std::pair<std::string, std::string> error_page;
 	std::vector<t_location>				locations;
+	std::vector<t_types>				types;
 	//method
 	void		clear();
 }	t_server;

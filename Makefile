@@ -2,8 +2,8 @@ NAME = server
 
 SRC = $(addprefix src/,  main.cpp) \
       $(addprefix src/parsing/, Parse.cpp server.cpp) \
-	  $(addprefix src/Response/, request.cpp response.cpp Message.cpp) \
-	  $(addprefix src/The_server/, Server_.cpp servers.cpp)
+	  $(addprefix src/The_server/, Server_.cpp servers.cpp) \
+	  $(addprefix src/Response/, request.cpp response.cpp Message.cpp)
 
 INCLUDE_DIR = inc/ # zido hna b / f lakhr
 

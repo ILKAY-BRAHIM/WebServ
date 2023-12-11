@@ -5,27 +5,48 @@ Message::Message(){};
 
 std::string Message::getResponse()
 {
-    std::ifstream file("/Users/bchifour/Desktop/WEBSERV/src/The_server/fill.txt");
-    if (!file.is_open())
-    {
-        // std::cout << "file not open" << std::endl;
-        std::perror("file not open");
-        exit(1);
-    }
-    std::string hello;
-    std::string line;
-    while (getline(file, line))
-    {
-        hello += line;
-    }
-    file.close();
-    std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\nContent-Length: "+ std::to_string(hello.length()+20)+"\r\n\r\n<html><body><h1>"+hello + "</h1></body></html>";
+    // std::string mes("Hello World -_-");
+    // int size = mes.length();
+    // return ("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: "+ std::to_string(size) +"\r\n\r\n" + mes);
+    return (this->mess);
+}
 
+// void    Message::setenv(request req)
+// {
+//     std::string envirement[25];
 
-    //  std::ifstream imageFile("/Users/bchifour/Desktop/WebServer/bchifour.jpeg", std::ios::binary);
-    // std::string imageData((std::istreambuf_iterator<char>(imageFile)), std::istreambuf_iterator<char>());
-    // std::string response = "HTTP/1.1 200 OK\nContent-Type: image/jpeg\nContent-Length: " + std::to_string(imageData.size()) + "\n\n" + imageData;
-    return (res);
+//     envirement[0] = "SERVER_NAME";
+//     envirement[1] = "SERVER_SOFTWARE";
+//     envirement[2] = "GATEWAY_INTERFACE";
+//     envirement[3] = "SERVER_PROTOCOL";
+//     envirement[4] = "SERVER_PORT";
+//     envirement[5] = "REQUEST_METHOD";
+//     envirement[6] = "PATH_INFO";
+//     envirement[7] = "PATH_TRANSLATED";
+//     envirement[8] = "SCRIPT_NAME";
+//     envirement[9] = "QUERY_STRING";
+//     envirement[10] = "AUTH_TYPE";
+//     envirement[11] = "REMOTE_USER";
+//     envirement[12] = "REMOTE_IDENT";
+//     envirement[13] = "CONTENT_TYPE";
+//     envirement[14] = "CONTENT_LENGTH";
+//     envirement[15] = "REMOTE_ADDR";
+//     envirement[16] = "REQUEST_URI";
+//     envirement[17] = "PATH";
+//     envirement[18] = "SERVER_ADDR";
+//     envirement[19] = "SERVER_NAME";
+//     envirement[20] = "SERVER_ADMIN";
+//     envirement[21] = "HTTP_ACCEPT";
+//     envirement[22] = "HTTP_ACCEPT_LANGUAGE";
+//     envirement[23] = "HTTP_COOKIE";
+//     envirement[24] = "HTTP_REFERER";
+//     envirement[25] = "HTTP_USER_AGENT";
+
+// }
+
+void    Message::setResponse(std::string mess)
+{
+    this->mess = mess;
 }
 
 char **Message::getEnv()

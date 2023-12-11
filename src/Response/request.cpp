@@ -55,8 +55,10 @@ int get_request(std::vector<t_server> servers)
         printf("%s\n", requestt);
 
         Response resp(servers);
-        // resp.generateResponse(requestt);
+        std::string r(requestt);
+        Message *m = resp.generateResponse(r);
         
+        write(new_socket ,(m->getResponse()).c_str() ,(m->getResponse()).length());
 
         // request req = parseRequest(requestt);
 

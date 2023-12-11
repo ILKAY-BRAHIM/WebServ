@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 #include <fstream>
 #include <exception>
 #include <cstdlib>
@@ -21,10 +22,12 @@ class Parse
 		Parse& operator= (const Parse &other);
 
 		typedef std::vector<std::string> vectstr_t;
+		typedef std::map<std::string, std::vector<std::string> > map_vectstr_t;
 
 		void						fill_parts(vectstr_t vector, int &i, std::string &to_fill, std::string msg);
 		void						fill_server();
 		void						handle_location(vectstr_t vector, int &i, t_location &location);
+		void						fill_indexs(vectstr_t vector, int &i, vectstr_t &to_fill, std::string msg);
 		void						fill_locations(vectstr_t vector, int &i, t_location &location);
 		void						fill_cgi(vectstr_t vector, int &i, vectstr_t &in, std::string msg);
 		void						fill_methods(vectstr_t vector, int &i, t_location &location);
@@ -33,6 +36,8 @@ class Parse
 		void						fast_check(std::ifstream &file_in, char **file_name);
 		void						fill_data_in_vector(std::string &file_cont);
 		bool						acollade_est_symetrique(vectstr_t vect);
+		void						fill_types(vectstr_t vector, int &i, t_types type);
+		void						collect_in_type(vectstr_t vector, int &i, map_vectstr_t &text, std::string name);
 
 		std::vector<t_server> const	&get_servers() const;
 

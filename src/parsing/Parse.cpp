@@ -90,6 +90,23 @@ void Parse::fill_parts(vectstr_t vector, int &i, std::string &to_fill, std::stri
 		throw Parse::ServerError("needs a \';\'");
 }
 
+
+void Parse::fill_indexs(vectstr_t vector, int &i, vectstr_t &to_fill, std::string msg)
+{
+	int size = vector.size ();
+	size_t j = to_fill.size();
+	while (++i < size && !semi_colone(vector[i]))
+		to_fill.push_back(vector[i]);
+	if (semi_colone(vector[i]))
+		to_fill.push_back(vector[i].substr(0, vector[i].size() - 1));
+	if (min_det)
+	{
+		while (j < to_fill.size())
+			std::cout << msg + to_fill[j++] + "\n";
+	}
+}
+
+
 void Parse::pass_comment(vectstr_t vector, int &i)
 {
 	if (min_det)
@@ -185,6 +202,45 @@ void Parse::fill_cgi(vectstr_t vector, int &i, vectstr_t &in, std::string msg)
 	}
 }
 
+void Parse::collect_in_type(vectstr_t vector, int &i, map_vectstr_t &the_map, std::string name)
+{
+	size_t n = 0;
+	size_t size = vector.size ();
+	std::string first;
+	vectstr_t tmp_vect;
+
+	first = vector[i]/*.substr(name.size() + 1, vector[i].size())*/;
+	while (++n < size && !semi_colone(vector[++i]))
+		tmp_vect.push_back (vector[i]);
+	if (semi_colone (vector[i]))
+		tmp_vect.push_back (vector[i].substr(0, vector[i].size() - 1));
+	the_map.insert(std::make_pair(first, tmp_vect));
+	if (min_det)
+	{
+		std::cout << "\t" << name << "> " << first << " < ";
+		size_t lo = 0;
+		while (lo < tmp_vect.size())
+		{
+			std::cout << tmp_vect[lo++] << " ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+void Parse::fill_types(vectstr_t vector, int &i, t_types &type)
+{
+	if (vector[i].substr(0, 5) == "text/")
+		collect_in_type(vector, i, type.text, "text");
+	else if (vector[i].substr(0, 12) == "application/")
+		collect_in_type(vector, i, type.application, "application");
+	else if (vector[i].substr(0, 6) == "image/")
+		collect_in_type(vector, i, type.image, "image");
+	else if (vector[i].substr(0, 6) == "video/")
+		collect_in_type(vector, i, type.video, "video");
+	else if (vector[i].substr(0, 6) == "audio/")
+		collect_in_type(vector, i, type.audio, "audio");
+}
+
 void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 {
 	if (vector[i] == "{")
@@ -194,7 +250,7 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 	else if (vector[i] == "alias")
 		fill_parts(vector, i, location.alias, "alias : ");
 	else if (vector[i] == "index")
-		fill_parts(vector, i, location.index, "index : ");
+		fill_indexs(vector, i, location.index, "index : ");
 	else if (vector[i] == "proxy_pass")
 		fill_parts(vector, i, location.proxy_pass, "proxy_pass : ");
 	else if (vector[i] == "rewrite")
@@ -255,6 +311,7 @@ void Parse::fill_server()
 {
 	t_server	server;
 	t_location	location;
+	t_types		type;
 	int			i = 0;
 	int			lock = 0;
 	int			size = vector.size();
@@ -292,7 +349,7 @@ void Parse::fill_server()
 					fill_parts(vector, i, server.root, "root : ");
 				else if (vector[i] == "index")
 				{
-					fill_parts(vector, i, server.index, "index : ");
+					fill_indexs(vector, i, server.index, "index : ");
 				}
 				else if (vector[i] == "error_page" && i + 2 < size)
 				{
@@ -315,14 +372,35 @@ void Parse::fill_server()
 					if (min_det)
 						std::cout << "_____" << "inside location with " << location.path << std::endl;
 				}
+				else if (vector[i] == "types")
+				{
+					type.on = true;
+					if (min_det)
+						std::cout << "_____" << "inside type" << std::endl;
+				}
 			}
-			else if (lock == 2)
+			else if (i + 1 < size && lock == 2)
 			{
 				if (!location.path.empty())
 				{
 					fill_locations(vector, i, location);
 					if (vector[i+1] == "}")
+					{
 						server.locations.push_back (location);
+						if (min_det)
+							std::cout << "_____" << "out of location\n" << std::endl;
+					}
+				}
+				else if (type.on)
+				{
+					fill_types(vector, i, type);
+					if ( vector[i+1] == "}")
+					{
+						server.types.push_back (type);
+						type.clear();
+						if (min_det)
+							std::cout << "_____" << "out of type\n" << std::endl;
+					}
 				}
 			}
 		}
