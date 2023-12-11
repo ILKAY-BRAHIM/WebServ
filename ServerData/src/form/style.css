@@ -73,6 +73,15 @@ button.delete-button {
     font-size: 16px;
 }
 
+a{
+    
+    text-align: center;
+    margin-bottom: 20px;
+    color: rgb(23, 55, 45);
+    text-decoration: none;
+    margin: 0 auto;
+}
+
 /* Style for hover effect */
 button.delete-button:hover {
     background-color: #ff473a;

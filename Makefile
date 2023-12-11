@@ -1,11 +1,13 @@
 NAME = server
 
-SRC = $(addprefix src/, printServers.cpp request.cpp main.cpp) \
+SRC = $(addprefix src/,  main.cpp) \
       $(addprefix src/parsing/, Parse.cpp server.cpp) \
-	  $(addprefix src/The_server/, Server_.cpp servers.cpp) \
-		#zido hna 
+	  $(addprefix src/Response/, request.cpp response.cpp Message.cpp) \
+	  $(addprefix src/The_server/, Server_.cpp servers.cpp)
 
 INCLUDE_DIR = inc/ # zido hna b / f lakhr
+
+INCLUDES = inc/*.h inc/*.hpp #will be updated to a wildcard after
 
 # dakxi lakhor ma t9isohx
 
@@ -17,7 +19,7 @@ CC = c++
 
 SRC_DIR = src
 
-CPPFLAGS = -Wall -Wextra -Werror -std=c++98  -I$(INCLUDE_DIR)
+CPPFLAGS = -Wall -Wextra -Werror -std=c++98  -fsanitize=address -g -I$(INCLUDE_DIR)
 
 all : $(OBJ_DIR) $(NAME)
 
@@ -28,10 +30,7 @@ $(OBJ_DIR) :
 $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp 
 	$(CC) $(CPPFLAGS) -c $< -o $@
 
-#$(OBJ_DIR)/%.o : src/The_server/%.cpp
-#	$(CC) $(CPPFLAGS) -c $< -o $@
-
-$(NAME) : $(OBJ) $(INCLUDE_DIR)
+$(NAME) : $(OBJ) $(INCLUDES)
 	$(CC) $(CPPFLAGS) $(OBJ) -o $(NAME)
 
 clean : 
