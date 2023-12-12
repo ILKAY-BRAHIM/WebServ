@@ -114,3 +114,5 @@ std::string get_index(T& location, std::string path, int noIndex)
     }
     return "";
 }
+
+std::string get_extension(std::string path);

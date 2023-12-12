@@ -34,10 +34,12 @@ class Servers
 
         void set_responce_class(Message *responce){this->responce = responce;}
         void set_total(int total) {this->total += total;}
+        void rset_total(int total) {this->total = total;}
         void set_partis(int partis) {this->partis = partis;}
         void set_responce(std::string responce) {this->_responce = responce;}
         void set_start(std::clock_t start) {this->start = start;}
         void set_ma9bara(int fd) {this->m9bara.push_back(fd);}
+        void set_request(std::string request) {this->request = request;}
         // Servers(const Responce &responce);
         // Servers(const Servers &other);
         // is_ready();

@@ -156,6 +156,11 @@ int     Response::getLocation(std::string url)
 
 void     Response::generateBodyError(int error)
 {
+    if (this->req.path == "/favicon.ico")
+    {
+        this->respMessage.Content_Lenght = "0";
+        return ;
+    }
     this->respMessage.Content_Type = "text/html";
     this->respMessage.body += "<!DOCTYPE html>\n<html lang=\"en\">\n";
     this->respMessage.body += "<html>\n";
@@ -269,7 +274,7 @@ void    Response::generateBody(std::string path)
 {
     // check permition & read & generate body 
     std::string ext = get_extension(path);
-    ssize_t     bytesRead;
+    // ssize_t     bytesRead;
 
     if (ext.size() != 0)
     {
@@ -282,22 +287,26 @@ void    Response::generateBody(std::string path)
     }
     else
         this->respMessage.Content_Type = "application/octet-stream";
-    int fd = open(path.c_str(), O_RDONLY);
-    int   bufferSize = 1000;
-    char* buffer = new char [bufferSize];
-
-    if (fd == -1)
-    {
-        generateBodyError(403);
-        throw (403);
-        return ;
-    }
-    
-    while ((bytesRead = read(fd, buffer, bufferSize)) > 0)
-        this->respMessage.body.append(buffer, bytesRead);
+    // int fd = open(path.c_str(), O_RDONLY);
+    // int   bufferSize = 1000;
+    // char* buffer = new char [bufferSize];
+    std::ifstream fd(path.c_str());
+    // if (fd == -1)
+    // {
+    //     generateBodyError(403);
+    //     throw (403);
+    //     return ;
+    // }
+    std::string line;
+    // while ((bytesRead = read(fd, buffer, bufferSize)) > 0)
+    //     this->respMessage.body.append(buffer, bytesRead);
+    while (getline(fd, line))
+        this->respMessage.body += line;
     this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
-    close (fd);
-    delete[] buffer;
+
+    // close (fd);
+    fd.close();
+    // delete[] buffer;
     this->respMessage.statusCode = generateStatusCode(200);
     return ;
 }
@@ -422,28 +431,28 @@ std::string Response::generateMessage()
     mess += this->respMessage.http_version;
     mess += ' ';
     mess += this->respMessage.statusCode;
-    mess += CRLF;
+    mess += std::string(CRLF);
     if (this->respMessage.Content_Type.size() != 0)
     {
-        mess += "Content-Type: ";
+        mess += std::string("Content-Type: ");
         mess += this->respMessage.Content_Type;
-        mess += CRLF;
+        mess += std::string(CRLF);
     }
     if (this->respMessage.Content_Lenght.size() != 0)
     {
-        mess += "Content-Lenght: ";
+        mess += std::string("Content-Length: ");
         mess += this->respMessage.Content_Lenght;
-        mess += CRLF;
+        mess += std::string(CRLF);
     }
     if (this->respMessage.Location.size() != 0)
     {
-        mess += "Location: ";
+        mess += std::string("Location: ");
         mess += this->respMessage.Location;
-        mess += CRLF;
+        mess += std::string(CRLF);
     }
     // add other headrs 
     //  ...
-    mess += CRLF;
+    mess += std::string(CRLF);
     if (this->respMessage.body.size() != 0)
         mess += this->respMessage.body;
     return mess;
