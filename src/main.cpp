@@ -1,5 +1,5 @@
 #include "Parse.hpp"
-#include "The_server/Server_.hpp"
+#include "Server_.hpp"
 #include "response.hpp"
 
 int main (int ac, char **av)
@@ -12,12 +12,15 @@ int main (int ac, char **av)
 	if (!servers.size())
 		return (1);
 	
-
+	Response resp(servers);
+	// std::string h("hello");
+	// Message *mes = resp.generateResponse(h);
+	// std::cout << mes->getResponse() << std::endl;
 	//continue above this line
-	// Response resp(servers);
-	// Server serv(servers);
-	// serv.start_server();
-	// serv.run();
+	// printServers(servers);
+	Server serv(servers, resp);
+	serv.start_server();
+	serv.run();
 
 	// get_request(servers);
 }

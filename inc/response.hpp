@@ -73,6 +73,7 @@ class Response
         int     getLocation(std::string url);
         void     generateBodyError(int error);
         std::string generateMessage();
+        void    clearResponse();
         // void    readPath();
         void        redirect(std::string path);
     public :
@@ -113,3 +114,5 @@ std::string get_index(T& location, std::string path, int noIndex)
     }
     return "";
 }
+
+std::string get_extension(std::string path);
