@@ -139,10 +139,13 @@ bool Parse::isNumber(const std::string& str)
 
 void Parse::handle_location(vectstr_t vector, int &i, t_location &location)
 {
+	location.clear();
 	if (vector[++i].find("/"))
 		throw Parse::ServerError("you should set a path after location and before \'{\'");
 	else
 		location.path = vector[i];
+	if (min_det)
+		std::cout << "_____" << "inside location with " << location.path << std::endl;
 }
 
 bool is_a_method(std::string vector)
@@ -307,6 +310,19 @@ void fill_listen_port(T &vector, int &i, std::vector<int> &port)
 	}
 }
 
+void Parse::fill_error_page(vectstr_t &vector, int &i, t_server &server)
+{
+	if (Parse::isNumber(vector[++i]) && server.error_page.first.empty())
+	{
+		server.error_page = std::make_pair(vector[i], vector[i + 1].substr(0, vector[i+1].size() - 1));
+		if (min_det)
+			std:: cout << "error_page : " << server.error_page.first + " " + server.error_page.second << "\n";
+		i++;
+	}
+	else 
+		throw Parse::ServerError("check error_page");
+}
+
 void Parse::fill_server()
 {
 	t_server	server;
@@ -340,38 +356,21 @@ void Parse::fill_server()
 				if (vector[i] == "server_name")
 					fill_parts(vector, i, server.name, "name : ");
 				else if (vector[i] == "listen")
-				{
 					fill_listen_port(vector, i, server.port);
-				}
 				else if (vector[i] == "host")
 					fill_parts(vector, i, server.host, "host : ");
 				else if (vector[i] == "root")
 					fill_parts(vector, i, server.root, "root : ");
+				else if (vector[i] == "timeout")
+					fill_parts(vector, i, server.timeout, "timeout : ");
 				else if (vector[i] == "index")
-				{
 					fill_indexs(vector, i, server.index, "index : ");
-				}
 				else if (vector[i] == "error_page" && i + 2 < size)
-				{
-					if (Parse::isNumber(vector[++i]) && server.error_page.first.empty())
-					{
-						server.error_page = std::make_pair(vector[i], vector[i + 1].substr(0, vector[i+1].size() - 1));
-						if (min_det)
-							std:: cout << "error_page : " << server.error_page.first + " " + server.error_page.second << "\n";
-						i++;
-					}
-					else 
-						throw Parse::ServerError("check error_page");
-				}
+					fill_error_page(vector, i, server);
 				else if (vector[i] == "redirect")
 					fill_parts(vector, i, server.redirect, "redirect : ");
 				else if (vector[i] == "location")
-				{
-					location.clear();
 					handle_location (vector, i, location);
-					if (min_det)
-						std::cout << "_____" << "inside location with " << location.path << std::endl;
-				}
 				else if (vector[i] == "types")
 				{
 					type.on = true;
@@ -404,6 +403,8 @@ void Parse::fill_server()
 				}
 			}
 		}
+	if (!server.full())
+		throw Parse::ServerError("server is missing something : it may be the server name, the listen port, the host, the error page or the root directory");
 		servers.push_back(server);
 		if (min_det)
 			std::cout << "-------------------\n";

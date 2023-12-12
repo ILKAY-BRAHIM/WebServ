@@ -24,6 +24,7 @@ class Parse
 		typedef std::vector<std::string> vectstr_t;
 		typedef std::map<std::string, std::vector<std::string> > map_vectstr_t;
 
+		void						fill_error_page(vectstr_t &vector, int &i, t_server &server);
 		void						fill_parts(vectstr_t vector, int &i, std::string &to_fill, std::string msg);
 		void						fill_server();
 		void						handle_location(vectstr_t vector, int &i, t_location &location);

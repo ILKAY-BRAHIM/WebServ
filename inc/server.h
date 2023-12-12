@@ -76,8 +76,10 @@ typedef struct s_server
 	std::pair<std::string, std::string> error_page;
 	std::vector<t_location>				locations;
 	std::vector<t_types>				types;
+	std::string							timeout;
 	//method
 	void		clear();
+	bool		full();
 }	t_server;
 
 #endif
