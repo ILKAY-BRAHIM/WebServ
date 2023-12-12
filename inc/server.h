@@ -5,9 +5,10 @@
 #include <map>
 
 # define min_det	0
-# ifndef COLOR
-# define COLOR
+# ifndef RED
 #  define RED	"\033[0;31m"
+# endif
+# ifndef WHITE
 #  define WHITE	"\033[0;37m"
 # endif
 

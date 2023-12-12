@@ -36,7 +36,7 @@ class Parse
 		void						fast_check(std::ifstream &file_in, char **file_name);
 		void						fill_data_in_vector(std::string &file_cont);
 		bool						acollade_est_symetrique(vectstr_t vect);
-		void						fill_types(vectstr_t vector, int &i, t_types type);
+		void						fill_types(vectstr_t vector, int &i, t_types &type);
 		void						collect_in_type(vectstr_t vector, int &i, map_vectstr_t &text, std::string name);
 
 		std::vector<t_server> const	&get_servers() const;
