@@ -1,0 +1,99 @@
+<!DOCTYPE html> <!--version of HTML-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" /> <!--Specifies the character encoding for the document as UTF-8, which supports a wide range of characters from various languages-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!--the webpage is displayed properly on different devices and screen sizes-->
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="style.css" />
+    
+  </head>
+
+  <body> <!--the visible content of the webpage,-->
+    
+      <nav id="desktop-nav"> <!--Defines a navigation bar with a logo and a list of links-->
+        <div class="logo"><h1>Brahim Chifour</h1></div>
+        <div>
+          <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+          </ul>
+        </div>
+      </nav>
+      <section id="profile"> 
+        <div class="section__pic-container">
+          <img src="./bchifour.jpeg" alt="picture" />
+        </div>
+        <div class="section__text">
+          <p class="section__text__p1">Hello, I'm</p>
+          <h1 class="title">Brahim chifour</h1>
+          <p class="section__text__p2">Frontend Developer</p>
+          <div class="btn-container">
+            <button class="btn btn-color-2">Download CV</button>
+            <button class="btn btn-color-1" onclick="location.href='./#contact'">
+              Contact Info
+            </button>
+          </div>
+          <div id="socials-container">
+            <img
+              src="./icons8-linkedin-50.png"
+              alt="My LinkedIn profile"
+              class="icon"
+              onclick="location.href='https://www.linkedin.com/in/brahim-chifour-639652239/'"
+            />
+            <img
+              src="./icons8-github-50.png"
+              alt="My Github profile"
+              class="icon"
+              onclick="location.href='https://github.com/ILKAY-BRAHIM'"
+            />
+          </div>
+        </div>
+      </section>
+      
+   
+  <!--  -->
+    
+    </div> <!-- particles.js lib - https://github.com/VincentGarreau/particles.js -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script> <!-- stats.js lib -->
+<script src="https://threejs.org/examples/js/libs/stats.min.js"></script>
+    <script src="script.js"></script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+</body>
+</html>

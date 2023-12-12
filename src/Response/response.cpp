@@ -425,19 +425,19 @@ std::string Response::generateMessage()
     mess += CRLF;
     if (this->respMessage.Content_Type.size() != 0)
     {
-        mess += "Content-Type: ";
+        mess += std::string("Content-Type: ");
         mess += this->respMessage.Content_Type;
         mess += CRLF;
     }
     if (this->respMessage.Content_Lenght.size() != 0)
     {
-        mess += "Content-Lenght: ";
+        mess += std::string("Content-Lenght: ");
         mess += this->respMessage.Content_Lenght;
         mess += CRLF;
     }
     if (this->respMessage.Location.size() != 0)
     {
-        mess += "Location: ";
+        mess += std::string("Location: ");
         mess += this->respMessage.Location;
         mess += CRLF;
     }
@@ -451,7 +451,26 @@ std::string Response::generateMessage()
 
 void    Response::clearResponse()
 {
-    ;
+    this->respMessage.http_version.clear();
+    this->respMessage.statusCode.clear();
+    this->respMessage.Access_Controle_Allow_Origin.clear();
+    this->respMessage.Cache_Control.clear();
+    this->respMessage.Content_Type.clear();
+    this->respMessage.Content_Lenght.clear();
+    this->respMessage.ETag.clear();
+    this->respMessage.Last_Modified.clear();
+    this->respMessage.Location.clear();
+    this->respMessage.Set_Cookie.clear();
+    this->respMessage.Server.clear();
+    this->respMessage.query_String.clear();
+    this->respMessage.body.clear();
+
+    this->req.method.clear();
+    this->req.path.clear();
+    this->req.httpVertion.clear();
+    this->req.headers.clear();
+    this->req.body.clear();
+
 }
 
 Message*    Response::generateResponse(std::string req)
@@ -473,7 +492,9 @@ Message*    Response::generateResponse(std::string req)
 	}
     
     mes->setResponse(generateMessage());
-    void    clearResponse();
+    std::cout << "------------------ response ------------------" << std::endl;
+    std::cout << mes->getResponse() << std::endl;
+    clearResponse();
     // http version
     // method type allowed & type component
     // url syntax & sources permission 

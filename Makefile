@@ -2,7 +2,7 @@ NAME = server
 
 SRC = $(addprefix src/,  main.cpp) \
       $(addprefix src/parsing/, Parse.cpp server.cpp) \
-	  $(addprefix src/The_server/, Server_.cpp) \
+	  $(addprefix src/The_server/, Server_.cpp servers.cpp) \
 	  $(addprefix src/Response/, request.cpp response.cpp Message.cpp)
 
 INCLUDE_DIR = inc/ # zido hna b / f lakhr
@@ -19,7 +19,7 @@ CC = c++
 
 SRC_DIR = src
 
-CPPFLAGS = -Wall -Wextra -Werror -std=c++98  -I$(INCLUDE_DIR)
+CPPFLAGS = -Wall -Wextra -Werror -std=c++98  -fsanitize=address -g -I$(INCLUDE_DIR)
 
 all : $(OBJ_DIR) $(NAME)
 
@@ -29,9 +29,6 @@ $(OBJ_DIR) :
 
 $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp 
 	$(CC) $(CPPFLAGS) -c $< -o $@
-
-#$(OBJ_DIR)/%.o : src/The_server/%.cpp
-#	$(CC) $(CPPFLAGS) -c $< -o $@
 
 $(NAME) : $(OBJ) $(INCLUDES)
 	$(CC) $(CPPFLAGS) $(OBJ) -o $(NAME)
