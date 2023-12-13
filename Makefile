@@ -1,4 +1,4 @@
-NAME = server
+NAME = webserv
 
 SRC = $(addprefix src/,  main.cpp) \
       $(addprefix src/parsing/, Parse.cpp server.cpp) \
