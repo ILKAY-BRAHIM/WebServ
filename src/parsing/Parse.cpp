@@ -486,7 +486,7 @@ void Parse::fill_data_in_vector(std::string &file_cont)
 
 void warning_message(int i, std::string str)
 {
-	std::cerr << Yellow << "Warning : " << "the server number " << i + 1 << " is missing the " << UYELLOW << str << YELLOW << " this server will be ignored" << WHITE << std::endl << std::endl;
+	std::cerr << YELLOW << "Warning : " << "the server number " << i + 1 << " is missing the " << UYELLOW << str << YELLOW << " this server will be ignored" << WHITE << std::endl << std::endl;
 }
 
 void Parse::last_check()
