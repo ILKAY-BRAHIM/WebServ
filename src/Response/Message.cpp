@@ -15,34 +15,29 @@ std::string Message::getResponse()
 // {
 //     std::string envirement[25];
 
-//     envirement[0] = "SERVER_NAME";
-//     envirement[1] = "SERVER_SOFTWARE";
-//     envirement[2] = "GATEWAY_INTERFACE";
-//     envirement[3] = "SERVER_PROTOCOL";
-//     envirement[4] = "SERVER_PORT";
-//     envirement[5] = "REQUEST_METHOD";
-//     envirement[6] = "PATH_INFO";
-//     envirement[7] = "PATH_TRANSLATED";
-//     envirement[8] = "SCRIPT_NAME";
-//     envirement[9] = "QUERY_STRING";
-//     envirement[10] = "AUTH_TYPE";
-//     envirement[11] = "REMOTE_USER";
-//     envirement[12] = "REMOTE_IDENT";
-//     envirement[13] = "CONTENT_TYPE";
-//     envirement[14] = "CONTENT_LENGTH";
-//     envirement[15] = "REMOTE_ADDR";
-//     envirement[16] = "REQUEST_URI";
-//     envirement[17] = "PATH";
-//     envirement[18] = "SERVER_ADDR";
-//     envirement[19] = "SERVER_NAME";
-//     envirement[20] = "SERVER_ADMIN";
-//     envirement[21] = "HTTP_ACCEPT";
-//     envirement[22] = "HTTP_ACCEPT_LANGUAGE";
-//     envirement[23] = "HTTP_COOKIE";
-//     envirement[24] = "HTTP_REFERER";
-//     envirement[25] = "HTTP_USER_AGENT";
+
 
 // }
+
+int Message::getStatus()
+{
+    return (this->status);
+}
+
+void    Message::setStatus(int status)
+{
+    this->status = status;
+}
+
+int    Message::getContentLength()
+{
+    return (this->content_length);
+}
+
+void    Message::setContentLength(int content_length)
+{
+    this->content_length = content_length;
+}
 
 void    Message::setResponse(std::string mess)
 {

@@ -51,15 +51,19 @@ class   Message
 {
     private :
         // char **env;
-        // int status;
+        int status;
         std::string mess;
+        int     content_length;
     public :
         Message();
         void    setResponse(std::string mess);
+        int     getContentLength();
+        void    setContentLength(int content_length);
         // void    setenv(request req);
-        // void    setStatus();
+        void    setStatus(int status);
+        int     getStatus();
         std::string getResponse();
         char **getEnv();
-        int getStatus;
+        // int getStatus;
         ~Message();
 };
