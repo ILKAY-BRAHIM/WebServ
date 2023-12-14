@@ -3,14 +3,9 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include "colors.h"
 
 # define min_det	0
-# ifndef RED
-#  define RED	"\033[0;31m"
-# endif
-# ifndef WHITE
-#  define WHITE	"\033[0;37m"
-# endif
 
 typedef struct s_types
 {
@@ -77,9 +72,11 @@ typedef struct s_server
 	std::vector<t_location>				locations;
 	std::vector<t_types>				types;
 	std::string							timeout;
+
+
 	//method
-	void		clear();
-	bool		full();
+	void								clear();
+	std::pair<bool, std::string>		full();
 }	t_server;
 
 #endif

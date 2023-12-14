@@ -139,7 +139,6 @@ bool Parse::isNumber(const std::string& str)
 
 void Parse::handle_location(vectstr_t vector, int &i, t_location &location)
 {
-	location.clear();
 	if (vector[++i].find("/"))
 		throw Parse::ServerError("you should set a path after location and before \'{\'");
 	else
@@ -340,7 +339,7 @@ void Parse::fill_server()
 		if (vector[i++] != "server")
 		{
 			std::cout << vector[i] << "\n";
-			throw Parse::ServerError("server name is needed");
+			throw Parse::ServerError("server keyword is needed");
 		}
 		if (i < size && vector[i] != "{")
 			throw Parse::ServerError("set begin point, should have a \'{\' after server keyword");
@@ -386,6 +385,7 @@ void Parse::fill_server()
 					if (vector[i+1] == "}")
 					{
 						server.locations.push_back (location);
+						location.clear();
 						if (min_det)
 							std::cout << "_____" << "out of location\n" << std::endl;
 					}
@@ -403,8 +403,6 @@ void Parse::fill_server()
 				}
 			}
 		}
-	if (!server.full())
-		throw Parse::ServerError("server is missing something : it may be the server name, the listen port, the host, the error page or the root directory");
 		servers.push_back(server);
 		if (min_det)
 			std::cout << "-------------------\n";
@@ -486,6 +484,33 @@ void Parse::fill_data_in_vector(std::string &file_cont)
 	}
 }
 
+void warning_message(int i, std::string str)
+{
+	std::cerr << YELLOW << "Warning : " << "the server number " << i + 1 << " is missing the " << UYELLOW << str << YELLOW << " this server will be ignored" << WHITE << std::endl << std::endl;
+}
+
+void Parse::last_check()
+{
+	size_t i;
+
+	i = 0;
+	while (i < servers.size())
+	{
+		if (!servers[i].full().first)
+		{
+			warning_message(i, servers[i].full().second);
+			std::swap(servers[i], servers.back());
+			servers.pop_back();
+		}
+		i++;
+	}
+	if (servers.size() == 1 && !servers[0].full().first)
+	{
+			warning_message(i, servers[0].full().second);
+			servers.pop_back();
+	}
+}
+
 Parse::Parse(char *file_name)
 {
 	std::string file_cont;
@@ -496,6 +521,7 @@ Parse::Parse(char *file_name)
 	pass_comment(file_in, file_cont, line);
 	fill_data_in_vector(file_cont);
 	fill_server();
+	last_check();
 }
 
 bool Parse::is_space(char c)

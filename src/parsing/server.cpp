@@ -48,12 +48,11 @@ void t_types::clear()
 
 }
 
-bool t_server::full()
+std::pair<bool, std::string> t_server::full()
 {
-	//check that the necessary things are there
 	if (name.empty() || port.empty() || host.empty() || root.empty())
-		return (0);
+		return (std::make_pair(0, "name"));
 	if (error_page.first.empty() || error_page.second.empty())
-		return (0);
-	return (1);
+		return (std::make_pair(0, "error_page"));
+	return (std::make_pair(1, ""));
 }
