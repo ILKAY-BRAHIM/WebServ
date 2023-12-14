@@ -379,7 +379,7 @@ void Server::run()
                 }
                 else
                 {
-                    char buffer[2];
+                    char buffer[1];
                     int a = recv(i, buffer, 1, 0);
                     if(a <= 0)
                     {
@@ -408,6 +408,7 @@ void Server::run()
                             Message *resw =  this->resp.generateResponse(it->second.get_request());
                             it->second.set_responce_class(resw);
                             it->second.set_responce(it->second.get_responce_class()->getResponse());
+                            // std::cout << it->second.get_responce() << std::endl;
                             unsigned long  index = it->second.get_responce().find("\r\n\r\n");
 
                             if (index != std::string::npos)
@@ -420,7 +421,7 @@ void Server::run()
                                     // FD_SET(it->first, &this->status1);
                                     FD_CLR(it->first, &this->master_set);
                                     this->msg.insert(std::pair<int, Servers>(it->first, it->second));
-                            std::cout << it->second.get_request() << std::endl;
+                            // std::cout << it->second.get_request() << std::endl;
                                     this->serv2.erase(it);
                                     
                                     if(serv2.empty() || serv2.size() == 0)
@@ -485,15 +486,19 @@ void Server::run()
                         std::cout << "\033[92msend " << it->second.get_total() << " bytes to client " << it->first << " total of data is " << it->second.get_responce().length() << " bytes\033[39m" <<std::endl;
                         if (it->second.get_total() == it->second.get_responce().length())
                         {
-                            close(it->first);
+                            // close(it->first);
                             FD_CLR(it->first, &this->write_set1);
-                            // FD_SET(it->first, &this->master_set);
-                            if (it->first == max_fd)
-                            {
-                                while (FD_ISSET(max_fd, &this->master_set) == 0)
-                                    max_fd -= 1;
-                            }
-                            it->second.set_total(0);
+                            FD_SET(it->first, &this->master_set);
+                            // if (it->first == max_fd)
+                            // {
+                            //     while (FD_ISSET(max_fd, &this->master_set) == 0)
+                            //         max_fd -= 1;
+                            // }
+                            it->second.rset_total(0);
+                            it->second.set_responce("");
+                            it->second.set_request("");
+                            serv2.push_back(std::pair<int, Servers>(it->first, it->second));
+                            this->msg.erase(it);
                             // if(this->timeout_client.empty())
                             //     this->timeout_client.insert(std::pair<int, Servers>(it->first, it->second));
                             // else
@@ -507,7 +512,7 @@ void Server::run()
                             //         this->timeout_client.insert(std::pair<int, Servers>(it->first, it->second));
                             //     }
                             // }
-                            this->msg.erase(it);
+                            // this->msg.erase(it);
                         }
                         if(this->msg.empty())
                             break;

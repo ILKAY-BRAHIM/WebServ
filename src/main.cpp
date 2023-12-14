@@ -22,5 +22,5 @@ int main (int ac, char **av)
 	serv.start_server();
 	serv.run();
 
-	get_request(servers);
+	// get_request(servers);
 }

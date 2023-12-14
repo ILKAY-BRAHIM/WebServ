@@ -26,6 +26,8 @@ void    getHeader(request &req, std::string line)
 
 request parseRequest(std::string buffer)
 {
+    // std::cout << "-------------------------REQUEST-------------------------" << std::endl;
+    // std::cout << buffer << std::endl;
     request req;
     std::string line;
     std::string value(buffer);
@@ -47,6 +49,7 @@ request parseRequest(std::string buffer)
         else
             break;
     }
+    // print_new_request(req);
     return (req);
 }
 
@@ -156,6 +159,11 @@ int     Response::getLocation(std::string url)
 
 void     Response::generateBodyError(int error)
 {
+    if (this->req.path == "/favicon.ico")
+    {
+        this->respMessage.Content_Lenght = "0";
+        return ;
+    }
     this->respMessage.Content_Type = "text/html";
     this->respMessage.body += "<!DOCTYPE html>\n<html lang=\"en\">\n";
     this->respMessage.body += "<html>\n";
@@ -269,7 +277,7 @@ void    Response::generateBody(std::string path)
 {
     // check permition & read & generate body 
     std::string ext = get_extension(path);
-    ssize_t     bytesRead;
+    // ssize_t     bytesRead;
 
     if (ext.size() != 0)
     {
@@ -282,22 +290,26 @@ void    Response::generateBody(std::string path)
     }
     else
         this->respMessage.Content_Type = "application/octet-stream";
-    int fd = open(path.c_str(), O_RDONLY);
-    int   bufferSize = 1000;
-    char* buffer = new char [bufferSize];
-
-    if (fd == -1)
-    {
-        generateBodyError(403);
-        throw (403);
-        return ;
-    }
-    
-    while ((bytesRead = read(fd, buffer, bufferSize)) > 0)
-        this->respMessage.body.append(buffer, bytesRead);
+    // int fd = open(path.c_str(), O_RDONLY);
+    // int   bufferSize = 1000;
+    // char* buffer = new char [bufferSize];
+    std::ifstream fd(path.c_str());
+    // if (fd == -1)
+    // {
+    //     generateBodyError(403);
+    //     throw (403);
+    //     return ;
+    // }
+    std::string line;
+    // while ((bytesRead = read(fd, buffer, bufferSize)) > 0)
+    //     this->respMessage.body.append(buffer, bytesRead);
+    while (getline(fd, line))
+        this->respMessage.body += line;
     this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
-    close (fd);
-    delete[] buffer;
+
+    // close (fd);
+    fd.close();
+    // delete[] buffer;
     this->respMessage.statusCode = generateStatusCode(200);
     return ;
 }
@@ -370,7 +382,7 @@ void	Response::urlRegenerate() // ->status_code & ->Location
 	//encode parameters
 }
 
-void    Response::fillServer(std::string req)
+t_server    Response:: fillServer(std::string req)
 {
     std::string	port;
     std::string	server;
@@ -378,6 +390,7 @@ void    Response::fillServer(std::string req)
 	size_t		found;
 	std::vector<t_server>::iterator it;
 	std::vector<int>::iterator itt;
+    t_server    tmp_server;
 
     this->req = parseRequest(req);
 	host = this->req.headers["Host"];
@@ -403,7 +416,7 @@ void    Response::fillServer(std::string req)
 			{
 				if (*itt == atoi(port.c_str()))
 				{
-					this->server = *it;
+					tmp_server = *it;
 					found = 1;
 					break;
 				}
@@ -412,6 +425,7 @@ void    Response::fillServer(std::string req)
 		}
 		it++;
 	}
+    return (tmp_server);
 }
 
 
@@ -422,28 +436,28 @@ std::string Response::generateMessage()
     mess += this->respMessage.http_version;
     mess += ' ';
     mess += this->respMessage.statusCode;
-    mess += CRLF;
+    mess += std::string(CRLF);
     if (this->respMessage.Content_Type.size() != 0)
     {
         mess += std::string("Content-Type: ");
         mess += this->respMessage.Content_Type;
-        mess += CRLF;
+        mess += std::string(CRLF);
     }
     if (this->respMessage.Content_Lenght.size() != 0)
     {
-        mess += std::string("Content-Lenght: ");
+        mess += std::string("Content-Length: ");
         mess += this->respMessage.Content_Lenght;
-        mess += CRLF;
+        mess += std::string(CRLF);
     }
     if (this->respMessage.Location.size() != 0)
     {
         mess += std::string("Location: ");
         mess += this->respMessage.Location;
-        mess += CRLF;
+        mess += std::string(CRLF);
     }
     // add other headrs 
     //  ...
-    mess += CRLF;
+    mess += std::string(CRLF);
     if (this->respMessage.body.size() != 0)
         mess += this->respMessage.body;
     return mess;
@@ -476,8 +490,13 @@ void    Response::clearResponse()
 Message*    Response::generateResponse(std::string req)
 {
     Message *mes = new Message();
-    
-    fillServer(req);
+    std::string line;
+    this->server =  fillServer(req);
+    if (req.find("Content-Length") != std::string::npos)
+        mes->setContentLength(atoi(this->req.headers["Content-Length"].c_str()));
+    else
+        mes->setContentLength(0);
+    mes->setStatus(1);
     this->respMessage.http_version = "HTTP/1.1";
 	try
 	{
@@ -486,14 +505,14 @@ Message*    Response::generateResponse(std::string req)
 	}
 	catch(int m)
 	{
+        mes->setStatus(-1);
 		this->respMessage.statusCode = generateStatusCode(m);
         // std::cout << this->respMessage.statusCode << std::endl;
 		// exit(1);
 	}
     
     mes->setResponse(generateMessage());
-    std::cout << "------------------ response ------------------" << std::endl;
-    std::cout << mes->getResponse() << std::endl;
+    // std::cout << "Content-Length: " << mes->getContentLength() << std::endl;
     clearResponse();
     // http version
     // method type allowed & type component
@@ -503,130 +522,29 @@ Message*    Response::generateResponse(std::string req)
 
 }
 
+int Response::checkHeader(std::string request_)
+{
+    t_server    tmp_server = fillServer(request_);
+    int content_length = 0;
+
+    unsigned long  index1 = request_.find("Content-Length: ");
+    if (index1 != std::string::npos)
+    {
+        unsigned long  index2 = request_.find("\r", index1);
+        if ( index2 != std::string::npos)
+        {
+            std::string str = request_.substr(index1 + 16 , index2 - index1 - 16);
+            content_length = atoi(str.c_str());
+        }
+    }
+    else
+        content_length = 0;
+    
+    // int max_body_size = atoi(tmp_server.client_body_buffer_size.c_str());
+
+    return (content_length);
+}
+
 Response::~Response(){};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// int pathCheck(std::string root)
-// {
-//     struct stat sb;
-//     if (stat(root.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
-//         return (1);
-//     return (0);
-// }
-
-// generate a generat_StartLine that check the server & the location & the path ;
-// retune a file descriptor to the there is a body or -1 if error
-// generate a generateHeaders function;
-
-// generateStartLine finction : it's fill a responseStruct part fo start_line;
-    // check if the server exist
-    // check if the location exist
-    // check if the path exist
-    // check if the path is a file or a directory
-    // check the permition
-    // check the method
-       // => generate a StartLine
-
-// generateHeader function :
-
-// void sendResponse(std::vector<t_server> servers , request req, int k)
-// {
-//     std::cout << "-------------------------RESPONSE-------------------------" << std::endl;
-//     (void)servers;
-//     if (req.path == "/")
-//     {
-//         std::string p = servers[0].root + "/" + servers[0].index;
-//         // std::string p = servers[0].root + "/index.html";
-//         printf("path : %s\n", p.c_str());
-//         int fd = open(p.c_str(), O_RDONLY);
-//         if (fd == -1)
-//         {
-//             std::cout << "Error : open file" << std::endl;
-//             return ;
-//         }
-//         char g[400000];
-//         read( fd , g, 400000);
-//         int size = strlen(g);
-//         std::string hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: "+ std::to_string(size) +"\r\n\r\n" + g;
-//         write(k , hello.c_str() , hello.length());
-//         write(1 , hello.c_str() , hello.length());
-//     }
-//     else if (req.path == "/index.html")
-//     {
-//         // std::string p = servers[0].root + "/" + servers[0].index;
-//         std::string p = servers[0].root + "/index.html";
-//         printf("path : %s\n", p.c_str());
-//         int fd = open(p.c_str(), O_RDONLY);
-//         if (fd == -1)
-//         {
-//             std::cout << "Error : open file" << std::endl;
-//             return ;
-//         }
-//         char g[400000];
-//         read( fd , g, 400000);
-//         int size = strlen(g);
-//         std::string hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: "+ std::to_string(size) +"\r\n\r\n" + g;
-//         write(k , hello.c_str() , hello.length());
-//         write(1 , hello.c_str() , hello.length());
-//     }
-//     else if (req.path == "/src/form/index.html")
-//     {
-//         std::string p = servers[0].root + "/src/form/index.html";
-//         printf("path : %s\n", p.c_str());
-//         int fd = open(p.c_str(), O_RDONLY);
-//         if (fd == -1)
-//         {
-//             std::cout << "Error : open file" << std::endl;
-//             return ;
-//         }
-//         char g[400000];
-//         read( fd , g, 400000);
-//         int size = strlen(g);
-//         std::string hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: "+ std::to_string(size) +"\r\n\r\n" + g;
-//         write(k , hello.c_str() , hello.length());
-//         write(1 , hello.c_str() , hello.length());
-//     }
-//     // pause();
-//     // else
-//     // {
-        
-//     // }
-// }
-
-
 
     

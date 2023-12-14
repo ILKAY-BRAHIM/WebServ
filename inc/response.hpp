@@ -65,7 +65,7 @@ class Response
         resp		respMessage;
 		request		req;
         std::string resp;
-        void    fillServer(std::string req);
+        t_server    fillServer(std::string req);
 		void	checkMethode();
 		void	urlRegenerate();
         void    generateBody(std::string path);
@@ -80,6 +80,7 @@ class Response
         Response();
         Response(std::vector<t_server> servS);
         Message*	generateResponse(std::string req);
+        int         checkHeader(std::string req);
         // char **getEnv();
         // std::string getResponse();
         // Response(const Response &copy);
@@ -114,3 +115,5 @@ std::string get_index(T& location, std::string path, int noIndex)
     }
     return "";
 }
+
+std::string get_extension(std::string path);
