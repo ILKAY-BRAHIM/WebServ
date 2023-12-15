@@ -166,6 +166,7 @@ void Server::run()
                                 max_fd = new_socket;
                             Servers s("");
                             s.set_start(std::clock());
+                            s.set_redirection(0);
                             this->serv2.push_back(std::pair<int, Servers>(new_socket, s));
                         }
                     }
@@ -175,66 +176,132 @@ void Server::run()
                         if (new_socket > max_fd)
                             max_fd = new_socket;
                         Servers s("");
+                        s.set_redirection(0);
                         s.set_start(std::clock());
                         this->serv2.push_back(std::pair<int, Servers>(new_socket, s));
                     }
                 }
                 else
                 {
-                    char buffer[1];
-                    int a = recv(i, buffer, 1, 0);
-                    if(a <= 0)
-                    {
-                        std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
-                        if (a == 0)
-                            std::cout << "socket " << i << " hung up" << std::endl;
-                        close(i);
-                        FD_CLR(i, &this->master_set);
-                        if (i == max_fd)
-                        {
-                            while (FD_ISSET(max_fd, &this->master_set) == 0)
-                                max_fd -= 1;
-                        }
-                    }
+                    // char buffer[1];
+                    // int a = recv(i, buffer, 1, 0);
+                    // // buffer[a] = '\0';
+                    // // std::cout << buffer << std::endl;
+                    // if(a <= 0)
+                    // {
+                    //     std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
+                    //     if (a == 0)
+                    //         std::cout << "socket " << i << " hung up" << std::endl;
+                    //     close(i);
+                    //     FD_CLR(i, &this->master_set);
+                    //     if (i == max_fd)
+                    //     {
+                    //         while (FD_ISSET(max_fd, &this->master_set) == 0)
+                    //             max_fd -= 1;
+                    //     }
+                    // }
                     
                     for(std::vector<std::pair<int, Servers> >::iterator it = this->serv2.begin(); it != this->serv2.end(); it++)
                     {
-                        if (it->first == i)
+                        if (it->first == i && it->second.get_redirection() == 0)
                         {
-                            it->second.collect_req(buffer);
-                            it->second.set_start(std::clock());
-                            break;
-                        }
-                    }
-                    for (std::vector<std::pair<int, Servers> >::iterator it = this->serv2.begin(); it != this->serv2.end();)
-                    {
-                        if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
-                        {
-                            Message *resw =  this->resp.generateResponse(it->second.get_request());
-                            it->second.set_responce_class(resw);
-                            it->second.set_responce(it->second.get_responce_class()->getResponse());
-                            unsigned long  index = it->second.get_request().find("\r\n\r\n");
-                            if (index != std::string::npos)
+                            char buffer[1];
+                            int a = recv(i, buffer, 1, 0);
+                             if(a <= 0)
                             {
-                                index = it->second.get_request().find("\0", index + 4);
-                                if (index != std::string::npos)
+                                std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
+                                if (a == 0)
+                                    std::cout << "socket " << i << " hung up" << std::endl;
+                                close(i);
+                                FD_CLR(i, &this->master_set);
+                                if (i == max_fd)
                                 {
-                                    std::cout << it->second.get_request() << std::endl;
+                                    while (FD_ISSET(max_fd, &this->master_set) == 0)
+                                        max_fd -= 1;
+                                }
+                            }
+                            it->second.collect_req(buffer, a);
+                            it->second.set_start(std::clock());
+                            if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
+                            {
+                                Message *resw =  this->resp.generateResponse(it->second.get_request()); // incoming changed..
+                                it->second.set_responce_class(resw);
+                                std::cout << it->second.get_responce_class()->getStatus() << std::endl;
+                                if(it->second.get_responce_class()->getContentLength() != 0)
+                                    it->second.set_redirection(1);
+                                else
+                                {
+                                    it->second.set_responce(it->second.get_responce_class()->getResponse());
                                     FD_SET(it->first, &this->write_set1);
                                     FD_CLR(it->first, &this->master_set);
                                     this->msg.insert(std::pair<int, Servers>(it->first, it->second));
                                     this->serv2.erase(it);
-                                    if(serv2.empty() || serv2.size() == 0)
-                                        break;
                                 }
-                                else
-                                    it++;
                             }
-
+                            break;
                         }
-                        else
-                            it++;
+                        else if (it->first == i && it->second.get_redirection() == 1)
+                        {
+                            char buffer[60000];
+                            int a = recv(i, buffer, 60000, 0);
+                            if(a <= 0)
+                            {
+                                std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
+                                if (a == 0)
+                                    std::cout << "socket " << i << " hung up" << std::endl;
+                                close(i);
+                                FD_CLR(i, &this->master_set);
+                                if (i == max_fd)
+                                {
+                                    while (FD_ISSET(max_fd, &this->master_set) == 0)
+                                        max_fd -= 1;
+                                }
+                            }
+                            it->second.collect_body(buffer, a);
+                            it->second.set_start(std::clock());
+                            it->second.set_total_body(a);
+                            if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength())
+                            {
+                                it->second.set_responce(it->second.get_responce_class()->getResponse());
+                                it->second.set_redirection(0);
+                                FD_SET(it->first, &this->write_set1);
+                                FD_CLR(it->first, &this->master_set);
+                                this->msg.insert(std::pair<int, Servers>(it->first, it->second));
+                                this->serv2.erase(it);
+                            }
+                            break;
+                        }
                     }
+                    // for (std::vector<std::pair<int, Servers> >::iterator it = this->serv2.begin(); it != this->serv2.end();)
+                    // {
+                    //     if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
+                    //     {
+                    //         Message *resw =  this->resp.generateResponse(it->second.get_request());
+                    //         it->second.set_responce_class(resw);
+                    //         it->second.set_responce(it->second.get_responce_class()->getResponse());
+                    //         std::cout << this->resp.checkHeader(it->second.get_request()) << std::endl;
+                    //         unsigned long  index = it->second.get_request().find("\r\n\r\n");
+                    //         if (index != std::string::npos)
+                    //         {
+                    //             index = it->second.get_request().find("\0", index + 4);
+                    //             if (index != std::string::npos)
+                    //             {
+                    //                 std::cout << it->second.get_request() << std::endl;
+                    //                 FD_SET(it->first, &this->write_set1);
+                    //                 FD_CLR(it->first, &this->master_set);
+                    //                 this->msg.insert(std::pair<int, Servers>(it->first, it->second));
+                    //                 this->serv2.erase(it);
+                    //                 if(serv2.empty() || serv2.size() == 0)
+                    //                     break;
+                    //             }
+                    //             else
+                    //                 it++;
+                    //         }
+
+                    //     }
+                    //     else
+                    //         it++;
+                    // }
                 }
             }
             if (FD_ISSET(i, &this->write_set2))

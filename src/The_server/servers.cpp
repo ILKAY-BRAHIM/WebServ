@@ -15,13 +15,14 @@ Servers::Servers(std::string request)
 //     this->responce = responce;
 // }
 
-void Servers::collect_req(char* request)
+void Servers::collect_req(char* request, int size)
 {
     // this->request += request;
-    this->request.append(request, 1);
+    this->request.append(request, size);
     // std::cout << "request: " << this->request << std::endl;
     return;
 }
+
 
 // void Servers::set_responce(Message *responce)
 // {
