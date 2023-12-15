@@ -234,7 +234,7 @@ void Server::run()
                                     
                                     this->resp.generateResponse(it->second.get_responce_class());
                                     it->second.set_responce(it->second.get_responce_class()->getResponse());
-                                    std::cout << it->second.get_responce() << std::endl;
+                                    // std::cout << it->second.get_responce() << std::endl;
                                     FD_SET(it->first, &this->write_set1);
                                     FD_CLR(it->first, &this->master_set);
                                     this->msg.insert(std::pair<int, Servers>(it->first, it->second));
@@ -263,9 +263,16 @@ void Server::run()
                             it->second.collect_body(buffer, a);
                             it->second.set_start(std::clock());
                             it->second.set_total_body(a);
+                            // std::cout << "total body: " << it->second.get_total_body() << std::endl;
+                            // std::cout << "content length: " << it->second.get_responce_class()->getContentLength() << std::endl;
+                            // std::cout << "body: " << it->second.get_body() << std::endl;
                             if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength())
                             {
+                                // std::cout << "body: " << it->second.get_body() << std::endl;
+                                it->second.get_responce_class()->setBody(it->second.get_body());
+                                this->resp.generateResponse(it->second.get_responce_class());
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());
+                                // it->second.set_responce(it->second.get_responce_class()->getResponse());
                                 it->second.set_redirection(0);
                                 FD_SET(it->first, &this->write_set1);
                                 FD_CLR(it->first, &this->master_set);
@@ -360,6 +367,8 @@ void Server::run()
                             it->second.rset_total(0);
                             it->second.set_responce("");
                             it->second.set_request("");
+                            it->second.set_body("");
+                            it->second.rset_total_body(0);
                             serv2.push_back(std::pair<int, Servers>(it->first, it->second));
                             this->msg.erase(it);
                         }

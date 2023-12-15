@@ -74,4 +74,14 @@ t_server Message::getServer()
     return (this->server);
 }
 
+void    Message::setBody(std::string body)
+{
+    this->body = body;
+}
+
+std::string Message::getBody()
+{
+    return (this->body);
+}
+
 Message::~Message(){};

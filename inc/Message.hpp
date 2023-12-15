@@ -58,6 +58,7 @@ class   Message
         int status;
         std::string mess;
         int     content_length;
+        std::string body;
     public :
         Message();
         void    setResponse(std::string mess);
@@ -65,6 +66,8 @@ class   Message
         void    setServer(t_server server);
         int     getContentLength();
         void    setContentLength(int content_length);
+        void    setBody(std::string body);
+        std::string getBody();
         // void    setenv(request req);
         t_server getServer();
         void    setStatus(int status);
