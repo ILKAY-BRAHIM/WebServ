@@ -40,6 +40,22 @@ request parseRequest(std::string buffer)
     req.method = line;
     std::getline(st, line, ' ');
     req.path = line;
+
+    std::string parameters;
+	std::string path;
+    std::string url;
+	size_t found = req.path.find('?');
+	if (found != std::string::npos)
+	{
+		parameters = req.path.substr(found+1);
+        std::cout << "parameters : " << parameters << std::endl;
+		url = req.path.substr(0, found);
+	}
+	else
+		url = req.path;
+    req.path = url;
+    req.headers["Query-String"] = parameters;
+
     std::getline(st, line, '\r');
     req.httpVertion = line;
     while (std::getline(ss, line, '\n'))
@@ -138,6 +154,7 @@ void    Response::redirect(std::string path)
     // std::cout << "redirection function" << std::endl;
     this->respMessage.statusCode = generateStatusCode(302);
     this->respMessage.Location = path + '/';
+    this->respMessage.Content_Lenght = "0";
     return ;
 }
 
@@ -290,26 +307,22 @@ void    Response::generateBody(std::string path)
     }
     else
         this->respMessage.Content_Type = "application/octet-stream";
-    // int fd = open(path.c_str(), O_RDONLY);
-    // int   bufferSize = 1000;
-    // char* buffer = new char [bufferSize];
+
+    // must check the permission of the file : use stat , access functions
+
     std::ifstream fd(path.c_str());
-    // if (fd == -1)
-    // {
-    //     generateBodyError(403);
-    //     throw (403);
-    //     return ;
-    // }
+    if (fd.is_open() == false)
+    {
+        generateBodyError(403);
+        throw (403);
+        return ;
+    }
     std::string line;
-    // while ((bytesRead = read(fd, buffer, bufferSize)) > 0)
-    //     this->respMessage.body.append(buffer, bytesRead);
     while (getline(fd, line))
         this->respMessage.body += line;
     this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
 
-    // close (fd);
     fd.close();
-    // delete[] buffer;
     this->respMessage.statusCode = generateStatusCode(200);
     return ;
 }
@@ -318,16 +331,16 @@ void    Response::generateBody(std::string path)
 void	Response::urlRegenerate() // ->status_code & ->Location 
 {
 	//get Path
-	std::string parameters;
+	// std::string parameters;
 	std::string path;
     std::string url;
-	size_t found = this->req.path.find('?');
-	if (found != std::string::npos)
-	{
-		parameters = req.path.substr(found);
-		url = req.path.substr(0, found);
-	}
-	else
+	// size_t found = this->req.path.find('?');
+	// if (found != std::string::npos)
+	// {
+	// 	parameters = req.path.substr(found);
+	// 	url = req.path.substr(0, found);
+	// }
+	// else
 		url = req.path;
     path = this->server.root + url;
     
@@ -382,9 +395,8 @@ void	Response::urlRegenerate() // ->status_code & ->Location
 	//encode parameters
 }
 
-t_server    Response:: fillServer(std::string req, request reqq)
+t_server    Response:: fillServer(request req)
 {
-    (void) req;
     std::string	port;
     std::string	server;
     std::string	host;
@@ -393,8 +405,7 @@ t_server    Response:: fillServer(std::string req, request reqq)
 	std::vector<int>::iterator itt;
     t_server    tmp_server;
 
-    // this->req = parseRequest(req);
-	host = reqq.headers["Host"];
+	host = req.headers["Host"];
 	found = host.find(':');
 	if (found != std::string::npos)
 	{
@@ -418,6 +429,8 @@ t_server    Response:: fillServer(std::string req, request reqq)
 				if (*itt == atoi(port.c_str()))
 				{
 					tmp_server = *it;
+                    tmp_server.port.clear();
+                    tmp_server.port.push_back(*itt);
 					found = 1;
 					break;
 				}
@@ -490,6 +503,8 @@ void    Response::clearResponse()
 
 void    Response::generateResponse(Message* mes)
 {
+    // check if there is a body and handle it [!] ..................... [!]
+
     std::string line;
     this->server =  mes->getServer();
     this->req = mes->getRequest();
@@ -509,14 +524,63 @@ void    Response::generateResponse(Message* mes)
 	}
     
     mes->setResponse(generateMessage());
-    // std::cout << "Content-Length: " << mes->getContentLength() << std::endl;
+    
     clearResponse();
-    // http version
-    // method type allowed & type component
-    // url syntax & sources permission 
-    // std::cout << mes->getResponse() << std::endl;
-    // return (mes);
+}
 
+char**   cgi_env(request req, t_server server)
+{
+    std::vector<std::string> env;
+
+    // env.push_back("AUTH_TYPE=" + req.headers["Authorization"]);
+    env.push_back("CONTENT_LENGTH=" + req.headers["Content-Length"]); // OK ----------------
+    env.push_back("CONTENT_TYPE=" + req.headers["Content-Type"]); // OK ----------------
+    env.push_back("GATEWAY_INTERFACE=CGI/1.1"); // OK ----------------
+    env.push_back("DOCUMENT_URI" + req.path); // OK ----------------
+    env.push_back("DOCUMENT_ROOT" + server.root); // OK ----------------
+    env.push_back("QUERY_STRING=" + req.headers["Query-String"]); // OK ----------------
+    env.push_back("REMOTE_ADDR="); // OK
+    env.push_back("REMOTE_HOST="); // OK ----------------
+    env.push_back("REMOTE_IDENT="); // OK ----------------
+    env.push_back("REMOTE_USER="); // OK ---------------- 
+    env.push_back("REQUEST_METHOD=" + req.method); // OK ----------------
+    env.push_back("REQUEST_URI=" + req.path); // OK ----------------
+    env.push_back("SCRIPT_NAME=" + req.path); // OK ----------------
+    env.push_back("SERVER_NAME=" + req.headers["Host"]); // OK ----------------
+    env.push_back("SERVER_PORT=" + std::to_string(server.port[0])); // OK -----
+    env.push_back("SERVER_PROTOCOL=" + req.httpVertion); // OK ----------------
+    env.push_back("SERVER_SOFTWARE=" + std::string("webserv/1.0")); // OK ----------------
+    env.push_back("REDIRECT_STATUS=" + std::to_string(200)); // -------------------- MOST BE CHANGED ---------------- [!]
+    env.push_back("SCRIPT_FILENAME=" + server.root + req.path);
+    env.push_back("HTTP_HOST=" + req.headers["Host"]); // OK ----------------
+    env.push_back("HTTP_USER_AGENT=" + req.headers["User-Agent"]);  // OK ----------------
+    env.push_back("HTTP_ACCEPT=" + req.headers["Accept"]); // OK ----------------
+    env.push_back("HTTP_ACCEPT_LANGUAGE=" + req.headers["Accept-Language"]); // OK ----------------
+    env.push_back("HTTP_ACCEPT_ENCODING=" + req.headers["Accept-Encoding"]); // OK ----------------
+    env.push_back("HTTP_CONTENT_TYPE=" + req.headers["Content-Type"]);  // OK ----------------
+    env.push_back("HTTP_COOKIE=" + req.headers["Cookie"]);  // OK ----------------
+    env.push_back("HTTP_REFERER=" + req.headers["Referer"]);    // OK ----------------
+    //env system 
+    env.push_back("HTTP_UPGRADE_INSECURE_REQUESTS=" + req.headers["Upgrade-Insecure-Requests"]); // OK ----------------
+    env.push_back("LANG=en_US.UTF-8"); // -------------------- MOST BE CHACKED ---------------- [!]
+    env.push_back("PATH=" + req.headers["Host"]);
+    env.push_back("HOME="); // OK ----------------
+    env.push_back("LOGNAME="); // OK ----------------
+    env.push_back("USER="); // OK ----------------
+    
+    env.push_back("SERVER_ADDR=" + server.name); // OK ------------------------
+    env.push_back("REQUEST_SCHEME=" + std::string("http")); // OK ----------------
+
+    char **envp = new char*[env.size() + 1];
+    int i = 0;
+    for (std::vector<std::string>::iterator it = env.begin(); it != env.end(); it++)
+    {
+        envp[i] = new char[it->length() + 1];
+        strcpy(envp[i], it->c_str());
+        i++;
+    }
+    envp[i] = NULL;
+    return (envp);
 }
 
 Message* Response::checkHeader(std::string request_)
@@ -524,7 +588,7 @@ Message* Response::checkHeader(std::string request_)
     Message *mes = new Message();
 
     mes->setRequest(parseRequest(request_));
-    mes->setServer(fillServer(request_, mes->getRequest()));
+    mes->setServer(fillServer(mes->getRequest()));
     // t_server    tmp_server = fillServer(request_);
     int content_length = 0;
 
@@ -544,9 +608,11 @@ Message* Response::checkHeader(std::string request_)
         content_length = 0; // must be deleted
         mes->setContentLength(0);
     }
-    
-    
+    mes->setEnv(cgi_env(mes->getRequest(), mes->getServer()));
 
+    // char **env = mes->getEnv();
+    // for(int i = 0; env[i]; i++)
+    //     std::cout << env[i] << std::endl;
     // return (content_length); // must be return a message
     return (mes);
 }

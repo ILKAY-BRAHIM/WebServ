@@ -57,7 +57,7 @@ class Response
         resp		respMessage;
 		request		req;
         std::string resp;
-        t_server    fillServer(std::string req, request reqq);
+        t_server    fillServer(request req);
 		void	checkMethode();
 		void	urlRegenerate();
         void    generateBody(std::string path);

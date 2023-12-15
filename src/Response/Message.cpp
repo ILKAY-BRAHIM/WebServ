@@ -46,7 +46,7 @@ void    Message::setResponse(std::string mess)
 
 char **Message::getEnv()
 {
-    return (NULL);
+    return (this->env);
 }
 
 int getStatus()
@@ -83,5 +83,11 @@ std::string Message::getBody()
 {
     return (this->body);
 }
+
+void    Message::setEnv(char **env)
+{
+    this->env = env;
+}
+
 
 Message::~Message(){};
