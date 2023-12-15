@@ -19,7 +19,7 @@
 # include <utility>
 # include "Message.hpp"
 # include <unistd.h>
-
+# include "test.hpp"
 // class   Message ;
 # define PORT 81
 
@@ -47,14 +47,6 @@ typedef struct t_response
     std::string body;
 }       resp;
 
-typedef struct t_request
-{
-    std::string method;
-    std::string path;
-    std::string httpVertion;
-    std::map<std::string, std::string> headers;
-    std::string body;
-}        request;
 
 class Response 
 {
