@@ -51,18 +51,24 @@ class   Message
 {
     private :
         // char **env;
+        request req; // to be used in the response generator
+        t_server server; // used in the check & response generator
         int status;
         std::string mess;
         int     content_length;
     public :
         Message();
         void    setResponse(std::string mess);
+        void    setRequest(request req);
+        void    setServer(t_server server);
         int     getContentLength();
         void    setContentLength(int content_length);
         // void    setenv(request req);
+        t_server getServer();
         void    setStatus(int status);
         int     getStatus();
         std::string getResponse();
+        request getRequest();
         char **getEnv();
         // int getStatus;
         ~Message();

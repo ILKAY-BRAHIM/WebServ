@@ -65,7 +65,7 @@ class Response
         resp		respMessage;
 		request		req;
         std::string resp;
-        t_server    fillServer(std::string req);
+        t_server    fillServer(std::string req, request reqq);
 		void	checkMethode();
 		void	urlRegenerate();
         void    generateBody(std::string path);
@@ -79,8 +79,8 @@ class Response
     public :
         Response();
         Response(std::vector<t_server> servS);
-        Message*	generateResponse(std::string req);
-        int         checkHeader(std::string req);
+        void	generateResponse(Message* mes);
+        Message*    checkHeader(std::string req);
         // char **getEnv();
         // std::string getResponse();
         // Response(const Response &copy);

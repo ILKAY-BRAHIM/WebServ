@@ -382,7 +382,7 @@ void	Response::urlRegenerate() // ->status_code & ->Location
 	//encode parameters
 }
 
-t_server    Response:: fillServer(std::string req)
+t_server    Response:: fillServer(std::string req, request reqq)
 {
     std::string	port;
     std::string	server;
@@ -392,8 +392,8 @@ t_server    Response:: fillServer(std::string req)
 	std::vector<int>::iterator itt;
     t_server    tmp_server;
 
-    this->req = parseRequest(req);
-	host = this->req.headers["Host"];
+    // this->req = parseRequest(req);
+	host = reqq.headers["Host"];
 	found = host.find(':');
 	if (found != std::string::npos)
 	{
@@ -487,15 +487,11 @@ void    Response::clearResponse()
 
 }
 
-Message*    Response::generateResponse(std::string req)
+void    Response::generateResponse(Message* mes)
 {
-    Message *mes = new Message();
     std::string line;
-    this->server =  fillServer(req);
-    if (req.find("Content-Length") != std::string::npos)
-        mes->setContentLength(atoi(this->req.headers["Content-Length"].c_str()));
-    else
-        mes->setContentLength(0);
+    this->server =  mes->getServer();
+    this->req = mes->getRequest();
     mes->setStatus(1);
     this->respMessage.http_version = "HTTP/1.1";
 	try
@@ -518,13 +514,17 @@ Message*    Response::generateResponse(std::string req)
     // method type allowed & type component
     // url syntax & sources permission 
     // std::cout << mes->getResponse() << std::endl;
-    return (mes);
+    // return (mes);
 
 }
 
-int Response::checkHeader(std::string request_)
+Message* Response::checkHeader(std::string request_)
 {
-    t_server    tmp_server = fillServer(request_);
+    Message *mes = new Message();
+
+    mes->setRequest(parseRequest(request_));
+    mes->setServer(fillServer(request_, mes->getRequest()));
+    // t_server    tmp_server = fillServer(request_);
     int content_length = 0;
 
     unsigned long  index1 = request_.find("Content-Length: ");
@@ -534,15 +534,20 @@ int Response::checkHeader(std::string request_)
         if ( index2 != std::string::npos)
         {
             std::string str = request_.substr(index1 + 16 , index2 - index1 - 16);
-            content_length = atoi(str.c_str());
+            content_length = atoi(str.c_str()); // must be deleted
+            mes->setContentLength(atoi(str.c_str()));
         }
     }
     else
-        content_length = 0;
+    {
+        content_length = 0; // must be deleted
+        mes->setContentLength(0);
+    }
     
-    // int max_body_size = atoi(tmp_server.client_body_buffer_size.c_str());
+    
 
-    return (content_length);
+    // return (content_length); // must be return a message
+    return (mes);
 }
 
 Response::~Response(){};

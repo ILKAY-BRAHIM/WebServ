@@ -54,4 +54,24 @@ int getStatus()
     return (1);
 }
 
+void    Message::setServer(t_server server)
+{
+    this->server = server;
+}
+
+void   Message::setRequest(request req)
+{
+    this->req = req;
+}
+
+request Message::getRequest()
+{
+    return (this->req);
+}
+
+t_server Message::getServer()
+{
+    return (this->server);
+}
+
 Message::~Message(){};
