@@ -56,7 +56,7 @@ int get_request(std::vector<t_server> servers)
 
         Response resp(servers);
         std::string r(requestt);
-        Message *m = resp.generateResponse(r);
+        // Message *m = resp.generateResponse(r);
         // std::cout << resp.checkHeader(r) << std::endl;
         write(new_socket ,(m->getResponse()).c_str() ,(m->getResponse()).length());
 

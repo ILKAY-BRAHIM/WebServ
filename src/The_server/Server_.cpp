@@ -224,14 +224,17 @@ void Server::run()
                             it->second.set_start(std::clock());
                             if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
                             {
-                                Message *resw =  this->resp.generateResponse(it->second.get_request()); // incoming changed..
+                                Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
-                                std::cout << it->second.get_responce_class()->getStatus() << std::endl;
+                                // std::cout << it->second.get_responce_class()->getStatus() << std::endl;
                                 if(it->second.get_responce_class()->getContentLength() != 0)
                                     it->second.set_redirection(1);
                                 else
                                 {
+                                    
+                                    this->resp.generateResponse(it->second.get_responce_class());
                                     it->second.set_responce(it->second.get_responce_class()->getResponse());
+                                    std::cout << it->second.get_responce() << std::endl;
                                     FD_SET(it->first, &this->write_set1);
                                     FD_CLR(it->first, &this->master_set);
                                     this->msg.insert(std::pair<int, Servers>(it->first, it->second));
