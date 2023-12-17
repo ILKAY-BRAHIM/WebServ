@@ -23,6 +23,7 @@ void Server::start_server()
 {
     int server_fd;
     int opt = 1;
+    std::string str;
 
     FD_ZERO(&this->master_set);
             int index = 0;
@@ -63,8 +64,14 @@ void Server::start_server()
                 std::cout << "listen" << std::endl;
                 return;
             }
-
-            std::cout << "\033[93mServer is running on port \033[92m" << *it << "\033[39m"<<std::endl;
+            if(str == "")
+                str = "\033[93mServer is running on ports " + std::to_string(*it);
+            else
+                str += ", " + std::to_string(*it);
+            std::cout << '\r' << std::string(80, ' ');
+            std::cout << '\r' << str << "\033[39m" << std::flush;
+            usleep(1000000);
+            // std::cout << "\033[93mServer is running on port \033[92m" << *it << "\033[39m"<<std::endl;
 
             this->fds.push_back(server_fd);
             // std::cout << "fds: " << this->fds[index] << std::endl;
@@ -72,6 +79,7 @@ void Server::start_server()
             index++;
         }
     }
+    std::cout << std::endl;
     return;
 }
 
@@ -209,6 +217,7 @@ void Server::run()
                             int a = recv(i, buffer, 1, 0);
                              if(a <= 0)
                             {
+                                std::cout << std::endl;
                                 std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
                                 if (a == 0)
                                     std::cout << "socket " << i << " hung up" << std::endl;
@@ -231,7 +240,17 @@ void Server::run()
                                     it->second.set_redirection(1);
                                 else
                                 {
-                                    
+                                    // char **env = it->second.get_responce_class()->getEnv();
+                                    // if (env != NULL)
+                                    // {
+                                    //     int j = 0;
+                                    //     while(env[j] != NULL)
+                                    //     {
+                                    //         std::cout << env[j] << std::endl;
+                                    //         j++;
+                                    //     }
+                                    // }
+                                    cgi cgi(env, "");
                                     this->resp.generateResponse(it->second.get_responce_class());
                                     it->second.set_responce(it->second.get_responce_class()->getResponse());
                                     // std::cout << it->second.get_responce() << std::endl;
@@ -249,6 +268,7 @@ void Server::run()
                             int a = recv(i, buffer, 60000, 0);
                             if(a <= 0)
                             {
+                                std::cout << std::endl;
                                 std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
                                 if (a == 0)
                                     std::cout << "socket " << i << " hung up" << std::endl;
@@ -263,6 +283,10 @@ void Server::run()
                             it->second.collect_body(buffer, a);
                             it->second.set_start(std::clock());
                             it->second.set_total_body(a);
+                            // std::cout << "recive \r\c" << it->second.get_total_body() << " bytes from client " << it->first << std::endl;
+                            static int count = 1;
+                            print_log("recive " + std::to_string(it->second.get_total_body()) + " bytes from client " + std::to_string(it->first), "\033[92m", ++count, it->second.get_total_body(), it->second.get_responce_class()->getContentLength());
+                            // std::cout << std::endl;
                             // std::cout << "total body: " << it->second.get_total_body() << std::endl;
                             // std::cout << "content length: " << it->second.get_responce_class()->getContentLength() << std::endl;
                             // std::cout << "body: " << it->second.get_body() << std::endl;
@@ -325,6 +349,7 @@ void Server::run()
                             int j = send(i, it->second.get_responce().c_str(), it->second.get_responce().length(), 0);
                             if (j <= 0)
                             {
+                                std::cout << std::endl;
                                 std::cout << "\033[91mconnection close by peer2... \033[39m" << std::endl;
                                 close(i);
                                 FD_CLR(i, &this->write_set1);
@@ -344,6 +369,7 @@ void Server::run()
                             int j = send(it->first, it->second.get_responce().c_str() + it->second.get_total(), it->second.get_responce().length() - it->second.get_total(), 0);
                             if (j <= 0 )
                             {
+                                std::cout << std::endl;
                                 std::cout << "\033[91mconnection close by peer1... \033[39m" << std::endl;
                                 close(i);
                                 FD_CLR(i, &this->write_set1);
@@ -359,6 +385,7 @@ void Server::run()
                                 it->second.set_partis(j);
                         }
                         it->second.set_total(it->second.get_partis());
+                        std::cout << std::endl;
                         std::cout << "\033[92msend " << it->second.get_total() << " bytes to client " << it->first << " total of data is " << it->second.get_responce().length() << " bytes\033[39m" <<std::endl;
                         if (it->second.get_total() == it->second.get_responce().length())
                         {
@@ -381,6 +408,36 @@ void Server::run()
             }
         }
     }
+}
+
+
+void Server::print_log(const std::string& str, const std::string& color, int count, unsigned long total, int content_length) {
+    std::string str2 = str;
+    (void)count;
+    // int length = 0;
+    // for (int i = 0; i < count; ++i) {
+    //     if (i % 70 == 0)
+    //     {
+    //         str2 += "-";
+    //         length++;
+    //     }
+    // }
+    // str2 += ">";
+    // int u = 74 - length;
+    // for (int i = 0; i < u; ++i)
+    // {
+    //     str2 += " ";
+
+    // }
+    int j = (total * 100) / content_length;
+    str2 += "  [";
+    str2 += std::to_string(j);
+    str2 += "%]";
+    // Clear line by overwriting with spaces
+    std::cout << '\r' << std::string(80, ' ');
+    // Print the new message with color
+    std::cout << '\r' << color << str2 << "\033[0m" << std::flush;
+    // usleep(200);
 }
 
 Server::~Server()

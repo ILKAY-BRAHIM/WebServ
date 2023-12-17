@@ -19,9 +19,9 @@ void cgi::runCgi()
             std::cerr << "dup2 failed\n";
             exit(1);
         }
-        char *argv[] = {"/Users/bchifour/Desktop/WebServer/cgi", NULL};
-        char *envp[] = {"check=hi i'am hir", NULL};
-        execve("/Users/bchifour/Desktop/WebServer/cgi", argv, envp);
+        char *argv[] = {get_path(), NULL};
+        // char *envp[] = {"check=hi i'am hir", NULL};
+        execve(get_path(), argv, this->env);
         exit(0);
     } 
     else 
