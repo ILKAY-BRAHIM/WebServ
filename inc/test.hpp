@@ -25,6 +25,7 @@ typedef struct t_request
     std::string method;
     std::string path;
     std::string httpVertion;
+    std::string boundary;
     std::map<std::string, std::string> headers;
     std::string body;
 }        request;

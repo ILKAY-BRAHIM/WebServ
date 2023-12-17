@@ -33,7 +33,9 @@ request parseRequest(std::string buffer)
     std::string value(buffer);
     std::istringstream ss(value);
     std::getline(ss, line, '\n');
-    
+    std::string parameters;
+    size_t found;
+
     //get start line :
     std::istringstream st(line);
     std::getline(st, line, ' ');
@@ -41,21 +43,12 @@ request parseRequest(std::string buffer)
     std::getline(st, line, ' ');
     req.path = line;
 
-    std::string parameters;
-	std::string path;
-    std::string url;
-	size_t found = req.path.find('?');
+	found = req.path.find('?');
 	if (found != std::string::npos)
 	{
-		parameters = req.path.substr(found+1);
-        std::cout << "parameters : " << parameters << std::endl;
-		url = req.path.substr(0, found);
+		req.headers["Query-String"] = req.path.substr(found+1);
+		req.path = req.path.substr(0, found);
 	}
-	else
-		url = req.path;
-    req.path = url;
-    req.headers["Query-String"] = parameters;
-
     std::getline(st, line, '\r');
     req.httpVertion = line;
     while (std::getline(ss, line, '\n'))
@@ -65,8 +58,15 @@ request parseRequest(std::string buffer)
         else
             break;
     }
+    found = std::string::npos;
+    if (req.headers.find("Content-Type") != req.headers.end())
+    {
+        found = req.headers["Content-Type"].find("boundary=");
+        if (found != std::string::npos)
+            req.boundary = req.headers["Content-Type"].substr(found + 9);
+    }
     // print_new_request(req);
-    return (req);
+    return (req); 
 }
 
 
@@ -501,13 +501,42 @@ void    Response::clearResponse()
 
 }
 
+void    Response::parseBody(Message *mes)
+{
+    (void)mes;
+    std::string part;
+    std::string tmp;
+    std::vector<std::string> parts;
+
+// this->req.boundary += "\r\n";
+    size_t found = this->req.body.find((this->req.boundary));
+    while (found != std::string::npos)
+    {
+        tmp = this->req.body.substr(0, found + this->req.boundary.length());
+        // tmp.erase(tmp.end() - 2, tmp.end());
+        parts.push_back(tmp);
+        this->req.body.erase(0, found + this->req.boundary.length());
+        found = this->req.body.find(this->req.boundary);
+    }
+    // for(std::vector<std::string>::iterator it = parts.begin(); it != parts.end(); it++)
+    // {
+        
+    //     std::cout << "part:\n" << *it << std::endl;
+    // }
+}
+
 void    Response::generateResponse(Message* mes)
 {
     // check if there is a body and handle it [!] ..................... [!]
 
-    std::string line;
     this->server =  mes->getServer();
     this->req = mes->getRequest();
+    if (mes->getBody().size() != 0)
+    {
+        this->req.body = mes->getBody();
+        parseBody(mes);
+    }
+
     mes->setStatus(1);
     this->respMessage.http_version = "HTTP/1.1";
 	try
@@ -519,57 +548,64 @@ void    Response::generateResponse(Message* mes)
 	{
         mes->setStatus(-1);
 		this->respMessage.statusCode = generateStatusCode(m);
-        // std::cout << this->respMessage.statusCode << std::endl;
-		// exit(1);
 	}
     
     mes->setResponse(generateMessage());
-    
+    // std::cout << mes->getBody() << std::endl;
     clearResponse();
 }
 
 char**   cgi_env(request req, t_server server)
 {
     std::vector<std::string> env;
+    std::string tmp;
 
-    // env.push_back("AUTH_TYPE=" + req.headers["Authorization"]);
+    // From request :
+    env.push_back("QUERY_STRING=" + req.headers["Query-String"]); // OK ----------------
     env.push_back("CONTENT_LENGTH=" + req.headers["Content-Length"]); // OK ----------------
     env.push_back("CONTENT_TYPE=" + req.headers["Content-Type"]); // OK ----------------
-    env.push_back("GATEWAY_INTERFACE=CGI/1.1"); // OK ----------------
-    env.push_back("DOCUMENT_URI" + req.path); // OK ----------------
-    env.push_back("DOCUMENT_ROOT" + server.root); // OK ----------------
-    env.push_back("QUERY_STRING=" + req.headers["Query-String"]); // OK ----------------
-    env.push_back("REMOTE_ADDR="); // OK
-    env.push_back("REMOTE_HOST="); // OK ----------------
-    env.push_back("REMOTE_IDENT="); // OK ----------------
-    env.push_back("REMOTE_USER="); // OK ---------------- 
     env.push_back("REQUEST_METHOD=" + req.method); // OK ----------------
-    env.push_back("REQUEST_URI=" + req.path); // OK ----------------
+
+    //From config file :
     env.push_back("SCRIPT_NAME=" + req.path); // OK ----------------
-    env.push_back("SERVER_NAME=" + req.headers["Host"]); // OK ----------------
-    env.push_back("SERVER_PORT=" + std::to_string(server.port[0])); // OK -----
+    if (req.headers["Query-String"] != "")
+        tmp = req.path + '?' + req.headers["Query-String"];
+    else
+        tmp = req.path;
+    env.push_back("REQUEST_URI=" + tmp); // OK ----------------
+    env.push_back("DOCUMENT_URI=" + req.path); // OK ----------------
+    env.push_back("DOCUMENT_ROOT=" + server.root); // OK ----------------
     env.push_back("SERVER_PROTOCOL=" + req.httpVertion); // OK ----------------
-    env.push_back("SERVER_SOFTWARE=" + std::string("webserv/1.0")); // OK ----------------
-    env.push_back("REDIRECT_STATUS=" + std::to_string(200)); // -------------------- MOST BE CHANGED ---------------- [!]
-    env.push_back("SCRIPT_FILENAME=" + server.root + req.path);
-    env.push_back("HTTP_HOST=" + req.headers["Host"]); // OK ----------------
-    env.push_back("HTTP_USER_AGENT=" + req.headers["User-Agent"]);  // OK ----------------
-    env.push_back("HTTP_ACCEPT=" + req.headers["Accept"]); // OK ----------------
-    env.push_back("HTTP_ACCEPT_LANGUAGE=" + req.headers["Accept-Language"]); // OK ----------------
-    env.push_back("HTTP_ACCEPT_ENCODING=" + req.headers["Accept-Encoding"]); // OK ----------------
-    env.push_back("HTTP_CONTENT_TYPE=" + req.headers["Content-Type"]);  // OK ----------------
-    env.push_back("HTTP_COOKIE=" + req.headers["Cookie"]);  // OK ----------------
-    env.push_back("HTTP_REFERER=" + req.headers["Referer"]);    // OK ----------------
-    //env system 
-    env.push_back("HTTP_UPGRADE_INSECURE_REQUESTS=" + req.headers["Upgrade-Insecure-Requests"]); // OK ----------------
-    env.push_back("LANG=en_US.UTF-8"); // -------------------- MOST BE CHACKED ---------------- [!]
-    env.push_back("PATH=" + req.headers["Host"]);
-    env.push_back("HOME="); // OK ----------------
-    env.push_back("LOGNAME="); // OK ----------------
-    env.push_back("USER="); // OK ----------------
-    
-    env.push_back("SERVER_ADDR=" + server.name); // OK ------------------------
     env.push_back("REQUEST_SCHEME=" + std::string("http")); // OK ----------------
+    env.push_back("SCRIPT_FILENAME=" + server.root + req.path);
+    // env.push_back("REMOTE_HOST="); // OK ----------------
+    // env.push_back("HTTP_HOST=" + req.headers["Host"]); // OK ----------------
+    // env.push_back("HTTP_USER_AGENT=" + req.headers["User-Agent"]);  // OK ----------------
+    // env.push_back("HTTP_ACCEPT=" + req.headers["Accept"]); // OK ----------------
+    // env.push_back("HTTP_ACCEPT_LANGUAGE=" + req.headers["Accept-Language"]); // OK ----------------
+    // env.push_back("HTTP_ACCEPT_ENCODING=" + req.headers["Accept-Encoding"]); // OK ----------------
+    // env.push_back("HTTP_CONTENT_TYPE=" + req.headers["Content-Type"]);  // OK ----------------
+    // env.push_back("HTTP_COOKIE=" + req.headers["Cookie"]);  // OK ----------------
+    // env.push_back("HTTP_REFERER=" + req.headers["Referer"]);    // OK ----------------
+    // env.push_back("HTTP_UPGRADE_INSECURE_REQUESTS=" + req.headers["Upgrade-Insecure-Requests"]); // OK ----------------
+
+    // From client :
+    env.push_back("GATEWAY_INTERFACE=CGI/1.1"); // OK ----------------
+    env.push_back("SERVER_SOFTWARE=" + std::string("webserv/1.0")); // OK ----------------
+
+    // From server (envirement):
+    env.push_back("REMOTE_ADDR="); // OK
+    env.push_back("REMOTE_PORT="); // OK ----------------
+    env.push_back("REMOTE_USER="); // OK ---------------- 
+    env.push_back("SERVER_ADDR=" + server.name); // OK ------------------------
+    env.push_back("SERVER_PORT=" + std::to_string(server.port[0])); // OK -----
+    env.push_back("SERVER_NAME=" + req.headers["Host"]); // OK ----------------
+    env.push_back("REDIRECT_STATUS=" + std::to_string(200)); // -------------------- MOST BE CHANGED ---------------- [!]
+    // env.push_back("LANG=en_US.UTF-8"); // -------------------- MOST BE CHACKED ---------------- [!]
+    // env.push_back("PATH=" + req.headers["Host"]);
+    // env.push_back("HOME="); // OK ----------------
+    // env.push_back("LOGNAME="); // OK ----------------
+    // env.push_back("USER="); // OK ----------------
 
     char **envp = new char*[env.size() + 1];
     int i = 0;
@@ -589,7 +625,7 @@ Message* Response::checkHeader(std::string request_)
 
     mes->setRequest(parseRequest(request_));
     mes->setServer(fillServer(mes->getRequest()));
-    // t_server    tmp_server = fillServer(request_);
+    
     int content_length = 0;
 
     unsigned long  index1 = request_.find("Content-Length: ");
@@ -609,11 +645,10 @@ Message* Response::checkHeader(std::string request_)
         mes->setContentLength(0);
     }
     mes->setEnv(cgi_env(mes->getRequest(), mes->getServer()));
-
     // char **env = mes->getEnv();
-    // for(int i = 0; env[i]; i++)
+    // for (int i = 0; env[i] != NULL; i++)
     //     std::cout << env[i] << std::endl;
-    // return (content_length); // must be return a message
+
     return (mes);
 }
 
