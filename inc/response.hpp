@@ -67,6 +67,7 @@ class Response
         std::string generateMessage();
         void    clearResponse();
         // void    readPath();
+        void        parseBody(Message *mes);
         void        redirect(std::string path);
     public :
         Response();
