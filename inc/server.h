@@ -41,6 +41,7 @@ typedef struct s_location
 	std::string					autoindex;
 	std::vector<std::string>	cgi_path;
 	std::vector<std::string>	cgi_ext;
+	std::vector<std::string>	cgi_index;
 	//method
 	void		clear();
 }	t_location;
