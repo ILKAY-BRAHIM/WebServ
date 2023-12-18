@@ -72,9 +72,10 @@ request parseRequest(std::string buffer)
 
 Response::Response(void){};
 
-Response::Response(std::vector<t_server> servS)
+Response::Response(std::vector<t_server> servS, char **env)
 {
     this->servS = servS;
+    this->env = env;
 }
 
 // Response::Response(const Response& copy){};
@@ -508,7 +509,7 @@ void    Response::parseBody(Message *mes)
     std::string tmp;
     std::vector<std::string> parts;
 
-// this->req.boundary += "\r\n";
+    // this->req.boundary += "\r\n";
     size_t found = this->req.body.find((this->req.boundary));
     while (found != std::string::npos)
     {
@@ -555,7 +556,7 @@ void    Response::generateResponse(Message* mes)
     clearResponse();
 }
 
-char**   cgi_env(request req, t_server server)
+char**   cgi_env(request req, t_server server, char **env_system)
 {
     std::vector<std::string> env;
     std::string tmp;
@@ -601,11 +602,32 @@ char**   cgi_env(request req, t_server server)
     env.push_back("SERVER_PORT=" + std::to_string(server.port[0])); // OK -----
     env.push_back("SERVER_NAME=" + req.headers["Host"]); // OK ----------------
     env.push_back("REDIRECT_STATUS=" + std::to_string(200)); // -------------------- MOST BE CHANGED ---------------- [!]
-    // env.push_back("LANG=en_US.UTF-8"); // -------------------- MOST BE CHACKED ---------------- [!]
-    // env.push_back("PATH=" + req.headers["Host"]);
-    // env.push_back("HOME="); // OK ----------------
-    // env.push_back("LOGNAME="); // OK ----------------
-    // env.push_back("USER="); // OK ----------------
+    if (env_system != NULL && env_system[0] != NULL)
+    {
+        std::string tmp;
+        for (int i = 0; env_system[i] != NULL; i++)
+        {
+            tmp = env_system[i];
+            if (tmp.find("PATH=") != std::string::npos)
+                env.push_back("PATH=" + std::string(env_system[i] + 5));
+            else if (tmp.find("LANG=") != std::string::npos)
+                env.push_back("LANG=" + std::string(env_system[i] + 5));
+            else if (tmp.find("HOME=") != std::string::npos)
+                env.push_back("HOME=" + std::string(env_system[i] + 5));
+            else if (tmp.find("LOGNAME=") != std::string::npos)
+                env.push_back("LOGNAME=" + std::string(env_system[i] + 8));
+            else if (tmp.find("USER=") != std::string::npos)
+                env.push_back("USER=" + std::string(env_system[i] + 5));
+        }
+        // env.push_back("PATH=" + std::string(env_system.find("PATH=") + 5));
+        // env.push_back("LANG=en_US.UTF-8"); // -------------------- MOST BE CHACKED ---------------- [!]
+        // env.push_back("PATH=" + req.headers["Host"]);
+        // env.push_back("HOME="); // OK ----------------
+        // env.push_back("LOGNAME="); // OK ----------------
+        // env.push_back("USER="); // OK ----------------
+
+    }
+
 
     char **envp = new char*[env.size() + 1];
     int i = 0;
@@ -644,11 +666,14 @@ Message* Response::checkHeader(std::string request_)
         content_length = 0; // must be deleted
         mes->setContentLength(0);
     }
-    mes->setEnv(cgi_env(mes->getRequest(), mes->getServer()));
-    // char **env = mes->getEnv();
-    // for (int i = 0; env[i] != NULL; i++)
-    //     std::cout << env[i] << std::endl;
+    mes->setEnv(cgi_env(mes->getRequest(), mes->getServer(), this->env));
+    char **env = mes->getEnv();
+    for (int i = 0; env[i] != NULL; i++)
+        std::cout << env[i] << std::endl;
 
+    // std::cout << "Envirement : " << std::endl;
+    // for (int i = 0; this->env[i] != NULL; i++)
+    //     std::cout << this->env[i] << std::endl;
     return (mes);
 }
 

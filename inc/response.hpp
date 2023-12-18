@@ -51,6 +51,7 @@ typedef struct t_response
 class Response 
 {
     private :
+        char **env;
         std::vector<t_server> servS;
         t_server    server;
         t_location  location;
@@ -71,7 +72,7 @@ class Response
         void        redirect(std::string path);
     public :
         Response();
-        Response(std::vector<t_server> servS);
+        Response(std::vector<t_server> servS, char **env);
         void	generateResponse(Message* mes);
         Message*    checkHeader(std::string req);
         // char **getEnv();
