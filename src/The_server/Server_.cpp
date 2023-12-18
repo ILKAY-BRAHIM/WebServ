@@ -70,7 +70,7 @@ void Server::start_server()
                 str += ", " + std::to_string(*it);
             std::cout << '\r' << std::string(80, ' ');
             std::cout << '\r' << str << "\033[39m" << std::flush;
-            usleep(1000000);
+            // usleep(1000000);
             // std::cout << "\033[93mServer is running on port \033[92m" << *it << "\033[39m"<<std::endl;
 
             this->fds.push_back(server_fd);
@@ -236,21 +236,38 @@ void Server::run()
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
                                 // std::cout << it->second.get_responce_class()->getStatus() << std::endl;
+
+
+
+
+
+                                    // char **env = it->second.get_responce_class()->getEnv();                              //
+                                    // if (env != NULL)                                                                     //
+                                    // {                                                                                    //
+                                    //     int j = 0;                                                                       //
+                                    //     while(env[j] != NULL)                                                            // cgi part
+                                    //     {                                                                                //
+                                    //         std::cout << env[j] << std::endl;                                            //
+                                    //         j++;                                                                         //
+                                    //     }                                                                                //
+                                    // }   
+                                    // Cgi cgi(env, "");
+                                    // cgi.runCgi();
+                                    // std::cout <<"  out "<< cgi.getResponse() << std::endl;
+
+
+
+
+
+
+
+
+
                                 if(it->second.get_responce_class()->getContentLength() != 0)
                                     it->second.set_redirection(1);
                                 else
                                 {
-                                    // char **env = it->second.get_responce_class()->getEnv();
-                                    // if (env != NULL)
-                                    // {
-                                    //     int j = 0;
-                                    //     while(env[j] != NULL)
-                                    //     {
-                                    //         std::cout << env[j] << std::endl;
-                                    //         j++;
-                                    //     }
-                                    // }
-                                    cgi cgi(env, "");
+                                    // cgi cgi(env, "");
                                     this->resp.generateResponse(it->second.get_responce_class());
                                     it->second.set_responce(it->second.get_responce_class()->getResponse());
                                     // std::cout << it->second.get_responce() << std::endl;
@@ -292,10 +309,26 @@ void Server::run()
                             // std::cout << "body: " << it->second.get_body() << std::endl;
                             if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength())
                             {
+
+                                //  char **env = it->second.get_responce_class()->getEnv();
+                                //     if (env != NULL)
+                                //     {
+                                //         int j = 0;
+                                //         while(env[j] != NULL)
+                                //         {
+                                //             std::cout << env[j] << std::endl;
+                                //             j++;
+                                //         }
+                                //     }
                                 // std::cout << "body: " << it->second.get_body() << std::endl;
                                 it->second.get_responce_class()->setBody(it->second.get_body());
                                 this->resp.generateResponse(it->second.get_responce_class());
+                                //  Cgi cgi(env, it->second.get_body());
+                                // cgi.runCgi();
+                                // std::cout <<"  out "<< cgi.get_response() << std::endl;
+                                // std::string test = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: "+ std::to_string(cgi.get_response().length()) +"\r\n\r\n"+cgi.get_response();
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());
+                                // it->second.set_responce(test);
                                 // it->second.set_responce(it->second.get_responce_class()->getResponse());
                                 it->second.set_redirection(0);
                                 FD_SET(it->first, &this->write_set1);
