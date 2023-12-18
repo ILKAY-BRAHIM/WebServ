@@ -28,6 +28,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
+// #include "cgi.hpp"
 
 
 class Server
@@ -52,5 +53,6 @@ class Server
         Server &operator=(const Server &other);
         void run();
         void start_server();
+        void print_log(const std::string& str, const std::string& color, int count, unsigned long total, int content_length);
         ~Server();
 };

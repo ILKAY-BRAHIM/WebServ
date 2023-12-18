@@ -20,6 +20,8 @@
 # include "Message.hpp"
 # include <unistd.h>
 # include "test.hpp"
+# include "cgi.hpp"
+
 // class   Message ;
 # define PORT 81
 
