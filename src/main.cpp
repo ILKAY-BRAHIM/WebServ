@@ -13,6 +13,10 @@ int main (int ac, char **av, char **env)
 		return (1);
 	
 	Response resp(servers, env);
+	if (env[0])
+		std::cout << env[0] << std::endl;
+	else
+		std::cout << "env is empty" << std::endl;
 	// std::string h("hello");
 	// Message *mes = resp.generateResponse(h);
 	// std::cout << mes->getResponse() << std::endl;

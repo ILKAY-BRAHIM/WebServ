@@ -60,6 +60,8 @@ class Response
         resp		respMessage;
 		request		req;
         std::string resp;
+        std::string body;
+        std::vector<std::string> r_env;
         t_server    fillServer(request req);
 		void	checkMethode();
 		void	urlRegenerate();

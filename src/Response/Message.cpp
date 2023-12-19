@@ -44,7 +44,7 @@ void    Message::setResponse(std::string mess)
     this->mess = mess;
 }
 
-char **Message::getEnv()
+std::vector<std::string> Message::getEnv()
 {
     return (this->env);
 }
@@ -84,7 +84,7 @@ std::string Message::getBody()
     return (this->body);
 }
 
-void    Message::setEnv(char **env)
+void    Message::setEnv(std::vector<std::string> env)
 {
     this->env = env;
 }

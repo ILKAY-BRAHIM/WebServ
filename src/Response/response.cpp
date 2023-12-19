@@ -199,12 +199,27 @@ void    Response::isDirectory(std::string path, std::string url)
 {
     // std::cout << "Is directory" << std::endl;
     std::string index_;
+    std::string fullPath;
     // check if the directory in the log
     if (url != "/")
         url.erase(url.end() - 1);
     if (getLocation(url))
     {
-        if (this->location.index.size() != 0)
+        if (this->location.cgi_index.size() != 0)
+        {
+            std::vector<std::string>::iterator it = this->location.cgi_index.begin();
+            while (it != this->location.cgi_index.end())
+            {
+                fullPath = path + (*it);
+                if (access((fullPath).c_str(), F_OK | X_OK) == 0)
+                {
+                    index_ = *it;
+                    break;
+                }
+                it++;
+            }
+        }
+        else if (this->location.index.size() != 0)
             index_ = get_index(this->location, path, 0);
         else 
         {
@@ -299,7 +314,6 @@ std::string getType(std::vector<t_types> types, std::string ext)
         return ("application/octet-stream");
     if (ext.size() != 0)
     {
-        std::cout << "EXTENSION : " << ext << std::endl;
         if (ext == "php" || ext == "py")
             return (ext);
     }
@@ -327,10 +341,6 @@ void    Response::generateBody(std::string path)
     // check permition & read & generate body 
     std::string ext = get_extension(path);
     this->respMessage.Content_Type = getType(this->server.types, ext);
-    std::cout << "MEDIA TYPE : " << this->respMessage.Content_Type << std::endl;
-
-    // must check the permission of the file : use stat , access functions
-
     std::ifstream fd(path.c_str());
     if (fd.is_open() == false)
     {
@@ -338,36 +348,62 @@ void    Response::generateBody(std::string path)
         throw (403);
         return ;
     }
-    if (this->respMessage.Content_Type == "py" || this->respMessage.Content_Type == "php")
+    if (this->location.cgi_index.size() != 0 && (this->respMessage.Content_Type == "py" || this->respMessage.Content_Type == "php"))
     {
-
-        // Cgi cgi(this->env, );
-
-        this->respMessage.body += "<!DOCTYPE html>\n<html lang=\"en\">\n";
-        this->respMessage.body += "<html>\n";
-        this->respMessage.body += ("<head><title>" + generateStatusCode(200) + "</title></head>\n");
-        this->respMessage.body += "<body>\n";
-        this->respMessage.body += ("<center><h1> it should be CGI Content </h1></center>\n");
-        this->respMessage.body += ("<hr><center>" + this->respMessage.Server + "</center>\n");
-        this->respMessage.body += "</body>\n";
-        this->respMessage.body += "</html>";
+        this->r_env.push_back("SCRIPT_FILENAME=" + path);
+        char **envp = new char*[this->r_env.size() + 1];
+        int i = 0;
+        for (std::vector<std::string>::iterator it = this->r_env.begin(); it != this->r_env.end(); it++)
+        {
+            envp[i] = new char[it->length() + 1];
+            strcpy(envp[i], it->c_str());
+            i++;
+        }
+        envp[i] = NULL;
+        Cgi cgi_(envp, this->body);
+        cgi_.runCgi();
+        this->respMessage.body = cgi_.get_response();
+        this->respMessage.Content_Type = "text/html";
         this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
-        // fd.close();
-        // this->respMessage.statusCode = generateStatusCode(200);
-        // return ;
+        this->respMessage.statusCode = generateStatusCode(200);
+        while (envp[i] != NULL)
+        {
+            delete envp[i];
+            i++;
+        }
+        delete[] envp;
     }
     else
     {
+        if (this->respMessage.Content_Type == "py" || this->respMessage.Content_Type == "php")
+            this->respMessage.Content_Type = "application/octet-stream";
         std::string line;
         while (getline(fd, line))
             this->respMessage.body += line;
         this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
+        this->respMessage.statusCode = generateStatusCode(200);
     }
     fd.close();
-    this->respMessage.statusCode = generateStatusCode(200);
     return ;
 }
 
+std::string extractLocation(std::string url)
+{
+
+    std::string::iterator it = url.end() - 1;
+    std::string original_url;
+
+    while (it != url.begin())
+    {
+        if (*it == '/')
+            break;
+        it--;
+    }
+    original_url = url.substr(0, it - url.begin() + 1);
+    if (original_url != "/")
+        original_url.erase(original_url.end() - 1);
+    return (original_url);
+}
 
 void	Response::urlRegenerate() // ->status_code & ->Location 
 {
@@ -393,6 +429,8 @@ void	Response::urlRegenerate() // ->status_code & ->Location
         }
         else if (S_ISREG(fileStat.st_mode))
         {
+            getLocation(extractLocation(url));
+            // std::cout << "LOCATION : " << extractLocation(url) << std::endl;
             generateBody(path);
         }
     }   
@@ -507,6 +545,32 @@ void    Response::clearResponse()
     this->req.headers.clear();
     this->req.body.clear();
 
+    this->location.path.clear();
+    this->location.root.clear();
+    this->location.alias.clear();
+    this->location.index.clear();
+    this->location.proxy_pass.clear();
+    this->location.rewrite.clear();
+    this->location.allow_methods.clear();
+    this->location.denny.clear();
+    this->location.try_files.clear();
+    this->location.expires.clear();
+    this->location.access_log.clear();
+    this->location.error_page.clear();
+    this->location.limite_rate.clear();
+    this->location.limite_except.clear();
+    this->location.client_body_buffer_size.clear();
+    this->location.proxy_set_header.clear();
+    this->location.redirect.clear();
+    this->location.autoindex.clear();
+    this->location.cgi_path.clear();
+    this->location.cgi_ext.clear();
+    this->location.cgi_index.clear();
+
+
+    this->body.clear();
+
+
 }
 
 void    Response::parseBody(Message *mes)
@@ -540,6 +604,8 @@ void    Response::generateResponse(Message* mes)
     std::string line;
     this->server =  mes->getServer();
     this->req = mes->getRequest();
+    this->body = mes->getBody();
+    this->r_env = mes->getEnv();
     mes->setStatus(1);
     this->respMessage.http_version = "HTTP/1.1";
 	try
@@ -560,7 +626,7 @@ void    Response::generateResponse(Message* mes)
     clearResponse();
 }
 
-char**   cgi_env(request req, t_server server, char **env_system)
+std::vector<std::string>   cgi_env(request req, t_server server, char **env_system)
 {
     std::vector<std::string> env;
 
@@ -568,8 +634,8 @@ char**   cgi_env(request req, t_server server, char **env_system)
     env.push_back("CONTENT_LENGTH=" + req.headers["Content-Length"]); // OK ----------------
     env.push_back("CONTENT_TYPE=" + req.headers["Content-Type"]); // OK ----------------
     env.push_back("GATEWAY_INTERFACE=CGI/1.1"); // OK ----------------
-    env.push_back("DOCUMENT_URI" + req.path); // OK ----------------
-    env.push_back("DOCUMENT_ROOT" + server.root); // OK ----------------
+    env.push_back("DOCUMENT_URI=" + req.path); // OK ----------------
+    env.push_back("DOCUMENT_ROOT=" + server.root); // OK ----------------
     env.push_back("QUERY_STRING=" + req.headers["Query-String"]); // OK ----------------
     env.push_back("REMOTE_ADDR="); // OK
     env.push_back("REMOTE_HOST="); // OK ----------------
@@ -579,6 +645,7 @@ char**   cgi_env(request req, t_server server, char **env_system)
     env.push_back("REQUEST_URI=" + req.path); // OK ----------------
     env.push_back("SCRIPT_NAME=" + req.path); // OK ----------------
     env.push_back("SERVER_NAME=" + req.headers["Host"]); // OK ----------------
+    // env.push_back("SCRIPT_FILENAME=" + server.root + req.path); // OK ----------------
     env.push_back("SERVER_PORT=" + std::to_string(server.port[0])); // OK -----
     env.push_back("SERVER_PROTOCOL=" + req.httpVertion); // OK ----------------
     env.push_back("SERVER_SOFTWARE=" + std::string("webserv/1.0")); // OK ----------------
@@ -603,16 +670,16 @@ char**   cgi_env(request req, t_server server, char **env_system)
     }
 
 
-    char **envp = new char*[env.size() + 1];
-    int i = 0;
-    for (std::vector<std::string>::iterator it = env.begin(); it != env.end(); it++)
-    {
-        envp[i] = new char[it->length() + 1];
-        strcpy(envp[i], it->c_str());
-        i++;
-    }
-    envp[i] = NULL;
-    return (envp);
+    // char **envp = new char*[env.size() + 1];
+    // int i = 0;
+    // for (std::vector<std::string>::iterator it = env.begin(); it != env.end(); it++)
+    // {
+    //     envp[i] = new char[it->length() + 1];
+    //     strcpy(envp[i], it->c_str());
+    //     i++;
+    // }
+    // envp[i] = NULL;
+    return (env);
 }
 
 Message* Response::checkHeader(std::string request_)
