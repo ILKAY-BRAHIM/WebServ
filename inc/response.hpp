@@ -20,6 +20,8 @@
 # include "Message.hpp"
 # include <unistd.h>
 # include "test.hpp"
+# include "cgi.hpp"
+
 // class   Message ;
 # define PORT 81
 
@@ -51,12 +53,15 @@ typedef struct t_response
 class Response 
 {
     private :
+        char **env;
         std::vector<t_server> servS;
         t_server    server;
         t_location  location;
         resp		respMessage;
 		request		req;
         std::string resp;
+        std::string body;
+        std::vector<std::string> r_env;
         t_server    fillServer(request req);
 		void	checkMethode();
 		void	urlRegenerate();
@@ -71,7 +76,7 @@ class Response
         void        redirect(std::string path);
     public :
         Response();
-        Response(std::vector<t_server> servS);
+        Response(std::vector<t_server> servS, char **env);
         void	generateResponse(Message* mes);
         Message*    checkHeader(std::string req);
         // char **getEnv();

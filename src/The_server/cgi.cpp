@@ -8,6 +8,7 @@ void Cgi::runCgi()
         std::cerr << "Pipe failed\n";
         exit(1);
     }
+    // std::cout << "PATH ---------- " << get_path() << std::endl;
     pid_t pid = fork();
     std::string fill = "fill";
     std::ofstream outputFile(fill, std::ios::out | std::ios::trunc);

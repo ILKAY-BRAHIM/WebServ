@@ -2,9 +2,9 @@
 #include "Server_.hpp"
 #include "response.hpp"
 
-int main (int ac, char **av)
+
+int main (int ac, char **av, char **env)
 {
-	
 	std::vector<t_server> servers;
 	if (ac != 2)
 		return (std::cout << "Error : no config file\n", 1);
@@ -12,7 +12,7 @@ int main (int ac, char **av)
 	if (!servers.size())
 		return (1);
 	
-	Response resp(servers);
+	Response resp(servers, env);
 	// std::string h("hello");
 	// Message *mes = resp.generateResponse(h);
 	// std::cout << mes->getResponse() << std::endl;

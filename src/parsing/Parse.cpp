@@ -253,6 +253,10 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 		fill_parts(vector, i, location.alias, "alias : ");
 	else if (vector[i] == "index")
 		fill_indexs(vector, i, location.index, "index : ");
+	else if (vector[i] == "cgi_index")
+		fill_indexs(vector, i, location.cgi_index, "cgi_index : ");
+	else if (vector[i] == "cgi_script")
+		fill_indexs(vector, i, location.cgi_script, "cgi_script : ");
 	else if (vector[i] == "proxy_pass")
 		fill_parts(vector, i, location.proxy_pass, "proxy_pass : ");
 	else if (vector[i] == "rewrite")
