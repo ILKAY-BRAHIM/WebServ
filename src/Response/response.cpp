@@ -559,7 +559,7 @@ void    Response::clearResponse()
     this->location.error_page.clear();
     this->location.limite_rate.clear();
     this->location.limite_except.clear();
-    this->location.client_body_buffer_size.clear();
+    this->location.client_body_size.clear();
     this->location.proxy_set_header.clear();
     this->location.redirect.clear();
     this->location.autoindex.clear();

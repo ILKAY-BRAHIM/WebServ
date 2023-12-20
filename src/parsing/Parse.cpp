@@ -277,8 +277,8 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 		fill_parts(vector, i, location.limite_rate, "limite_rate : ");
 	else if (vector[i] == "limite_except")
 		fill_parts(vector, i, location.limite_except, "limite_except : ");
-	else if (vector[i] == "client_body_buffer_size")
-		fill_parts(vector, i, location.client_body_buffer_size, "client_body_buffer_size : ");
+	else if (vector[i] == "client_body_size")
+		fill_parts(vector, i, location.client_body_size, "client_body_size : ");
 	else if (vector[i] == "proxy_set_header")
 		fill_parts(vector, i, location.proxy_set_header, "proxy_set_header : ");
 	else if (vector[i] == "return")
@@ -495,7 +495,7 @@ void warning_message(int i, std::string str)
 
 void Parse::last_check()
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (i < servers.size())
