@@ -1,4 +1,4 @@
-#!/usr/bin/php
+
 <html lang="en">
 <body style="background-color: darkslateblue; color: lightgrey;">
 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">

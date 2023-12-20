@@ -29,6 +29,7 @@ void Cgi::runCgi()
         // char *envp[] = {"check=hi i'am hir", NULL};
         execve(get_path(), argv, this->env);
         std::cerr << "execve failed\n";
+        throw "execve failed";
         exit(0);
     } 
     else 
