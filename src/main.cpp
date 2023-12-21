@@ -26,7 +26,9 @@ int main (int ac, char **av, char **env)
 	}
 	catch(const char *e)
 	{
-		std::cout << "Error: " << e << std::endl;
+		// std::cout << "Error: " << e << std::endl;
+
+		std::cerr << "\nError: " << e << std::endl;
 		return (1);
 	}
 

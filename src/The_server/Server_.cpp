@@ -209,7 +209,7 @@ void Server::run()
                         {
                             char buffer[1];
                             int a = recv(i, buffer, 1, 0);
-                             if(a <= 0)
+                            if(a <= 0)
                             {
                                 std::cout << std::endl;
                                 std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
@@ -223,10 +223,14 @@ void Server::run()
                                         max_fd -= 1;
                                 }
                             }
-                            it->second.collect_req(buffer, a);
-                            it->second.set_start(std::clock());
+                            else
+                            {
+                                it->second.collect_req(buffer, a);
+                                it->second.set_start(std::clock());
+                            }
                             if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
                             {
+                                std::cout << it->second.get_request() << std::endl;
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
                                 if(it->second.get_responce_class()->getContentLength() != 0)
@@ -243,7 +247,7 @@ void Server::run()
                             }
                             break;
                         }
-                        else if (it->first == i && it->second.get_redirection() == 1)
+                        else if (it->first == i && it->second.get_redirection() == 1) // i need  indicate of error or not
                         {
                             char buffer[60000];
                             int a = recv(i, buffer, 60000, 0);
@@ -261,17 +265,38 @@ void Server::run()
                                         max_fd -= 1;
                                 }
                             }
+                            // std::cout << buffer << std::endl;
                             it->second.collect_body(buffer, a);
                             it->second.set_start(std::clock());
                             it->second.set_total_body(a);
                             static int count = 1;
                             print_log("recive " + std::to_string(it->second.get_total_body()) + " bytes from client " + std::to_string(it->first), "\033[92m", ++count, it->second.get_total_body(), it->second.get_responce_class()->getContentLength());
-                            if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength())
+                            // if (count == 1 && count++)
+                            //     std::cout << (unsigned long)it->second.get_responce_class()->getContentLength() << std::endl;
+                            // std::cout << "total body: " << it->second.get_total_body() << std::endl;
+                            // std::cout << "content length: " << it->second.get_responce_class()->getContentLength() << std::endl;
+                            // std::cout << "body: " << it->second.get_body() << "|     |"   <<std::endl;
+                            if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength()) // i need  indicate of chunked or not
                             {
+                                // std::cout << "body: " << it->second.get_body() << std::endl;
                                 it->second.get_responce_class()->setBody(it->second.get_body());
                                 this->resp.generateResponse(it->second.get_responce_class());
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());
                                 it->second.set_redirection(0);
+                                std::cout << it->second.get_responce() << std::endl;
+                                FD_SET(it->first, &this->write_set1);
+                                FD_CLR(it->first, &this->master_set);
+                                this->msg.insert(std::pair<int, Servers>(it->first, it->second));
+                                this->serv2.erase(it);
+                            }
+                            if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
+                            {
+                                // std::cout << "body: " << it->second.get_body() << std::endl;
+                                it->second.get_responce_class()->setBody(it->second.get_body());
+                                this->resp.generateResponse(it->second.get_responce_class());
+                                it->second.set_responce(it->second.get_responce_class()->getResponse());
+                                it->second.set_redirection(0);
+                                std::cout << it->second.get_responce() << std::endl;
                                 FD_SET(it->first, &this->write_set1);
                                 FD_CLR(it->first, &this->master_set);
                                 this->msg.insert(std::pair<int, Servers>(it->first, it->second));
