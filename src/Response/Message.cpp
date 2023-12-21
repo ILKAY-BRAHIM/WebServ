@@ -29,12 +29,12 @@ void    Message::setStatus(int status)
     this->status = status;
 }
 
-int    Message::getContentLength()
+size_t    Message::getContentLength()
 {
     return (this->content_length);
 }
 
-void    Message::setContentLength(int content_length)
+void    Message::setContentLength(size_t content_length)
 {
     this->content_length = content_length;
 }
@@ -89,5 +89,14 @@ void    Message::setEnv(std::vector<std::string> env)
     this->env = env;
 }
 
+void    Message::setLocation(t_location location)
+{
+    this->location = location;
+}
+
+t_location Message::getLocation()
+{
+    return (this->location);
+}
 
 Message::~Message(){};

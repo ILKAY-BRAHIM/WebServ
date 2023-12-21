@@ -29,6 +29,7 @@
 # define ISFILE 1
 # define NOTFONDE 2
 # define CRLF "\r\n"
+# define CLIENT_MAX_BODY_SIZE 1048576 // equevalent of 10M
 
 class Message;
 
@@ -71,9 +72,11 @@ class Response
         void     generateBodyError(int error);
         std::string generateMessage();
         void    clearResponse();
+        void    checkUrl();
         // void    readPath();
         void        parseBody(Message *mes);
         void        redirect(std::string path);
+        void        uploadFile();
     public :
         Response();
         Response(std::vector<t_server> servS, char **env);
