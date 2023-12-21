@@ -233,7 +233,7 @@ void Server::run()
                                 std::cout << it->second.get_request() << std::endl;
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
-                                if(it->second.get_responce_class()->getContentLength() != 0)
+                                if(it->second.get_responce_class()->getContentLength() != 0 && it->second.get_responce_class()->getStatus() == 0)
                                     it->second.set_redirection(1);
                                 else
                                 {
