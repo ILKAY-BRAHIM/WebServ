@@ -16,7 +16,7 @@ void t_location::clear()
 	error_page.clear();
 	limite_rate.clear();
 	limite_except.clear();
-	client_body_buffer_size.clear();
+	client_body_size.clear();
 	proxy_set_header.clear();
 	redirect.clear();
 	autoindex.clear();
