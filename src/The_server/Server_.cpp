@@ -230,7 +230,7 @@ void Server::run()
                             }
                             if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
                             {
-                                std::cout << it->second.get_request() << std::endl;
+                                // std::cout << it->second.get_request() << std::endl;
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
                                 if(it->second.get_responce_class()->getContentLength() != 0 && it->second.get_responce_class()->getStatus() == 0)
@@ -289,19 +289,19 @@ void Server::run()
                                 this->msg.insert(std::pair<int, Servers>(it->first, it->second));
                                 this->serv2.erase(it);
                             }
-                            if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
-                            {
-                                // std::cout << "body: " << it->second.get_body() << std::endl;
-                                it->second.get_responce_class()->setBody(it->second.get_body());
-                                this->resp.generateResponse(it->second.get_responce_class());
-                                it->second.set_responce(it->second.get_responce_class()->getResponse());
-                                it->second.set_redirection(0);
-                                std::cout << it->second.get_responce() << std::endl;
-                                FD_SET(it->first, &this->write_set1);
-                                FD_CLR(it->first, &this->master_set);
-                                this->msg.insert(std::pair<int, Servers>(it->first, it->second));
-                                this->serv2.erase(it);
-                            }
+                            // if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
+                            // {
+                            //     // std::cout << "body: " << it->second.get_body() << std::endl;
+                            //     it->second.get_responce_class()->setBody(it->second.get_body());
+                            //     this->resp.generateResponse(it->second.get_responce_class());
+                            //     it->second.set_responce(it->second.get_responce_class()->getResponse());
+                            //     it->second.set_redirection(0);
+                            //     std::cout << it->second.get_responce() << std::endl;
+                            //     FD_SET(it->first, &this->write_set1);
+                            //     FD_CLR(it->first, &this->master_set);
+                            //     this->msg.insert(std::pair<int, Servers>(it->first, it->second));
+                            //     this->serv2.erase(it);
+                            // }
                             break;
                         }
                     }

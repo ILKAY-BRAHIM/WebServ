@@ -119,7 +119,7 @@ std::string generateStatusCode(int status)
             message =  std::to_string(status) + " Method Not Allowed";
             break;
         case 413:
-            message =  std::to_string(status) + " Payload Too Large";
+            message =  std::to_string(status) + " Content Too Large";
             break;
         case 415:
             message =  std::to_string(status) + " Unsupported Media Type";
@@ -603,6 +603,12 @@ std::string Response::generateMessage()
         mess += this->respMessage.Location;
         mess += std::string(CRLF);
     }
+    if (this->respMessage.Connection.size() != 0)
+    {
+        mess += std::string("Connection: ");
+        mess += this->respMessage.Connection;
+        mess += std::string(CRLF);
+    }
     // add other headrs 
     //  ...
     mess += std::string(CRLF);
@@ -689,19 +695,21 @@ void    Response::generateResponse(Message* mes)
 {
     // check if there is a body and handle it [!] ..................... [!]
     std::string line;
-    this->server =  mes->getServer();
-    this->req = mes->getRequest();
-    this->body = mes->getBody();
-    this->r_env = mes->getEnv();
     // std::cout << this->body << std::endl;
     this->respMessage.http_version = "HTTP/1.1";
 	try
 	{
         if (mes->getStatus() != 0)
         {
-            std::cout << "Error : " << mes->getStatus() << std::endl;
+            std::cout << "Error -------- : " << mes->getStatus() << std::endl;
+            // std::cout << "content " << this->respMessage.Content_Lenght << std::endl;
+            this->respMessage.Content_Lenght = "0";
             throw (mes->getStatus());
         }
+        this->server =  mes->getServer();
+        this->req = mes->getRequest();
+        this->body = mes->getBody();
+        this->r_env = mes->getEnv();
 		checkMethode();
         urlRegenerate();
         mes->setStatus(1);

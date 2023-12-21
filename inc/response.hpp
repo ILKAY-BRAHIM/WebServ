@@ -47,6 +47,7 @@ typedef struct t_response
     std::string Set_Cookie;
     std::string Server;
 	std::string query_String; //+
+    std::string Connection;
     std::string body;
 }       resp;
 

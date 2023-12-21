@@ -28,7 +28,7 @@ int main (int ac, char **av, char **env)
 	{
 		// std::cout << "Error: " << e << std::endl;
 
-		std::cerr << "\nError: " << e << std::endl;
+		std::cerr << "\nErrorr: " << e << std::endl;
 		return (1);
 	}
 
