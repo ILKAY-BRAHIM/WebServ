@@ -447,9 +447,9 @@ void    Response::generateBody(std::string path)
     else if (this->req.method == "POST" && this->req.headers.find("Content-Type") != this->req.headers.end())
     {
         std::cout << "i'm here" << std::endl;
-        if (this->location.client_body_buffer_size.size() != 0)
+        if (this->location.client_body_size.size() != 0)
         {
-            if ((int)(this->req.headers["Content-Length"].size()) > atoi(this->location.client_body_buffer_size.c_str()))
+            if ((int)(this->req.headers["Content-Length"].size()) > atoi(this->location.client_body_size.c_str()))
             {
                 generateBodyError(413);
                 throw (413);
@@ -647,7 +647,7 @@ void    Response::clearResponse()
     this->location.error_page.clear();
     this->location.limite_rate.clear();
     this->location.limite_except.clear();
-    this->location.client_body_buffer_size.clear();
+    this->location.client_body_size.clear();
     this->location.proxy_set_header.clear();
     this->location.redirect.clear();
     this->location.autoindex.clear();
@@ -694,12 +694,17 @@ void    Response::generateResponse(Message* mes)
     this->body = mes->getBody();
     this->r_env = mes->getEnv();
     // std::cout << this->body << std::endl;
-    mes->setStatus(1);
     this->respMessage.http_version = "HTTP/1.1";
 	try
 	{
+        if (mes->getStatus() != 0)
+        {
+            std::cout << "Error : " << mes->getStatus() << std::endl;
+            throw (mes->getStatus());
+        }
 		checkMethode();
         urlRegenerate();
+        mes->setStatus(1);
 	}
 	catch(int m)
 	{
@@ -816,14 +821,17 @@ int    checkUrlSyntax(request &req)
 Message* Response::checkHeader(std::string request_)
 {
     Message *mes = new Message();
+    mes->setStatus(0);
     request tmp_request = parseRequest(request_);
     int url = checkUrlSyntax(tmp_request);
     if (url != 0)
+    {
         mes->setStatus(url);
+        return mes;
+    }
     t_server    tmp_server = fillServer(tmp_request);
     t_location tmp_location = fillLocation(tmp_server, tmp_request);
     size_t     tmp_size;
-
     if (tmp_location.path.size() != 0)
     {
         mes->setRequest(tmp_request);
@@ -840,14 +848,19 @@ Message* Response::checkHeader(std::string request_)
                 std::istringstream ss( request_.substr(index1 + 16 , index2 - index1 - 16));
                 if (ss >> content_length)
                 {
-                    tmp_size = getSize(tmp_location.client_body_buffer_size);
+                    tmp_size = getSize(tmp_location.client_body_size);
                     if (content_length <= tmp_size)
                         mes->setContentLength(content_length);
                     else
-                        mes->setContentLength(413);
+                    {
+                        mes->setStatus(413);
+                        mes->setContentLength(0);
+                    }
                 }
                 else
+                {
                     mes->setStatus(500);
+                }
             }
         }
         else
@@ -866,4 +879,5 @@ Message* Response::checkHeader(std::string request_)
 }
 
 Response::~Response(){};
- 
+
+    

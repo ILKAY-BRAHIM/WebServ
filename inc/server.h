@@ -35,7 +35,7 @@ typedef struct s_location
 	std::string 				error_page;				//defines custom error pages for specific http status codes
 	std::string 				limite_rate;			//sets the maximum transfer rate for responses
 	std::string 				limite_except;			//defines the set of http methods that are allowed in a given location
-	std::string 				client_body_buffer_size;//sets the buffer size for the client request body
+	std::string 				client_body_size;//sets the buffer size for the client request body
 	std::string 				proxy_set_header;		//sets header fields to be passed to the proxied server
 	std::string 				redirect;				//performs url redirection (return or rewrite)
 	std::string					autoindex;

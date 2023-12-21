@@ -32,21 +32,21 @@ void Server::start_server()
         std::vector<int>::iterator it = server[i].port.begin();
         for(; it !=  server[i].port.end(); it++)
         {
-            // std::cout << *it << std::endl;
+            int valid = 0;
             if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
             {
                 std::cout << "socket failed" << std::endl;
-                return;
+                valid = 1;
             }
-            if(setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+            if(valid == 0 && setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
             {
                 std::perror("setsockopt");
-                return;
+                valid = 1;
             }
-            if (ioctl(server_fd, FIONBIO, (char *)&opt) < 0)
+            if (valid == 0 && fcntl(server_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
             {
                 perror("ioctl");
-                exit(EXIT_FAILURE);
+                valid = 1;
             }
             this->address.sin_family = AF_INET;
             this->address.sin_addr.s_addr = INADDR_ANY;
@@ -54,29 +54,30 @@ void Server::start_server()
             this->address.sin_port = htons(*it);
             memset(address.sin_zero, '\0', sizeof this->address.sin_zero);
 
-            if (bind(server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
+            if (valid == 0 && bind(server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
             {
-                std::cout << "bind failed" << std::endl;
-                return;
+                std::endl(std::cout);
+                std::cout << "\033[33mbind failed in port " << *it << std::endl;
+                valid = 1;
             }
-            if (listen(server_fd, 20) < 0)
+            if (valid == 0 && listen(server_fd, 20) < 0)
             {
                 std::cout << "listen" << std::endl;
-                return;
+                valid = 1;
             }
-            if(str == "")
-                str = "\033[93mServer is running on ports " + std::to_string(*it);
-            else
-                str += ", " + std::to_string(*it);
-            std::cout << '\r' << std::string(80, ' ');
-            std::cout << '\r' << str << "\033[39m" << std::flush;
-            // usleep(1000000);
-            // std::cout << "\033[93mServer is running on port \033[92m" << *it << "\033[39m"<<std::endl;
 
-            this->fds.push_back(server_fd);
-            // std::cout << "fds: " << this->fds[index] << std::endl;
-            FD_SET(fds[index], &this->master_set);
-            index++;
+            if (valid == 0)
+            {
+                if(str == "")
+                    str = "\033[93mServer is running on ports " + std::to_string(*it);
+                else
+                    str += ", " + std::to_string(*it);
+                std::cout << '\r' << std::string(80, ' ');
+                std::cout << '\r' << str << "\033[39m" << std::flush;
+                this->fds.push_back(server_fd);
+                FD_SET(fds[index], &this->master_set);
+                index++;
+            }
         }
     }
     std::cout << std::endl;
@@ -85,6 +86,9 @@ void Server::start_server()
 
 void Server::run()
 {
+
+    if (this->fds.size() == 0)
+        throw "empty server";
     int max_fd = this->fds.back();
     int addrlen = sizeof(this->address);
     timeout.tv_sec  = 60;
@@ -102,6 +106,7 @@ void Server::run()
             std::cout << "select error" << std::endl;
             std::cout << "errno: " << errno << std::endl;
             std::perror("select");
+            throw "error in server ";
             return;
         }
         if (activity == 0)
@@ -136,27 +141,34 @@ void Server::run()
                 if (y < fds.size() && i == this->fds[y])
                 {
                     int new_socket = accept(this->fds[y], (struct sockaddr *)&this->address, (socklen_t*)&addrlen);
-                    if (ioctl(new_socket, FIONBIO, (char *)&opt) < 0)
+                    int valid = 0;
+                    if (new_socket < 0)
                     {
-                         perror("ioctl");
-                        exit(EXIT_FAILURE);
+                        std::cout << "accept error" << std::endl;
+                        valid = 1;
+                    }
+                    if (valid == 0 && fcntl(new_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
+                    {
+                        perror("ioctl");
+                        valid = 1;
                     }
 
-                    if(setsockopt(new_socket, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0)
+                    if(valid == 0 && setsockopt(new_socket, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0)
                     {
                         std::perror("setsockopt");
-                        return;
+                        valid = 1;
                     }
-                    if (new_socket  < 0)
-                    {
-                        if (errno != EWOULDBLOCK)
-                        {
-                            perror("In accept");
-                            std::cout << "accept error" << std::endl;
-                            exit(1);
-                        }
-                    }
-                    if (this->serv.size() >= 1)
+                    // if (new_socket  < 0)
+                    // {
+                    //     if (errno != EWOULDBLOCK)
+                    //     {
+                    //         perror("In accept");
+                    //         std::cout << "accept error" << std::endl;
+                    //         throw "error in server ";
+                    //         exit(1);
+                    //     }
+                    // }
+                    if (valid == 0 && this->serv.size() >= 1)
                     {
                         std::vector<std::pair<int, Servers> >::iterator ittt = this->serv2.end();
                         for (std::vector<std::pair<int, Servers> >::iterator it = this->serv2.begin(); it != this->serv2.end(); it++)
@@ -178,7 +190,7 @@ void Server::run()
                             this->serv2.push_back(std::pair<int, Servers>(new_socket, s));
                         }
                     }
-                    else
+                    else if (valid == 0)
                     {
                         FD_SET(new_socket, &this->master_set);
                         if (new_socket > max_fd)
@@ -191,31 +203,13 @@ void Server::run()
                 }
                 else
                 {
-                    // char buffer[1];
-                    // int a = recv(i, buffer, 1, 0);
-                    // // buffer[a] = '\0';
-                    // // std::cout << buffer << std::endl;
-                    // if(a <= 0)
-                    // {
-                    //     std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
-                    //     if (a == 0)
-                    //         std::cout << "socket " << i << " hung up" << std::endl;
-                    //     close(i);
-                    //     FD_CLR(i, &this->master_set);
-                    //     if (i == max_fd)
-                    //     {
-                    //         while (FD_ISSET(max_fd, &this->master_set) == 0)
-                    //             max_fd -= 1;
-                    //     }
-                    // }
-                    
                     for(std::vector<std::pair<int, Servers> >::iterator it = this->serv2.begin(); it != this->serv2.end(); it++)
                     {
                         if (it->first == i && it->second.get_redirection() == 0)
                         {
                             char buffer[1];
                             int a = recv(i, buffer, 1, 0);
-                             if(a <= 0)
+                            if(a <= 0)
                             {
                                 std::cout << std::endl;
                                 std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
@@ -229,48 +223,22 @@ void Server::run()
                                         max_fd -= 1;
                                 }
                             }
-                            it->second.collect_req(buffer, a);
-                            it->second.set_start(std::clock());
+                            else
+                            {
+                                it->second.collect_req(buffer, a);
+                                it->second.set_start(std::clock());
+                            }
                             if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
                             {
+                                std::cout << it->second.get_request() << std::endl;
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
-                                // std::cout << it->second.get_responce_class()->getStatus() << std::endl;
-
-
-
-
-
-                                    // char **env = it->second.get_responce_class()->getEnv();                              //
-                                    // if (env != NULL)                                                                     //
-                                    // {                                                                                    //
-                                    //     int j = 0;                                                                       //
-                                    //     while(env[j] != NULL)                                                            // cgi part
-                                    //     {                                                                                //
-                                    //         std::cout << env[j] << std::endl;                                            //
-                                    //         j++;                                                                         //
-                                    //     }                                                                                //
-                                    // }   
-                                    // Cgi cgi(env, "");
-                                    // cgi.runCgi();
-                                    // std::cout <<"  out "<< cgi.getResponse() << std::endl;
-
-
-
-
-
-
-
-
-
                                 if(it->second.get_responce_class()->getContentLength() != 0)
                                     it->second.set_redirection(1);
                                 else
                                 {
-                                    // cgi cgi(env, "");
                                     this->resp.generateResponse(it->second.get_responce_class());
                                     it->second.set_responce(it->second.get_responce_class()->getResponse());
-                                    // std::cout << it->second.get_responce() << std::endl;
                                     FD_SET(it->first, &this->write_set1);
                                     FD_CLR(it->first, &this->master_set);
                                     this->msg.insert(std::pair<int, Servers>(it->first, it->second));
@@ -279,7 +247,7 @@ void Server::run()
                             }
                             break;
                         }
-                        else if (it->first == i && it->second.get_redirection() == 1)
+                        else if (it->first == i && it->second.get_redirection() == 1) // i need  indicate of error or not
                         {
                             char buffer[60000];
                             int a = recv(i, buffer, 60000, 0);
@@ -297,40 +265,38 @@ void Server::run()
                                         max_fd -= 1;
                                 }
                             }
+                            // std::cout << buffer << std::endl;
                             it->second.collect_body(buffer, a);
                             it->second.set_start(std::clock());
                             it->second.set_total_body(a);
-                            // std::cout << "recive \r\c" << it->second.get_total_body() << " bytes from client " << it->first << std::endl;
                             static int count = 1;
                             print_log("recive " + std::to_string(it->second.get_total_body()) + " bytes from client " + std::to_string(it->first), "\033[92m", ++count, it->second.get_total_body(), it->second.get_responce_class()->getContentLength());
-                            // std::cout << std::endl;
+                            // if (count == 1 && count++)
+                            //     std::cout << (unsigned long)it->second.get_responce_class()->getContentLength() << std::endl;
                             // std::cout << "total body: " << it->second.get_total_body() << std::endl;
                             // std::cout << "content length: " << it->second.get_responce_class()->getContentLength() << std::endl;
-                            // std::cout << "body: " << it->second.get_body() << std::endl;
-                            if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength())
+                            // std::cout << "body: " << it->second.get_body() << "|     |"   <<std::endl;
+                            if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength()) // i need  indicate of chunked or not
                             {
-
-                                //  char **env = it->second.get_responce_class()->getEnv();
-                                //     if (env != NULL)
-                                //     {
-                                //         int j = 0;
-                                //         while(env[j] != NULL)
-                                //         {
-                                //             std::cout << env[j] << std::endl;
-                                //             j++;
-                                //         }
-                                //     }
                                 // std::cout << "body: " << it->second.get_body() << std::endl;
                                 it->second.get_responce_class()->setBody(it->second.get_body());
                                 this->resp.generateResponse(it->second.get_responce_class());
-                                //  Cgi cgi(env, it->second.get_body());
-                                // cgi.runCgi();
-                                // std::cout <<"  out "<< cgi.get_response() << std::endl;
-                                // std::string test = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: "+ std::to_string(cgi.get_response().length()) +"\r\n\r\n"+cgi.get_response();
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());
-                                // it->second.set_responce(test);
-                                // it->second.set_responce(it->second.get_responce_class()->getResponse());
                                 it->second.set_redirection(0);
+                                std::cout << it->second.get_responce() << std::endl;
+                                FD_SET(it->first, &this->write_set1);
+                                FD_CLR(it->first, &this->master_set);
+                                this->msg.insert(std::pair<int, Servers>(it->first, it->second));
+                                this->serv2.erase(it);
+                            }
+                            if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
+                            {
+                                // std::cout << "body: " << it->second.get_body() << std::endl;
+                                it->second.get_responce_class()->setBody(it->second.get_body());
+                                this->resp.generateResponse(it->second.get_responce_class());
+                                it->second.set_responce(it->second.get_responce_class()->getResponse());
+                                it->second.set_redirection(0);
+                                std::cout << it->second.get_responce() << std::endl;
                                 FD_SET(it->first, &this->write_set1);
                                 FD_CLR(it->first, &this->master_set);
                                 this->msg.insert(std::pair<int, Servers>(it->first, it->second));
@@ -339,36 +305,6 @@ void Server::run()
                             break;
                         }
                     }
-                    // for (std::vector<std::pair<int, Servers> >::iterator it = this->serv2.begin(); it != this->serv2.end();)
-                    // {
-                    //     if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
-                    //     {
-                    //         Message *resw =  this->resp.generateResponse(it->second.get_request());
-                    //         it->second.set_responce_class(resw);
-                    //         it->second.set_responce(it->second.get_responce_class()->getResponse());
-                    //         std::cout << this->resp.checkHeader(it->second.get_request()) << std::endl;
-                    //         unsigned long  index = it->second.get_request().find("\r\n\r\n");
-                    //         if (index != std::string::npos)
-                    //         {
-                    //             index = it->second.get_request().find("\0", index + 4);
-                    //             if (index != std::string::npos)
-                    //             {
-                    //                 std::cout << it->second.get_request() << std::endl;
-                    //                 FD_SET(it->first, &this->write_set1);
-                    //                 FD_CLR(it->first, &this->master_set);
-                    //                 this->msg.insert(std::pair<int, Servers>(it->first, it->second));
-                    //                 this->serv2.erase(it);
-                    //                 if(serv2.empty() || serv2.size() == 0)
-                    //                     break;
-                    //             }
-                    //             else
-                    //                 it++;
-                    //         }
-
-                    //     }
-                    //     else
-                    //         it++;
-                    // }
                 }
             }
             if (FD_ISSET(i, &this->write_set2))

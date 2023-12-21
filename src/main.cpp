@@ -18,9 +18,19 @@ int main (int ac, char **av, char **env)
 	// std::cout << mes->getResponse() << std::endl;
 	//continue above this line
 	// printServers(servers);
-	Server serv(servers, resp);
-	serv.start_server();
-	serv.run();
+	try{
+
+		Server serv(servers, resp);
+		serv.start_server();
+		serv.run();
+	}
+	catch(const char *e)
+	{
+		// std::cout << "Error: " << e << std::endl;
+
+		std::cerr << "\nError: " << e << std::endl;
+		return (1);
+	}
 
 	// get_request(servers);
 }
