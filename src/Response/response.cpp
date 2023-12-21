@@ -701,9 +701,8 @@ void    Response::generateResponse(Message* mes)
 	{
         if (mes->getStatus() != 0)
         {
-            std::cout << "Error -------- : " << mes->getStatus() << std::endl;
-            // std::cout << "content " << this->respMessage.Content_Lenght << std::endl;
-            this->respMessage.Content_Lenght = "0";
+            this->respMessage.Server = "Not nginx/0.0.0 (macOS)";
+            generateBodyError(mes->getStatus());
             throw (mes->getStatus());
         }
         this->server =  mes->getServer();
@@ -810,9 +809,14 @@ int    checkUrlSyntax(request &req)
     std::string path = req.path;
     std::string transfer_encoding = req.headers["Transfer-Encoding"];
     if (transfer_encoding.size() != 0 && transfer_encoding != "chunked")
+    {
         return 501;
-    if (req.method == "POST" && req.headers["Content-Length"].length() == 0 && transfer_encoding.length() == 0)
+    }
+    std::string content_length = req.headers["Content-Length"];
+    if (req.method == "POST" && (content_length == "0") && (req.headers["Transfer-Encoding"].size() == 0))
+    {
         return 400;
+    }
     if (req.path.length() > 2048)
         return 414;
     // int i = 0;
@@ -829,9 +833,12 @@ int    checkUrlSyntax(request &req)
 Message* Response::checkHeader(std::string request_)
 {
     Message *mes = new Message();
-    mes->setStatus(0);
+    // std::cout << "-------------------------REQUEST-------------------------" << std::endl;
+    // std::cout << request_ << std::endl;
     request tmp_request = parseRequest(request_);
     int url = checkUrlSyntax(tmp_request);
+    mes->setStatus(0);
+    mes->setContentLength(0);
     if (url != 0)
     {
         mes->setStatus(url);
@@ -862,27 +869,21 @@ Message* Response::checkHeader(std::string request_)
                     else
                     {
                         mes->setStatus(413);
-                        mes->setContentLength(0);
+                        mes->setContentLength(content_length);
                     }
                 }
                 else
-                {
                     mes->setStatus(500);
-                }
             }
+            else
+                mes->setStatus(400);
         }
-        else
-        {
-            content_length = 0; // must be deleted
-            mes->setContentLength(0);
-        }
+        // else
+        //     mes->setContentLength(0);
         mes->setEnv(cgi_env(mes->getRequest(), mes->getServer(), this->env));
     }
     else
-    {
         mes->setStatus(404);
-    }
-
     return (mes);
 }
 
