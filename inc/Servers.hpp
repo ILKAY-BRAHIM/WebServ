@@ -19,7 +19,10 @@ class Servers
         unsigned long  total;
         unsigned long  total_body;
         Message *responce;
-        std::vector<int> m9bara; 
+        std::vector<int> m9bara;
+        int bypass;
+        unsigned long pass_total;
+        unsigned long content_length;
 
     public:
         // Servers();
@@ -37,12 +40,16 @@ class Servers
         std::clock_t get_start() const {return this->start;}
         std::vector<int> get_ma9bara() const {return this->m9bara;}
         int get_redirection() const {return this->redirection;}
+        int get_bypass() const {return this->bypass;}
+        unsigned long get_pass_total() const {return this->pass_total;}
+        unsigned long get_content_length() const {return this->content_length;}
 
         void set_responce_class(Message *responce){this->responce = responce;}
         void set_total(int total) {this->total += total;}
         void set_total_body(int total_body) {this->total_body += total_body;}
         void rset_total(int total) {this->total = total;}
         void rset_total_body(int total_body) {this->total_body = total_body;}
+        void rset_total_pass(int total_pass) {this->pass_total = total_pass;}
         void set_partis(int partis) {this->partis = partis;}
         void set_responce(std::string responce) {this->_responce = responce;}
         void set_start(std::clock_t start) {this->start = start;}
@@ -50,6 +57,9 @@ class Servers
         void set_request(std::string request) {this->request = request;}
         void set_body(std::string body) {this->body = body;}
         void set_redirection(int redirection) {this->redirection = redirection;}
+        void set_bypass(int bypass) {this->bypass = bypass;}
+        void set_pass_total(int total_pass) {this->pass_total += total_pass;}
+        void set_content_length(unsigned long len) {this->content_length = len;}
         // Servers(const Responce &responce);
         // Servers(const Servers &other);
         // is_ready();

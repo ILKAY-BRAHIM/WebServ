@@ -862,7 +862,7 @@ Message* Response::checkHeader(std::string request_)
                     else
                     {
                         mes->setStatus(413);
-                        mes->setContentLength(0);
+                        mes->setContentLength(content_length);
                     }
                 }
                 else

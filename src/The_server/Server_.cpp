@@ -208,8 +208,17 @@ void Server::run()
                         if (it->first == i && it->second.get_redirection() == 0)
                         {
                             char buffer[1];
-                            int a = recv(i, buffer, 1, 0);
-                            if(a <= 0)
+                            char bu[100001];
+                            int a = 0;
+                            int pass = 0;
+                            if (it->second.get_bypass() == 0)
+                            {
+                                a = recv(i, buffer, 1, 0);
+                                pass = 1;
+                            }
+                            if (it->second.get_bypass() == -1)
+                                pass = recv(i, bu, 100000, 0);
+                            if(a < 0 || pass <= 0)
                             {
                                 std::cout << std::endl;
                                 std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
@@ -223,16 +232,33 @@ void Server::run()
                                         max_fd -= 1;
                                 }
                             }
-                            else
+                            else if (a != 0)
                             {
                                 it->second.collect_req(buffer, a);
                                 it->second.set_start(std::clock());
                             }
+                            else if (pass > 0)
+                            {
+                                it->second.set_pass_total(pass);
+                                if (it->second.get_pass_total() == it->second.get_content_length())
+                                {
+                                    it->second.set_bypass(0);
+                                    it->second.set_content_length(0);
+                                    it->second.rset_total_pass(0);
+                                }
+                            }
                             if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
                             {
-                                // std::cout << it->second.get_request() << std::endl;
+                                std::cout << it->second.get_request() << std::endl;
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
+                                // std::cout << it->second.get_responce_class()->getContentLength() << 
+                                if(it->second.get_responce_class()->getContentLength() != 0 && it->second.get_responce_class()->getStatus() != 0)
+                                {
+                                    it->second.set_bypass(-1);
+                                    it->second.set_content_length(it->second.get_responce_class()->getContentLength());
+                                    std::cout << "hir ........" << std::endl;
+                                }
                                 if(it->second.get_responce_class()->getContentLength() != 0 && it->second.get_responce_class()->getStatus() == 0)
                                     it->second.set_redirection(1);
                                 else
@@ -275,10 +301,10 @@ void Server::run()
                             //     std::cout << (unsigned long)it->second.get_responce_class()->getContentLength() << std::endl;
                             // std::cout << "total body: " << it->second.get_total_body() << std::endl;
                             // std::cout << "content length: " << it->second.get_responce_class()->getContentLength() << std::endl;
-                            // std::cout << "body: " << it->second.get_body() << "|     |"   <<std::endl;
+                            std::cout << "body: " << it->second.get_body() << "|     |"   <<std::endl;
                             if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength()) // i need  indicate of chunked or not
                             {
-                                // std::cout << "body: " << it->second.get_body() << std::endl;
+                                std::cout << "body: " << it->second.get_body() << std::endl;
                                 it->second.get_responce_class()->setBody(it->second.get_body());
                                 this->resp.generateResponse(it->second.get_responce_class());
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());
