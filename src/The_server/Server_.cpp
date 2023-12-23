@@ -257,7 +257,7 @@ void Server::run()
                                 {
                                     it->second.set_bypass(-1);
                                     it->second.set_content_length(it->second.get_responce_class()->getContentLength());
-                                    std::cout << "hir ........" << std::endl;
+                                    // std::cout << "hir ........" << std::endl;
                                 }
                                 if(it->second.get_responce_class()->getContentLength() != 0 && it->second.get_responce_class()->getStatus() == 0)
                                     it->second.set_redirection(1);
@@ -301,10 +301,10 @@ void Server::run()
                             //     std::cout << (unsigned long)it->second.get_responce_class()->getContentLength() << std::endl;
                             // std::cout << "total body: " << it->second.get_total_body() << std::endl;
                             // std::cout << "content length: " << it->second.get_responce_class()->getContentLength() << std::endl;
-                            std::cout << "body: " << it->second.get_body() << "|     |"   <<std::endl;
+                            // std::cout << "body: " << it->second.get_body() << "|     |"   <<std::endl;
                             if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength()) // i need  indicate of chunked or not
                             {
-                                std::cout << "body: " << it->second.get_body() << std::endl;
+                                // std::cout << "body: " << it->second.get_body() << std::endl;
                                 it->second.get_responce_class()->setBody(it->second.get_body());
                                 this->resp.generateResponse(it->second.get_responce_class());
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());

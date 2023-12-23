@@ -63,12 +63,14 @@ class Response
 		request		req;
         std::string resp;
         std::string body;
+        std::string path;
+        size_t      content_length;
         std::vector<std::string> r_env;
         t_server    fillServer(request req);
 		void	checkMethode();
-		void	urlRegenerate();
-        void    generateBody(std::string path);
-        void    isDirectory(std::string path, std::string url);
+		int	urlRegenerate();
+        int    generateBody(std::string path);
+        int    isDirectory(std::string path);
         int     getLocation(std::string url);
         void     generateBodyError(int error);
         std::string generateMessage();
@@ -76,8 +78,11 @@ class Response
         void    checkUrl();
         // void    readPath();
         void        parseBody(Message *mes);
-        void        redirect(std::string path);
+        void        redirect(std::string path, int status);
         void        uploadFile();
+        // int        getMethod();
+        int        postMethod();
+        // void        deleteMethod();
     public :
         Response();
         Response(std::vector<t_server> servS, char **env);
