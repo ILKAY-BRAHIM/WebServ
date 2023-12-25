@@ -67,4 +67,5 @@ typedef struct s_server
 	std::pair<bool, std::string>		full();
 }	t_server;
 
+void    printServerData(t_server serv);
 #endif

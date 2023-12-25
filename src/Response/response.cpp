@@ -168,21 +168,8 @@ void	Response::checkMethode() // it's ok now :)
         // generateBodyError(501);
         throw (501);
     }
-    if (this->location.path.size() && this->location.allow_methods.size())
-        tmp = this->location.allow_methods;
-    if (tmp.size() != 0)
-    {
-        if (allowedMethod(tmp, this->req.method) == false)
-        {
-            // generateBodyError(405);
-            throw (405);
-        }
-    }
     if (this->req.httpVertion != "HTTP/1.1")
-    {
-        // generateBodyError(505);
         throw (505);
-    }
     this->respMessage.statusCode = "200 OK"; // is possible to chage
 	this->respMessage.Server = "Not nginx/0.0.0 (macOS)";
 }
@@ -200,7 +187,12 @@ void    Response::redirect(std::string path, int status)
 int     Response::getLocation(std::string url)
 {
     std::vector<t_location>::iterator it = this->server.locations.begin();
-
+    if (url != "/")
+    {
+        std::string::iterator itt = url.end() - 1;
+        if (*itt == '/')
+            url.erase(itt);
+    }
     while (it != this->server.locations.end())
     {
         if (url == it->path)
@@ -237,7 +229,7 @@ int    Response::isDirectory(std::string path)
 {
     std::string index_;
     std::string fullPath;
-
+    // printServerData(this->server);
     if (this->location.path.size())
     {
         if (this->location.cgi_index.size() != 0)
@@ -255,7 +247,9 @@ int    Response::isDirectory(std::string path)
             }
         }
         else if (this->location.index.size() != 0)
+        {
             index_ = get_index(this->location, path, 0);
+        }
         else 
         {
             if (this->server.index.size() != 0)
@@ -265,15 +259,16 @@ int    Response::isDirectory(std::string path)
         }
         if (index_.length() != 0)
         {
-            std::cout << "\n generate body" << std::endl;
             this->path = path + index_;
             return (0);
-            generateBody(path + index_);
         }
         else
         {
             this->path = "";
-            std::cout << RED << "isDirectory() < no index >" << COLOR_OFF << std::endl;
+            if (this->req.method == "POST" || this->req.method == "DELETE")
+            {
+                return (0);
+            }
             return(403);
             generateBodyError(403);
             throw (403);
@@ -289,15 +284,13 @@ int    Response::isDirectory(std::string path)
         {
             this->path = path + index_;
             return (0);
-            generateBody(path + index_);
         }
         else
         {
+            if (this->req.method == "POST" || this->req.method == "DELETE")
+                return (0);
             this->path = "";
-            std::cout << RED << "isDirectory() < no index >" << COLOR_OFF << std::endl;
             return(403);
-            generateBodyError(403);
-            throw (403);
         }
     }
 
@@ -404,7 +397,6 @@ int checkMimeType(std::vector<t_types> types, std::string type)
             {
                 if (itt->first == type)
                 {
-                    std::cout << "type : " << itt->first << std::endl;
                     return (1);
                 }
                 itt++;
@@ -526,6 +518,47 @@ std::string extractLocation(std::string url, std::string root)
     return ("");
 }
 
+void    printServerData(t_server serv)
+{
+    std::cout << "server " << std::endl;
+    std::cout << "	name: " << serv.name << std::endl;
+    std::cout << "	host: " << serv.host << std::endl;
+    std::cout << "	root: " << serv.root << std::endl;
+    std::cout << "	port: ";
+    for (size_t j = 0; j < serv.port.size(); j++)
+        std::cout << serv.port[j] << " ";
+    std::cout << std::endl;
+    std::cout << "	index: ";
+    for (size_t j = 0; j < serv.index.size(); j++)
+        std::cout << serv.index[j] << " ";
+    std::cout << std::endl;
+    std::cout << "	error_page: " << serv.error_page.first << " " << serv.error_page.second << std::endl;
+    std::cout << "	redirect: " << serv.redirect << std::endl;
+    std::cout << "	timeout: " << serv.timeout << std::endl;
+    std::cout << "	allow_methods: ";
+    for (size_t j = 0; j < serv.allow_methods.size(); j++)
+        std::cout << serv.allow_methods[j] << " ";
+    std::cout << std::endl;
+    std::cout << "	location: " << std::endl;
+    for (size_t j = 0; j < serv.locations.size(); j++)
+    {
+        std::cout << "	location " << j << std::endl;
+        std::cout << "		path: " << serv.locations[j].path << std::endl;
+        std::cout << "		root: " << serv.locations[j].root << std::endl;
+        std::cout << "		alias: " << serv.locations[j].alias << std::endl;
+        std::cout << "		index: ";
+        for (size_t k = 0; k < serv.locations[j].index.size(); k++)
+            std::cout << serv.locations[j].index[k] << " ";
+        std::cout << std::endl;
+        std::cout << "      cgi_index: ";
+        for (size_t k = 0; k < serv.locations[j].cgi_index.size(); k++)
+            std::cout << serv.locations[j].cgi_index[k] << " ";
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+}
+
 t_server    Response:: fillServer(request req)
 {
     std::string	port;
@@ -570,6 +603,7 @@ t_server    Response:: fillServer(request req)
 		}
 		it++;
 	}
+    // printServerData(tmp_server);
     return (tmp_server);
 }
 
@@ -663,29 +697,6 @@ void    Response::clearResponse()
 
 }
 
-void    Response::parseBody(Message *mes)
-{
-    (void)mes;
-    std::string part;
-    std::string tmp;
-    std::vector<std::string> parts;
-
-    // this->req.boundary += "\r\n";
-    size_t found = this->req.body.find((this->req.boundary));
-    while (found != std::string::npos)
-    {
-        tmp = this->req.body.substr(0, found + this->req.boundary.length());
-        // tmp.erase(tmp.end() - 2, tmp.end());
-        parts.push_back(tmp);
-        this->req.body.erase(0, found + this->req.boundary.length());
-        found = this->req.body.find(this->req.boundary);
-    }
-    // for(std::vector<std::string>::iterator it = parts.begin(); it != parts.end(); it++)
-    // {
-        
-    //     std::cout << "part:\n" << *it << std::endl;
-    // }
-}
 
 std::vector<std::string>   cgi_env(request req, t_server server, char **env_system)
 {
@@ -740,10 +751,8 @@ t_location  fillLocation(t_server &serv, request& req)
     t_location loc;
     std::string path = extractLocation(req.path, serv.root);
     std::vector<t_location>::iterator it = serv.locations.begin();
-    std::cout << "path : " << path << std::endl;
     if (path.size() != 0)
     {
-                std::cout << "location : " << path << std::endl;
         while (it != serv.locations.end())
         {
             if (path == it->path)
@@ -836,7 +845,9 @@ int	Response::urlRegenerate() // ->status_code & ->Location
         {
             std::string tmp_loc = extractLocation(path, this->server.root);
             if (tmp_loc.size() != 0)
+            {
                 getLocation(tmp_loc);
+            }
             else
                 this->location.path = "";
             this->path = path;
@@ -853,6 +864,23 @@ int	Response::urlRegenerate() // ->status_code & ->Location
     return 0;
 }
 
+int   Response::generateUploadDeleteBody(std::string method)
+{
+    this->respMessage.Content_Type = "text/html";
+    this->respMessage.body += "<!DOCTYPE html>\n<html lang=\"en\">\n";
+    this->respMessage.body += "<html>\n";
+    this->respMessage.body += ("<head><title> "+ method +" is succesful </title></head>\n");
+    this->respMessage.body += "<body>\n";
+    this->respMessage.body += ("<center><h1> "+ method +" is succesful </h1></center>\n");
+    if (this->server.index.size() != 0)
+        this->respMessage.body += ("<center><a href=\"./" + this->server.index[0] + "\">" + " back to home" + "</a></center>\n");
+    this->respMessage.body += "</body>\n";
+    this->respMessage.body += "</html>";
+    this->respMessage.Content_Lenght = std::to_string(this->respMessage.body.length());
+    this->respMessage.statusCode = generateStatusCode(200);
+    return (0);
+}
+
 int   Response::postMethod()
 {
     std::string tmp = this->req.headers["Content-Type"];
@@ -867,8 +895,12 @@ int   Response::postMethod()
             }
         }
         else 
+        {
             return (403);
+        }
         uploadFile();
+        if (this->path.size() == 0 && this->location.redirect.size() == 0)
+            return (generateUploadDeleteBody("Upload"));
     }
     return (generateBody(this->path));
 }
@@ -886,7 +918,7 @@ void    Response::generateResponse(Message* mes)
         if (mes->getStatus() != 0)
         {
             this->respMessage.Server = "Not nginx/0.0.0 (macOS)";
-            generateBodyError(mes->getStatus());
+            // generateBodyError(mes->getStatus());
             throw (mes->getStatus());
         }
         this->server =  mes->getServer();
@@ -897,9 +929,21 @@ void    Response::generateResponse(Message* mes)
 		checkMethode();
         state = urlRegenerate(); // the location is filled here
         if (state != 0 && state != 1)
+        {
             throw (state);
+        }
+        
         if (state == 0)
         {
+
+            std::vector<std::string> tmp;
+            if (this->location.path.size() && this->location.allow_methods.size())
+                tmp = this->location.allow_methods;
+            if (tmp.size() != 0)
+            {
+                if (allowedMethod(tmp, this->req.method) == false)
+                    throw (405);
+            }
             if (this->req.method == "GET")
             {
                 st = generateBody(this->path);
@@ -908,6 +952,7 @@ void    Response::generateResponse(Message* mes)
             }
             else if (this->req.method == "POST")
             {
+
                 st = postMethod();
                 if (st != 0 && st != 1)
                     throw (st);
@@ -954,7 +999,6 @@ Message* Response::checkHeader(std::string request_)
             {
                     if (content_length > (CLIENT_MAX_BODY_SIZE))
                     {
-                        std::cout << RED << "checkHeaders() < Big CLIENT_BODY_SIZE >" << COLOR_OFF << std::endl;
                         mes->setStatus(413);
                     }
                 mes->setContentLength(content_length);

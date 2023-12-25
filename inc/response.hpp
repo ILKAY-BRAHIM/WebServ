@@ -74,13 +74,12 @@ class Response
         int     getLocation(std::string url);
         void     generateBodyError(int error);
         std::string generateMessage();
+        int     generateUploadDeleteBody(std::string method);
         void    clearResponse();
         void    checkUrl();
         // void    readPath();
-        void        parseBody(Message *mes);
         void        redirect(std::string path, int status);
         void        uploadFile();
-        // int        getMethod();
         int        postMethod();
         // void        deleteMethod();
     public :
@@ -117,7 +116,9 @@ std::string get_index(T& location, std::string path, int noIndex)
     {
         fullPath = path + (*it);
         if (access((fullPath).c_str(), F_OK | R_OK) == 0)
+        {
             return (*it);
+        }
         it++;
     }
     return "";
