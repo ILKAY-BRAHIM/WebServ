@@ -36,6 +36,10 @@ void	printServer(std::vector<t_server > serv)
 			for (size_t k = 0; k < serv[i].locations[j].index.size(); k++)
 				std::cout << serv[i].locations[j].index[k] << " ";
 			std::cout << std::endl;
+			std::cout << "		alllow_methods: ";
+			for (size_t k = 0; k < serv[i].locations[j].allow_methods.size(); k++)
+				std::cout << serv[i].locations[j].allow_methods[k] << " ";
+			std::cout << std::endl;
 			std::cout << "		cgi_index: ";
 			for (size_t k = 0; k < serv[i].locations[j].cgi_index.size(); k++)
 				std::cout << serv[i].locations[j].cgi_index[k] << " ";

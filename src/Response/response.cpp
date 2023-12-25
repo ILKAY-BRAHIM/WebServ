@@ -997,10 +997,10 @@ Message* Response::checkHeader(std::string request_)
             std::istringstream ss( request_.substr(index1 + 16 , index2 - index1 - 16));
             if (ss >> content_length)
             {
-                    if (content_length > (CLIENT_MAX_BODY_SIZE))
-                    {
-                        mes->setStatus(413);
-                    }
+                if (content_length > (CLIENT_MAX_BODY_SIZE))
+                {
+                    mes->setStatus(413);
+                }
                 mes->setContentLength(content_length);
             }
             else
