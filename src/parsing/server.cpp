@@ -22,6 +22,8 @@ void t_location::clear()
 	autoindex.clear();
 	cgi_path.clear();
 	cgi_ext.clear();
+	cgi_index.clear();
+	cgi_script.clear();
 }
 
 void t_server::clear()

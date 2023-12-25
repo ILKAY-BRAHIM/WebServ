@@ -281,8 +281,8 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 		fill_parts(vector, i, location.client_body_size, "client_body_size : ");
 	else if (vector[i] == "proxy_set_header")
 		fill_parts(vector, i, location.proxy_set_header, "proxy_set_header : ");
-	else if (vector[i] == "return")
-		fill_parts(vector, i, location.redirect, "return : ");
+	else if (vector[i] == "redirect")
+		fill_parts(vector, i, location.redirect, "redirect : ");
 	else if (vector[i] == "autoindex")
 		fill_parts(vector, i, location.autoindex, "autoindex : ");
 	else if (vector[i] == "cgi_path")
