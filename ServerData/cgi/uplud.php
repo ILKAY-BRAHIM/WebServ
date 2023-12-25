@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/Users/bchifour/Desktop/WEBSERV/ServerData/cgi/php-cgi
 <html lang="en">
 <head>
    
@@ -10,7 +10,7 @@
 
 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
 
-   <form action="upload.php" method="POST" enctype="multipart/form-data">
+   <form action="uplud.php" method="POST" enctype="multipart/form-data">
          <input type="file" name="image" />
          <input type="submit"/>
       </form>
@@ -34,7 +34,7 @@
       {
          $errors[]="extension not allowed, please choose a JPEG or PNG file.";
       }
-      $path = "../uploads/".$file_name ;
+      $path = "./uploads/".$file_name ;
       move_uploaded_file($file_tmp,$path);
       echo "Success <br/>";
       
