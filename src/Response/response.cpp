@@ -531,7 +531,13 @@ void    printServerData(t_server serv)
     for (size_t j = 0; j < serv.index.size(); j++)
         std::cout << serv.index[j] << " ";
     std::cout << std::endl;
-    std::cout << "	error_page: " << serv.error_page.first << " " << serv.error_page.second << std::endl;
+	{
+		std::cout << "	error_page: ";
+		size_t h = 0;
+		while (h < serv.error_page.first.size())
+			std::cout << serv.error_page.first[h++] << " ";
+		std::cout << serv.error_page.second << std::endl;
+	}
     std::cout << "	redirect: " << serv.redirect << std::endl;
     std::cout << "	timeout: " << serv.timeout << std::endl;
     std::cout << "	allow_methods: ";
@@ -679,7 +685,6 @@ void    Response::clearResponse()
     this->location.try_files.clear();
     this->location.expires.clear();
     this->location.access_log.clear();
-    this->location.error_page.clear();
     this->location.limite_rate.clear();
     this->location.limite_except.clear();
     this->location.client_body_size.clear();
