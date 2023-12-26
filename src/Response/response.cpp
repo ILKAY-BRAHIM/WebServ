@@ -164,10 +164,7 @@ void	Response::checkMethode() // it's ok now :)
 {
     std::vector<std::string> tmp;
     if (!(this->req.method == "GET" || this->req.method == "POST" || this->req.method == "DELETE"))
-    {
-        // generateBodyError(501);
         throw (501);
-    }
     if (this->req.httpVertion != "HTTP/1.1")
         throw (505);
     this->respMessage.statusCode = "200 OK"; // is possible to chage
@@ -473,6 +470,8 @@ int    Response::generateBody(std::string path)
     }
     else
     {
+        // if (this->location.path.size() == 0)
+        //     std::cout << "\n-------------------------- NO location ------------------------- " << path << std::endl;
         if (this->respMessage.Content_Type == "py" || this->respMessage.Content_Type == "php")
             this->respMessage.Content_Type = "application/octet-stream";
         std::string line(std::istreambuf_iterator<char>(fd), (std::istreambuf_iterator<char>()));
@@ -824,6 +823,8 @@ int	Response::urlRegenerate() // ->status_code & ->Location
         {
             if (*(path.end() - 1) != '/')
             {
+                if (this->req.method == "DELETE")
+                    return (403);
                 redirect(url, 302);
                 return (1);
             }
@@ -838,6 +839,8 @@ int	Response::urlRegenerate() // ->status_code & ->Location
                 {
                     this->location.path = "";
                 }
+                if (this->req.method == "DELETE")
+                    return (403);
                 return (isDirectory(path));
             }
         }
@@ -852,14 +855,11 @@ int	Response::urlRegenerate() // ->status_code & ->Location
                 this->location.path = "";
             this->path = path;
             return(0);
-            generateBody(path);
         }
     }   
     else
     {
         return (404);
-        generateBodyError(404);
-        throw (404);
     }
     return 0;
 }
@@ -905,34 +905,42 @@ int   Response::postMethod()
     return (generateBody(this->path));
 }
 
+int   Response::deleteMethod()
+{
+    if (this->req.headers["Content-Type"].size() != 0)
+        return (415);
+    if (remove(this->path.c_str()) != 0)
+        return (403);
+    if (this->location.redirect.size() == 0)
+        return (generateUploadDeleteBody("Delete"));
+    return (generateBody(this->path));
+}
+
 void    Response::generateResponse(Message* mes)
 {
     // check if there is a body and handle it [!] ..................... [!]
     std::string line;
     int st;
     int state;
-    // std::cout << this->body << std::endl;
     this->respMessage.http_version = "HTTP/1.1";
 	try
 	{
         if (mes->getStatus() != 0)
         {
             this->respMessage.Server = "Not nginx/0.0.0 (macOS)";
-            // generateBodyError(mes->getStatus());
             throw (mes->getStatus());
         }
         this->server =  mes->getServer();
         this->req = mes->getRequest();
         this->body = mes->getBody();
+        // if (this->body.size() != 0)
+        //     std::cout << "\nbody : " << this->body << "\n" << std::endl;
         this->r_env = mes->getEnv();
         this->content_length = mes->getContentLength();
 		checkMethode();
         state = urlRegenerate(); // the location is filled here
         if (state != 0 && state != 1)
-        {
             throw (state);
-        }
-        
         if (state == 0)
         {
 
@@ -945,18 +953,13 @@ void    Response::generateResponse(Message* mes)
                     throw (405);
             }
             if (this->req.method == "GET")
-            {
                 st = generateBody(this->path);
-                if (st != 0 && st != 1)
-                    throw (st);
-            }
             else if (this->req.method == "POST")
-            {
-
                 st = postMethod();
-                if (st != 0 && st != 1)
-                    throw (st);
-            }
+            else
+                st = deleteMethod();
+            if (st != 0 && st != 1)
+                throw (st);
         }
         mes->setStatus(1);
 	}
@@ -966,7 +969,8 @@ void    Response::generateResponse(Message* mes)
         generateBodyError(m);
 		this->respMessage.statusCode = generateStatusCode(m);
 	}
-    
+    if (this->respMessage.Content_Lenght.size() == 0)
+        this->respMessage.Content_Lenght = "0";
     mes->setResponse(generateMessage());
     clearResponse();
 }

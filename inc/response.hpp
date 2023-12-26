@@ -81,7 +81,8 @@ class Response
         void        redirect(std::string path, int status);
         void        uploadFile();
         int        postMethod();
-        // void        deleteMethod();
+        int        deleteMethod();
+        int        specificErrorPage(std::string path);
     public :
         Response();
         Response(std::vector<t_server> servS, char **env);
