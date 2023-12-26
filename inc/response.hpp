@@ -88,15 +88,10 @@ class Response
         Response(std::vector<t_server> servS, char **env);
         void	generateResponse(Message* mes);
         Message*    checkHeader(std::string req);
-        // char **getEnv();
-        // std::string getResponse();
         // Response(const Response &copy);
         // Response& operator=(Response& asignement);
         ~Response();
 };
-
-
-int get_request(std::vector<t_server> servers);
 
 template <typename T>
 std::string get_index(T& location, std::string path, int noIndex)
