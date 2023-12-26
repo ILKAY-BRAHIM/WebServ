@@ -56,7 +56,7 @@ typedef struct s_server
 	std::vector<std::string>			allow_methods;
 	std::string							redirect;
 	std::vector<std::string> 			index;
-	std::pair<std::string, std::string> error_page;
+	std::pair<std::string, std::string>	error_page;
 	std::vector<t_location>				locations;
 	std::vector<t_types>				types;
 	std::string							timeout;
