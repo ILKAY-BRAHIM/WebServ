@@ -2,6 +2,52 @@
 #include "Server_.hpp"
 #include "response.hpp"
 
+void	printServer(std::vector<t_server > serv)
+{
+	for(size_t i = 0, j = 0; i < serv.size(); i++)
+	{
+		std::cout << "server " << i << std::endl;
+		std::cout << "	name: " << serv[i].name << std::endl;
+		std::cout << "	host: " << serv[i].host << std::endl;
+		std::cout << "	root: " << serv[i].root << std::endl;
+		std::cout << "	port: ";
+		for (j = 0; j < serv[i].port.size(); j++)
+			std::cout << serv[i].port[j] << " ";
+		std::cout << std::endl;
+		std::cout << "	index: ";
+		for (j = 0; j < serv[i].index.size(); j++)
+			std::cout << serv[i].index[j] << " ";
+		std::cout << std::endl;
+		std::cout << "	error_page: " << serv[i].error_page.first << " " << serv[i].error_page.second << std::endl;
+		std::cout << "	redirect: " << serv[i].redirect << std::endl;
+		std::cout << "	timeout: " << serv[i].timeout << std::endl;
+		std::cout << "	allow_methods: ";
+		for (j = 0; j < serv[i].allow_methods.size(); j++)
+			std::cout << serv[i].allow_methods[j] << " ";
+		std::cout << std::endl;
+		std::cout << "	location: " << std::endl;
+		for (j = 0; j < serv[i].locations.size(); j++)
+		{
+			std::cout << "	location " << j << std::endl;
+			std::cout << "		path: " << serv[i].locations[j].path << std::endl;
+			std::cout << "		root: " << serv[i].locations[j].root << std::endl;
+			std::cout << "		alias: " << serv[i].locations[j].alias << std::endl;
+			std::cout << "		index: ";
+			for (size_t k = 0; k < serv[i].locations[j].index.size(); k++)
+				std::cout << serv[i].locations[j].index[k] << " ";
+			std::cout << std::endl;
+			std::cout << "		alllow_methods: ";
+			for (size_t k = 0; k < serv[i].locations[j].allow_methods.size(); k++)
+				std::cout << serv[i].locations[j].allow_methods[k] << " ";
+			std::cout << std::endl;
+			std::cout << "		cgi_index: ";
+			for (size_t k = 0; k < serv[i].locations[j].cgi_index.size(); k++)
+				std::cout << serv[i].locations[j].cgi_index[k] << " ";
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	}
+}
 
 int main (int ac, char **av, char **env)
 {
@@ -17,7 +63,8 @@ int main (int ac, char **av, char **env)
 	// Message *mes = resp.generateResponse(h);
 	// std::cout << mes->getResponse() << std::endl;
 	//continue above this line
-	// printServers(servers);
+	// printServer(servers);
+	// pause();
 	try{
 
 		Server serv(servers, resp);
