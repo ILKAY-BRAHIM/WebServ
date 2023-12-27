@@ -1,6 +1,6 @@
 #include "cgi.hpp"
 
-void Cgi::runCgi()
+int Cgi::runCgi()
 {
     char bufferr[30000];
     int status;
@@ -8,13 +8,13 @@ void Cgi::runCgi()
     if (pipe(fd) == -1) {
         std::cerr << "Pipe failed\n";
         this->valid = -1;
-        return;
+        return (-1);
     }
     pid_t pid = fork();
     if (pid == -1) {
         this->valid = -1;
         std::cerr << "Fork failed\n";
-        return;
+        return (-1);
     }
     else if (pid == 0) 
     {
@@ -41,7 +41,7 @@ void Cgi::runCgi()
             this->valid = -1;
             close(fd[0]);
             close(fd[1]);
-            return;
+            return (-1);
         }
         close(fd[1]);
 
@@ -52,4 +52,5 @@ void Cgi::runCgi()
         }
         close(fd[0]);
     }
+    return (1);
 }
