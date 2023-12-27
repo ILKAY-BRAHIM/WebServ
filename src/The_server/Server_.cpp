@@ -214,11 +214,14 @@ void Server::run()
                                         max_fd -= 1;
                                 }
                             }
+                            if (a > 0)
+                            {
                                 it->second.collect_req(buffer, a);
                                 it->second.set_start(std::clock());
+                            }
                             if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
                             {
-                                // std::cout <<"hi ... "<< it->second.get_request() << std::endl;
+                                std::cout <<"hi ... "<< it->second.get_request() << std::endl;
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
                                 if(it->second.get_responce_class()->getContentLength() != 0 || it->second.get_responce_class()->getTransfer_Encoding() == true)
@@ -275,7 +278,7 @@ void Server::run()
                             }
                             if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
                             {
-                                // std::cout << "body: " << it->second.get_body() << std::endl;
+                                std::cout << "body: " << it->second.get_body() << std::endl;
                                 it->second.get_responce_class()->setBody(it->second.get_body());
                                 this->resp.generateResponse(it->second.get_responce_class());
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());
@@ -351,11 +354,10 @@ void Server::run()
                             it->second.rset_total_body(0);
                             serv2.push_back(std::pair<int, Servers>(it->first, it->second));
                             this->msg.erase(it);
+                            break;
                         }
                         else
                             it->second.set_start(std::clock());
-                        if(this->msg.empty())
-                            break;
                     }
                 }
             }
