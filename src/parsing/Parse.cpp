@@ -271,8 +271,6 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 		fill_parts(vector, i, location.expires, "expires : ");
 	else if (vector[i] == "access_log")
 		fill_parts(vector, i, location.access_log, "access_log : ");
-	else if (vector[i] == "error_page")
-		fill_parts(vector, i, location.error_page, "error_page : ");
 	else if (vector[i] == "limite_rate")
 		fill_parts(vector, i, location.limite_rate, "limite_rate : ");
 	else if (vector[i] == "limite_except")
@@ -289,6 +287,12 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 		fill_cgi(vector, i, location.cgi_path, "cgi_path : ");
 	else if (vector[i] == "cgi_ext")
 		fill_cgi(vector, i, location.cgi_ext, "cgi_ext : ");
+	else if (vector[i] == "internal;" && ++i < (int)vector.size())
+	{
+		location.internal = true;
+		if (min_det)
+			std::cout << "location is internal" << std::endl;
+	}
 	else
 		throw Parse::ServerError(std::string("not allowed or defined keyword -> " + vector[i]).c_str());
 }
@@ -313,16 +317,29 @@ void fill_listen_port(T &vector, int &i, std::vector<int> &port)
 	}
 }
 
-void Parse::fill_error_page(vectstr_t &vector, int &i, t_server &server)
+void Parse::fill_error_page(vectstr_t &vector, int &i, t_server &server, int size)
 {
-	if (Parse::isNumber(vector[++i]) && server.error_page.first.empty())
+	std::vector<std::string> tmp;
+
+	while (++i < size && Parse::isNumber(vector[i]))
 	{
-		server.error_page = std::make_pair(vector[i], vector[i + 1].substr(0, vector[i+1].size() - 1));
-		if (min_det)
-			std:: cout << "error_page : " << server.error_page.first + " " + server.error_page.second << "\n";
-		i++;
+		tmp.push_back(vector[i]);
 	}
-	else 
+	//if (Parse::isNumber(vector[++i]) && server.error_page.first.empty())
+	//{
+		server.error_page = std::make_pair(tmp, vector[i].substr(0, vector[i].size() - 1));
+		if (min_det)
+		{
+			std:: cout << "error_page : ";
+			size_t j = 0;
+			while (j < server.error_page.first.size())
+				std::cout << server.error_page.first[j++] << " ";
+			std::cout << server.error_page.second << "\n";
+		}
+		i++;
+	//}
+	//else 
+	if (server.error_page.first.empty() || server.error_page.second.empty())
 		throw Parse::ServerError("check error_page");
 }
 
@@ -368,8 +385,8 @@ void Parse::fill_server()
 					fill_parts(vector, i, server.timeout, "timeout : ");
 				else if (vector[i] == "index")
 					fill_indexs(vector, i, server.index, "index : ");
-				else if (vector[i] == "error_page" && i + 2 < size)
-					fill_error_page(vector, i, server);
+				else if (vector[i] == "error_page"/* && i + 2 < size*/)
+					fill_error_page(vector, i, server, size);
 				else if (vector[i] == "redirect")
 					fill_parts(vector, i, server.redirect, "redirect : ");
 				else if (vector[i] == "location")

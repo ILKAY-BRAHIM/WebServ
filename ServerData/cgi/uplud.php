@@ -1,14 +1,44 @@
-#!/Users/bchifour/Desktop/WEBSERV/ServerData/cgi/php-cgi
+#!./ServerData/cgi/php-cgi
 <html lang="en">
 <head>
-   
+<style>
+   * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
+    /* background-color: #f4f4f4; */
+   }
+   body {
+         background-color: #d7d3d3;
+         /* padding: 20px; */
+   }
+   h1 {
+    text-align: center;
+    margin: 1.5em;
+   }
+   .c1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+   }
+   form {
+    max-width: 600px;
+    margin: 2rem 2rem;
+    background-color: #e3e1e1;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    
+   }
+</style>
 </head>
-<body style="background-color: lightgrey; color: red;">
+<body >
 
 <h1>Uploading images using PHP-CGI</h1>
 
 
-<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+<div class="c1">
 
    <form action="uplud.php" method="POST" enctype="multipart/form-data">
          <input type="file" name="image" />
@@ -36,16 +66,17 @@
       }
       $path = "./uploads/".$file_name ;
       move_uploaded_file($file_tmp,$path);
-      echo "Success <br/>";
       
-
+      
       if(empty($errors)==true)
       {
-         echo "<img src=".$path." width=50% />";
+         echo "<p style=\"font-size: 1.2rem;\"> Success <br/></p>";
+         echo "<img style=\"width: 25rem;\" src=".$path." width=50% />";
       }
       else
       {
-         print_r($errors);
+         echo "<p style=\"font-size: 1.2rem;\"> Error : extension not allowed, please choose a JPEG or PNG file.<br/></p>";
+         // print_r($errors);
       }
    }
    else
