@@ -927,7 +927,42 @@ int   Response::deleteMethod()
 
 void    Response::unchunkeBody()
 {
-    
+    std::string part;
+    std::string size_hex;
+    size_t pos;
+    std::string body = this->body;
+    size_t     i = 0;
+    std::string result;
+    std::cout << std::endl;
+
+    // while (body[i] != '\0')
+    // {
+    //     if (body[i] == '\r')
+    //         std::cout << "\\r";
+    //     else if (body[i] == '\n')
+    //         std::cout << "\\n";
+    //     else
+    //         std::cout << body[i];
+    //     i++;
+    // }
+    // std::cout << std::endl;
+    while ((pos = body.find("\r\n") != std::string::npos))
+    {
+        part = body.substr(0, pos);
+        std::cout << "\n *** " << part << "pos " << pos << std::endl;
+        if (i % 2 == 0)
+            result += part;
+        else
+        {
+            if (part == "0")
+                break;
+        }
+        body.erase(0, pos + 2);
+        std::cout << "rest of body " << body << std::endl;
+        i++;
+    }
+    std::cout << "\n---------------> Body :\n" << result << std::endl;
+
 }
 
 void    Response::generateResponse(Message* mes)
@@ -947,6 +982,7 @@ void    Response::generateResponse(Message* mes)
         this->server =  mes->getServer();
         this->req = mes->getRequest();
         this->body = mes->getBody();
+        std::cout << "\n BODY :\n" << this->body << std::endl;
         if (mes->getTransfer_Encoding())
             unchunkeBody();
         // if (this->body.size() != 0)
@@ -993,6 +1029,7 @@ void    Response::generateResponse(Message* mes)
 
 Message* Response::checkHeader(std::string request_)
 {
+    std::cout << "\nRequest\n" << request_ << std::endl;
     Message *mes = new Message();
     request tmp_request = parseRequest(request_);
     int url = checkUrlSyntax(tmp_request);
