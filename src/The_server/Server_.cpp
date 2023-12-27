@@ -256,11 +256,11 @@ void Server::run()
                             if (it->second.get_responce_class()->getStatus() == 0) // by pass body....
                             {
                                 it->second.collect_body(buffer, a);
-                                it->second.set_start(std::clock());
-                                it->second.set_total_body(a);
                                 static int count = 1;
                                 print_log("recive " + std::to_string(it->second.get_total_body()) + " bytes from client " + std::to_string(it->first), "\033[92m", ++count, it->second.get_total_body(), it->second.get_responce_class()->getContentLength());
                             }
+                            it->second.set_start(std::clock());
+                            it->second.set_total_body(a);
                             if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength()) // i need  indicate of chunked or not
                             {
                                 it->second.get_responce_class()->setBody(it->second.get_body());
