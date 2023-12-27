@@ -925,6 +925,11 @@ int   Response::deleteMethod()
     return (generateBody(this->path));
 }
 
+void    Response::unchunkeBody()
+{
+    
+}
+
 void    Response::generateResponse(Message* mes)
 {
     // check if there is a body and handle it [!] ..................... [!]
@@ -942,6 +947,8 @@ void    Response::generateResponse(Message* mes)
         this->server =  mes->getServer();
         this->req = mes->getRequest();
         this->body = mes->getBody();
+        if (mes->getTransfer_Encoding())
+            unchunkeBody();
         // if (this->body.size() != 0)
         //     std::cout << "\nbody : " << this->body << "\n" << std::endl;
         this->r_env = mes->getEnv();
