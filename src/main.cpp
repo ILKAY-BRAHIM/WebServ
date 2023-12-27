@@ -18,7 +18,13 @@ void	printServer(std::vector<t_server > serv)
 		for (j = 0; j < serv[i].index.size(); j++)
 			std::cout << serv[i].index[j] << " ";
 		std::cout << std::endl;
-		std::cout << "	error_page: " << serv[i].error_page.first << " " << serv[i].error_page.second << std::endl;
+		{
+			std::cout << "	error_page: ";
+			size_t h = 0;
+			while (h < serv[i].error_page.first.size())
+			std::cout << serv[i].error_page.first[h++] << " ";
+			std::cout << serv[i].error_page.second << std::endl;
+		}
 		std::cout << "	redirect: " << serv[i].redirect << std::endl;
 		std::cout << "	timeout: " << serv[i].timeout << std::endl;
 		std::cout << "	allow_methods: ";

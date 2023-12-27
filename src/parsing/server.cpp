@@ -13,7 +13,6 @@ void t_location::clear()
 	try_files.clear();
 	expires.clear();
 	access_log.clear();
-	error_page.clear();
 	limite_rate.clear();
 	limite_except.clear();
 	client_body_size.clear();
@@ -24,6 +23,7 @@ void t_location::clear()
 	cgi_ext.clear();
 	cgi_index.clear();
 	cgi_script.clear();
+	internal = false;
 }
 
 void t_server::clear()
@@ -35,7 +35,7 @@ void t_server::clear()
 	index.clear();
 	timeout.clear();
 	allow_methods.clear();
-	error_page = std::make_pair("", ""); 
+	error_page = std::make_pair(allow_methods, ""); 
 	locations.clear();
 }
 

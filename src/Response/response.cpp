@@ -531,7 +531,13 @@ void    printServerData(t_server serv)
     for (size_t j = 0; j < serv.index.size(); j++)
         std::cout << serv.index[j] << " ";
     std::cout << std::endl;
-    std::cout << "	error_page: " << serv.error_page.first << " " << serv.error_page.second << std::endl;
+	{
+		std::cout << "	error_page: ";
+		size_t h = 0;
+		while (h < serv.error_page.first.size())
+			std::cout << serv.error_page.first[h++] << " ";
+		std::cout << serv.error_page.second << std::endl;
+	}
     std::cout << "	redirect: " << serv.redirect << std::endl;
     std::cout << "	timeout: " << serv.timeout << std::endl;
     std::cout << "	allow_methods: ";

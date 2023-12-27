@@ -3,4 +3,5 @@
 ### Aotoindex
 ### Transfer-Encoding : chunked
 ### Cookis
-### return of CGI
+### Encoding url
+### return of CGI // solved 
