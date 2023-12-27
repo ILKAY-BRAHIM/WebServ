@@ -249,7 +249,7 @@ void Server::run()
                             }
                             if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
                             {
-                                std::cout << it->second.get_request() << std::endl;
+                                std::cout <<"hi ... "<< it->second.get_request() << std::endl;
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
                                 // std::cout << it->second.get_responce_class()->getContentLength() << 

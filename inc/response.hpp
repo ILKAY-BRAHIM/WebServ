@@ -61,7 +61,7 @@ class Response
         t_location  location;
         resp		respMessage;
 		request		req;
-        std::string resp;
+        std::string resp; // must delete it mabe
         std::string body;
         std::string path;
         size_t      content_length;

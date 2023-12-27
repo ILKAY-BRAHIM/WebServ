@@ -668,30 +668,33 @@ void    Response::clearResponse()
     this->req.headers.clear();
     this->req.body.clear();
 
-    this->location.path.clear();
-    this->location.root.clear();
-    this->location.alias.clear();
-    this->location.index.clear();
-    this->location.proxy_pass.clear();
-    this->location.rewrite.clear();
-    this->location.allow_methods.clear();
-    this->location.denny.clear();
-    this->location.try_files.clear();
-    this->location.expires.clear();
-    this->location.access_log.clear();
-    this->location.error_page.clear();
-    this->location.limite_rate.clear();
-    this->location.limite_except.clear();
-    this->location.client_body_size.clear();
-    this->location.proxy_set_header.clear();
-    this->location.redirect.clear();
-    this->location.autoindex.clear();
-    this->location.cgi_path.clear();
-    this->location.cgi_ext.clear();
-    this->location.cgi_index.clear();
-
-
+    // this->location.path.clear();
+    // this->location.root.clear();
+    // this->location.alias.clear();
+    // this->location.index.clear();
+    // this->location.proxy_pass.clear();
+    // this->location.rewrite.clear();
+    // this->location.allow_methods.clear();
+    // this->location.denny.clear();
+    // this->location.try_files.clear();
+    // this->location.expires.clear();
+    // this->location.access_log.clear();
+    // this->location.error_page.clear();
+    // this->location.limite_rate.clear();
+    // this->location.limite_except.clear();
+    // this->location.client_body_size.clear();
+    // this->location.proxy_set_header.clear();
+    // this->location.redirect.clear();
+    // this->location.autoindex.clear();
+    // this->location.cgi_path.clear();
+    // this->location.cgi_ext.clear();
+    // this->location.cgi_index.clear();
+    this->location.clear();
     this->body.clear();
+    this->server.clear();
+
+    // must use the clear function in the server part [!] ---------------------- [!]
+
 
 
 }
@@ -990,10 +993,19 @@ Message* Response::checkHeader(std::string request_)
     t_server    tmp_server = fillServer(tmp_request);
     mes->setRequest(tmp_request);
     mes->setServer(tmp_server);
-
     size_t content_length = 0;
+
+    std::string transfer = tmp_request.headers["Transfer-Encoding"];
+    if (transfer.size() != 0)
+    {
+        mes->setTransfer_Encoding(true);
+        if (transfer != "chunked")
+            mes->setStatus(501);
+    }
+    else
+        mes->setTransfer_Encoding(false);
     unsigned long  index1 = request_.find("Content-Length: ");
-    if (index1 != std::string::npos)
+    if (transfer.size() == 0 && index1 != std::string::npos)
     {
         unsigned long  index2 = request_.find("\r", index1);
         if (index2 != std::string::npos)

@@ -99,4 +99,14 @@ t_location Message::getLocation()
     return (this->location);
 }
 
+void    Message::setTransfer_Encoding(bool s)
+{
+    this->transfer_encoding = s;
+}
+
+bool    Message::getTransfer_Encoding(void)
+{
+    return(this->transfer_encoding);
+}
+
 Message::~Message(){};

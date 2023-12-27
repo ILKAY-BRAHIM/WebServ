@@ -16,6 +16,7 @@ class   Message
         std::string mess;
         size_t content_length;
         std::string body;
+        bool    transfer_encoding;
     public :
         Message();
         void    setResponse(std::string mess);
@@ -34,6 +35,8 @@ class   Message
         int     getStatus();
         std::string getResponse();
         request getRequest();
+        void    setTransfer_Encoding(bool s);
+        bool    getTransfer_Encoding(void);
         // int getStatus;
         ~Message();
 };
