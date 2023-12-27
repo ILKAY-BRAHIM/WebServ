@@ -218,10 +218,10 @@ void Server::run()
                                 it->second.set_start(std::clock());
                             if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
                             {
-                                std::cout <<"hi ... "<< it->second.get_request() << std::endl;
+                                // std::cout <<"hi ... "<< it->second.get_request() << std::endl;
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
-                                if(it->second.get_responce_class()->getContentLength() != 0)
+                                if(it->second.get_responce_class()->getContentLength() != 0 || it->second.get_responce_class()->getTransfer_Encoding() == true)
                                     it->second.set_redirection(1);
                                 else
                                 {
@@ -253,14 +253,14 @@ void Server::run()
                                         max_fd -= 1;
                                 }
                             }
+                            it->second.set_start(std::clock());
+                            it->second.set_total_body(a);
                             if (it->second.get_responce_class()->getStatus() == 0) // by pass body....
                             {
                                 it->second.collect_body(buffer, a);
                                 static int count = 1;
                                 print_log("recive " + std::to_string(it->second.get_total_body()) + " bytes from client " + std::to_string(it->first), "\033[92m", ++count, it->second.get_total_body(), it->second.get_responce_class()->getContentLength());
                             }
-                            it->second.set_start(std::clock());
-                            it->second.set_total_body(a);
                             if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength()) // i need  indicate of chunked or not
                             {
                                 it->second.get_responce_class()->setBody(it->second.get_body());
@@ -273,19 +273,19 @@ void Server::run()
                                 this->msg.insert(std::pair<int, Servers>(it->first, it->second));
                                 this->serv2.erase(it);
                             }
-                            // if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
-                            // {
-                            //     // std::cout << "body: " << it->second.get_body() << std::endl;
-                            //     it->second.get_responce_class()->setBody(it->second.get_body());
-                            //     this->resp.generateResponse(it->second.get_responce_class());
-                            //     it->second.set_responce(it->second.get_responce_class()->getResponse());
-                            //     it->second.set_redirection(0);
-                            //     std::cout << it->second.get_responce() << std::endl;
-                            //     FD_SET(it->first, &this->write_set1);
-                            //     FD_CLR(it->first, &this->master_set);
-                            //     this->msg.insert(std::pair<int, Servers>(it->first, it->second));
-                            //     this->serv2.erase(it);
-                            // }
+                            if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
+                            {
+                                // std::cout << "body: " << it->second.get_body() << std::endl;
+                                it->second.get_responce_class()->setBody(it->second.get_body());
+                                this->resp.generateResponse(it->second.get_responce_class());
+                                it->second.set_responce(it->second.get_responce_class()->getResponse());
+                                it->second.set_redirection(0);
+                                std::cout << it->second.get_responce() << std::endl;
+                                FD_SET(it->first, &this->write_set1);
+                                FD_CLR(it->first, &this->master_set);
+                                this->msg.insert(std::pair<int, Servers>(it->first, it->second));
+                                this->serv2.erase(it);
+                            }
                             break;
                         }
                     }
@@ -382,6 +382,8 @@ void Server::print_log(const std::string& str, const std::string& color, int cou
     //     str2 += " ";
 
     // }
+    if (content_length == 0)
+        content_length = 1;
     int j = (total * 100) / content_length;
     str2 += "  [";
     str2 += std::to_string(j);
