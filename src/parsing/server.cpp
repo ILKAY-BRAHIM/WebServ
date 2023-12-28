@@ -3,6 +3,9 @@
 void t_location::clear()
 {
 	path.clear();
+	autoindex = false;
+	autoindex_exact_size = false;
+	autoindex_localtime = false;
 	root.clear();
 	alias.clear();
 	index.clear();
@@ -18,7 +21,6 @@ void t_location::clear()
 	client_body_size.clear();
 	proxy_set_header.clear();
 	redirect.clear();
-	autoindex.clear();
 	cgi_path.clear();
 	cgi_ext.clear();
 	cgi_index.clear();
@@ -30,12 +32,16 @@ void t_server::clear()
 {
 	name.clear();
 	port.clear();
+	autoindex = false;
+	autoindex_exact_size = false;
+	autoindex_localtime = false;
 	host.clear();
 	root.clear();
 	index.clear();
 	timeout.clear();
 	allow_methods.clear();
 	error_page = std::make_pair(allow_methods, ""); 
+	client_body_size.clear();
 	locations.clear();
 }
 
