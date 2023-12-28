@@ -84,6 +84,7 @@ class Response
         int        deleteMethod();
         int        specificErrorPage(std::string path);
         void        unchunkeBody();
+        std::string getRoot();
     public :
         Response();
         Response(std::vector<t_server> servS, char **env);

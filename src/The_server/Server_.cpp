@@ -276,9 +276,9 @@ void Server::run()
                                 this->msg.insert(std::pair<int, Servers>(it->first, it->second));
                                 this->serv2.erase(it);
                             }
-                            if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
+                            else if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
                             {
-                                std::cout << "body: " << it->second.get_body() << std::endl;
+                                // std::cout << "body: " << it->second.get_body() << std::endl;
                                 it->second.get_responce_class()->setBody(it->second.get_body());
                                 this->resp.generateResponse(it->second.get_responce_class());
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());

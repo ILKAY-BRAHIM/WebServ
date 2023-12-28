@@ -226,7 +226,6 @@ int    Response::isDirectory(std::string path)
 {
     std::string index_;
     std::string fullPath;
-    // printServerData(this->server);
     if (this->location.path.size())
     {
         if (this->location.cgi_index.size() != 0)
@@ -247,7 +246,7 @@ int    Response::isDirectory(std::string path)
         {
             index_ = get_index(this->location, path, 0);
         }
-        else 
+        else // befor this line we must check if there is an autoindex
         {
             if (this->server.index.size() != 0)
                 index_ = get_index(this->server, path, 0);
@@ -273,6 +272,7 @@ int    Response::isDirectory(std::string path)
     }
     else
     {
+        // befor this line we must check if there is an autoindex
         if (this->server.index.size() != 0)
             index_ = get_index(this->server, path, 0);
         else 
@@ -292,7 +292,6 @@ int    Response::isDirectory(std::string path)
     }
 
     // check if there is an autoindex
-    // generate body || send an error
     return (0);
 }
 
@@ -355,22 +354,64 @@ std::string getType(std::vector<t_types> types, std::string ext)
         if (ext == "php" || ext == "py")
             return (ext);
     }
-    std::vector<t_types>::iterator it = types.begin();
-    std::vector<std::map<std::string, std::vector<std::string> > > media;
-    std::string type ;
-    while (it != types.end())
-    {
-        media.push_back(it->text);
-        media.push_back(it->application);
-        media.push_back(it->image);
-        media.push_back(it->video);
-        media.push_back(it->audio);
-        type = file_type(media, ext);
-        if (type.size() != 0)
-            return (type);
-        it++;    
-        media.clear();
-    }
+    (void) types;
+    // std::vector<t_types>::iterator it = types.begin();
+    // std::vector<std::map<std::string, std::vector<std::string> > > media;
+    // std::string type ;
+    // while (it != types.end())
+    // {
+    //     media.push_back(it->text);
+    //     media.push_back(it->application);
+    //     media.push_back(it->image);
+    //     media.push_back(it->video);
+    //     media.push_back(it->audio);
+    //     type = file_type(media, ext);
+    //     if (type.size() != 0)
+    //         return (type);
+    //     it++;    
+    //     media.clear();
+    // }
+    if (ext == "html")
+        return ("text/html");
+    else if (ext == "css")
+        return ("text/css");
+    else if (ext == "js")
+        return ("application/javascript");
+    else if (ext == "jpg" || ext == "jpeg")
+        return ("image/jpeg");
+    else if (ext == "png")
+        return ("image/png");
+    else if (ext == "gif")
+        return ("image/gif");
+    else if (ext == "ico")
+        return ("image/x-icon");
+    else if (ext == "mp4")
+        return ("video/mp4");
+    else if (ext == "mp3")
+        return ("audio/mpeg");
+    else if (ext == "wav")
+        return ("audio/wav");
+    else if (ext == "avi")
+        return ("video/x-msvideo");
+    else if (ext == "mpeg")
+        return ("video/mpeg");
+    else if (ext == "pdf")
+        return ("application/pdf");
+    else if (ext == "zip")
+        return ("application/zip");
+    else if (ext == "tar")
+        return ("application/x-tar");
+    else if (ext == "gz")
+        return ("application/x-gzip");
+    else if (ext == "xml")
+        return ("application/xml");
+    else if (ext == "json")
+        return ("application/json");
+    else if (ext == "txt")
+        return ("text/plain");
+    else if (ext == "php" || ext == "py")
+        return (ext);
+    
     return "application/octet-stream";
 }
 
@@ -470,8 +511,6 @@ int    Response::generateBody(std::string path)
     }
     else
     {
-        // if (this->location.path.size() == 0)
-        //     std::cout << "\n-------------------------- NO location ------------------------- " << path << std::endl;
         if (this->respMessage.Content_Type == "py" || this->respMessage.Content_Type == "php")
             this->respMessage.Content_Type = "application/octet-stream";
         std::string line(std::istreambuf_iterator<char>(fd), (std::istreambuf_iterator<char>()));
@@ -685,7 +724,6 @@ void    Response::clearResponse()
     // this->location.try_files.clear();
     // this->location.expires.clear();
     // this->location.access_log.clear();
-    // this->location.error_page.clear();
     // this->location.limite_rate.clear();
     // this->location.limite_except.clear();
     // this->location.client_body_size.clear();
@@ -698,11 +736,6 @@ void    Response::clearResponse()
     this->location.clear();
     this->body.clear();
     this->server.clear();
-
-    // must use the clear function in the server part [!] ---------------------- [!]
-
-
-
 }
 
 
@@ -925,44 +958,40 @@ int   Response::deleteMethod()
     return (generateBody(this->path));
 }
 
+int hex_to_decimal(std::string hexString)
+{
+    int decimalValue;
+
+    std::stringstream ss;
+    ss << std::hex << hexString;
+    ss >> decimalValue;
+    return (decimalValue);
+}
+
 void    Response::unchunkeBody()
 {
     std::string part;
     std::string size_hex;
     size_t pos;
     std::string body = this->body;
-    size_t     i = 0;
     std::string result;
-    std::cout << std::endl;
+    int size;
 
-    // while (body[i] != '\0')
-    // {
-    //     if (body[i] == '\r')
-    //         std::cout << "\\r";
-    //     else if (body[i] == '\n')
-    //         std::cout << "\\n";
-    //     else
-    //         std::cout << body[i];
-    //     i++;
-    // }
-    // std::cout << std::endl;
-    while ((pos = body.find("\r\n") != std::string::npos))
+    while (1)
     {
+        pos = body.find("\r\n");
+        if (pos == std::string::npos)
+            break;
         part = body.substr(0, pos);
-        std::cout << "\n *** " << part << "pos " << pos << std::endl;
-        if (i % 2 == 0)
-            result += part;
-        else
-        {
-            if (part == "0")
-                break;
-        }
-        body.erase(0, pos + 2);
-        std::cout << "rest of body " << body << std::endl;
-        i++;
+        size =  hex_to_decimal(part);
+        if (size == 0)
+            break;
+        result += body.substr(pos + 2, size);
+        body.erase(0, 2 + size + 2 + part.size());
+        size = 0;
     }
-    std::cout << "\n---------------> Body :\n" << result << std::endl;
-
+    this->body.clear();
+    this->body = result;
 }
 
 void    Response::generateResponse(Message* mes)
@@ -982,11 +1011,8 @@ void    Response::generateResponse(Message* mes)
         this->server =  mes->getServer();
         this->req = mes->getRequest();
         this->body = mes->getBody();
-        std::cout << "\n BODY :\n" << this->body << std::endl;
         if (mes->getTransfer_Encoding())
             unchunkeBody();
-        // if (this->body.size() != 0)
-        //     std::cout << "\nbody : " << this->body << "\n" << std::endl;
         this->r_env = mes->getEnv();
         this->content_length = mes->getContentLength();
 		checkMethode();
@@ -1029,7 +1055,6 @@ void    Response::generateResponse(Message* mes)
 
 Message* Response::checkHeader(std::string request_)
 {
-    std::cout << "\nRequest\n" << request_ << std::endl;
     Message *mes = new Message();
     request tmp_request = parseRequest(request_);
     int url = checkUrlSyntax(tmp_request);
