@@ -524,7 +524,6 @@ int    Response::generateBody(std::string path)
 
 std::string extractLocation(std::string url, std::string root)
 {
-    (void)root;
     std::string path = url;
             
     if (access(path.c_str(), F_OK) == 0)
@@ -846,14 +845,35 @@ int    checkUrlSyntax(request &req)
     return 0;
 }
 
+std::string Response::getRoot()
+{
+    std::string tmp_root;
+
+    tmp_root = this->server.root + this->req.path;
+    if (access(tmp_root.c_str(), F_OK) == 0)
+        return (this->server.root);
+    for(std::vector<t_location>::iterator it = this->server.locations.begin(); it != this->server.locations.end(); it++)
+    {
+        if (it->path.size() != 0)
+        {
+            tmp_root = it->root + this->req.path;
+            if (access(tmp_root.c_str(), F_OK) == 0)
+                return (it->root);
+        }
+    }
+    return "";
+}
+
 int	Response::urlRegenerate() // ->status_code & ->Location 
 {
 	std::string path;
     std::string url;
 	url = req.path;
-    path = this->server.root + url; 
-    if (access(path.c_str(), F_OK) == 0)
+    std::string root = getRoot();
+
+    if (root.size() != 0)
     {
+        path = root + url;
         struct stat fileStat;
         if (!(stat(path.c_str(), &fileStat) == 0))
         {
@@ -872,15 +892,8 @@ int	Response::urlRegenerate() // ->status_code & ->Location
             }
             else
             {
-                std::string tmp_loc = extractLocation(path, this->server.root);
-                if (tmp_loc.size() != 0)
-                {
-                    getLocation(tmp_loc);
-                }
-                else
-                {
+                if (getLocation(url) != 1)
                     this->location.path = "";
-                }
                 if (this->req.method == "DELETE")
                     return (403);
                 return (isDirectory(path));
@@ -888,7 +901,7 @@ int	Response::urlRegenerate() // ->status_code & ->Location
         }
         else if (S_ISREG(fileStat.st_mode))
         {
-            std::string tmp_loc = extractLocation(path, this->server.root);
+            std::string tmp_loc = extractLocation(path, root);
             if (tmp_loc.size() != 0)
             {
                 getLocation(tmp_loc);

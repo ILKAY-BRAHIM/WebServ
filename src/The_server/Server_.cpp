@@ -264,26 +264,26 @@ void Server::run()
                                 static int count = 1;
                                 print_log("recive " + std::to_string(it->second.get_total_body()) + " bytes from client " + std::to_string(it->first), "\033[92m", ++count, it->second.get_total_body(), it->second.get_responce_class()->getContentLength());
                             }
-                            if(it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength()) // i need  indicate of chunked or not
+                            if(it->second.get_responce_class()->getTransfer_Encoding() == false && it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength()) // i need  indicate of chunked or not
                             {
                                 it->second.get_responce_class()->setBody(it->second.get_body());
                                 this->resp.generateResponse(it->second.get_responce_class());
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());
                                 it->second.set_redirection(0);
-                                std::cout << it->second.get_responce() << std::endl;
+                                // std::cout << it->second.get_responce() << std::endl;
                                 FD_SET(it->first, &this->write_set1);
                                 FD_CLR(it->first, &this->master_set);
                                 this->msg.insert(std::pair<int, Servers>(it->first, it->second));
                                 this->serv2.erase(it);
                             }
-                            else if (it->second.get_body().find("\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
+                            else if (it->second.get_responce_class()->getTransfer_Encoding() == true && it->second.get_body().find("\r\n0\r\n\r\n") != std::string::npos) // i need  indicate of chunked or not
                             {
                                 // std::cout << "body: " << it->second.get_body() << std::endl;
                                 it->second.get_responce_class()->setBody(it->second.get_body());
                                 this->resp.generateResponse(it->second.get_responce_class());
                                 it->second.set_responce(it->second.get_responce_class()->getResponse());
                                 it->second.set_redirection(0);
-                                std::cout << it->second.get_responce() << std::endl;
+                                // std::cout << it->second.get_responce() << std::endl;
                                 FD_SET(it->first, &this->write_set1);
                                 FD_CLR(it->first, &this->master_set);
                                 this->msg.insert(std::pair<int, Servers>(it->first, it->second));
