@@ -13,6 +13,9 @@
 # include <fcntl.h>
 # include <map>
 # include <sstream>
+# include <ctime>
+#include <dirent.h>
+# include <sstream>
 # include "Parse.hpp"
 # include <sys/stat.h>
 # include <sys/types.h>
@@ -30,6 +33,12 @@
 # define NOTFONDE 2
 # define CRLF "\r\n"
 # define CLIENT_MAX_BODY_SIZE 1048576 // equevalent of 10M
+# define KB 1000
+# define MB 1000000
+# define GB 1000000000
+# define T_KB 125
+# define T_MB T_KB * KB
+# define T_GB T_KB * MB
 
 class Message;
 
@@ -85,6 +94,7 @@ class Response
         int        specificErrorPage(std::string path);
         void        unchunkeBody();
         std::string getRoot();
+        int        generateAutoindexBody();
     public :
         Response();
         Response(std::vector<t_server> servS, char **env);
@@ -122,4 +132,5 @@ std::string get_index(T& location, std::string path, int noIndex)
     return "";
 }
 
-std::string get_extension(std::string path);
+std::string  get_extension(std::string path);
+t_Dir_Data   readDirectory(std::string path);

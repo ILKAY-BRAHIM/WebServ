@@ -1,6 +1,5 @@
 
 #include "response.hpp"
-#include <sys/stat.h>
 
 void    print_new_request(request req)
 {
@@ -174,9 +173,9 @@ void	Response::checkMethode() // it's ok now :)
 void    Response::redirect(std::string path, int status)
 {
     // most send a response with redirect code status
-    // std::cout << "redirection function" << std::endl;
+    std::cout << "redirection function : " << path << std::endl;
     this->respMessage.statusCode = generateStatusCode(status);
-    this->respMessage.Location = path + '/';
+    this->respMessage.Location = path;
     this->respMessage.Content_Lenght = "0";
     return ;
 }
@@ -222,13 +221,132 @@ void     Response::generateBodyError(int error)
 
 }
 
+int    Response::generateAutoindexBody()
+{
+    std::string path;
+    bool size, time, type;
+    if (this->location.path.size() != 0)
+    {
+        path = this->server.root + this->location.path;
+        size = this->location.autoindex_exact_size;
+        time = this->location.autoindex_localtime;
+        type = this->location.autoindex;
+    }
+    else
+    {
+        path = this->server.root + '/';
+        size = this->server.autoindex_exact_size;
+        time = this->server.autoindex_localtime;
+        type = this->server.autoindex;
+    }
+    try 
+    {
+        t_Dir_Data data = readDirectory(path);
+        if (data.directory.size() == 0 && data.file.size() == 0)
+            throw (500);
+        this->respMessage.Content_Type = "text/html";
+        this->respMessage.body += "<!DOCTYPE html>\n<html lang=\"en\">\n";
+        this->respMessage.body += "<html>\n";
+        this->respMessage.body += ("<head>\n<title>Index of " + this->req.path + "</title>\n");
+        this->respMessage.body += "<style>\n";
+        this->respMessage.body += "  * { \n";
+        this->respMessage.body += "       font-family: 'Courier New', Courier, monospace;\n";
+        this->respMessage.body += "       font-size: 0.9rem;\n";
+        this->respMessage.body += "       background-color: rgb(246, 246, 246);\n";
+        this->respMessage.body += "   }\n";
+        this->respMessage.body += "   .container {\n";
+        this->respMessage.body += "       display: flex;\n";
+        this->respMessage.body += "       flex-wrap: wrap;\n";
+        this->respMessage.body += "       justify-content: center;\n";
+        this->respMessage.body += "       gap: 0.3rem;\n";
+        this->respMessage.body += "       width: 90%;\n";
+        this->respMessage.body += "       margin: 2rem auto;\n";
+        this->respMessage.body += "   }\n";
+        this->respMessage.body += "   .align-horizontal {\n";
+        this->respMessage.body += "       display: flex;\n";
+        this->respMessage.body += "       justify-content: space-between;\n";
+        this->respMessage.body += "       width: 100%;\n";
+        this->respMessage.body += "       background-color: rgb(235, 235, 235);\n";
+        this->respMessage.body += "       padding: 0.5rem;\n";
+        this->respMessage.body += "       border-radius: 0.3rem;\n";
+        this->respMessage.body += "   }\n";
+        this->respMessage.body += "   .align-horizontal p{\n";
+        this->respMessage.body += "       margin: 0.2rem;\n";
+        this->respMessage.body += "       background-color: rgb(235, 235, 235);\n";
+        this->respMessage.body += "   }\n";
+        this->respMessage.body += "  a{\n";
+        this->respMessage.body += "       text-decoration: none;\n";
+        this->respMessage.body += "       width: 20rem;\n";
+        this->respMessage.body += "       background-color: rgb(235, 235, 235);\n";
+        this->respMessage.body += "   }\n";
+        this->respMessage.body += "   .sp{\n";
+        this->respMessage.body += "       width: 20rem;\n";
+        this->respMessage.body += "       word-wrap: break-word;\n";
+        this->respMessage.body += "   }\n";
+        this->respMessage.body += "   .sd{\n";
+        this->respMessage.body += "       width: 10rem;\n";
+        this->respMessage.body += "       text-align: right;\n";
+        this->respMessage.body += "       word-wrap: break-word;\n";
+        this->respMessage.body += "   }\n";
+        this->respMessage.body += "</style>\n";
+        this->respMessage.body += "</head>\n";        
+        this->respMessage.body += "<body>\n";
+        this->respMessage.body += ("<center><h1>Index of " + this->req.path + "</h1></center>\n");
+        this->respMessage.body += "<hr>\n";
+        this->respMessage.body += "<div class=\"container\">\n";
+        std::multimap<std::string, t_info>::iterator it = data.directory.begin();
+        while (it != data.directory.end())
+        {
+            this->respMessage.body += "<div class=\"align-horizontal\">";
+            this->respMessage.body += ("<p class=\"sp\"><a href=\"" + it->second.name + "\">" + it->second.name + "</a></p>\n");
+            if(time)
+                this->respMessage.body += "<p>"  + it->second.date +  "</p>\n";
+            if(size)
+                this->respMessage.body += "<p>"  + it->second.size +  "</p>\n";
+            this->respMessage.body += "<p class=\"sd\">"  + it->second.type +  "</p>\n";
+            this->respMessage.body += "</div>";
+            it++;
+        }
+        it = data.file.begin();
+        while (it != data.file.end())
+        {
+            this->respMessage.body += "<div class=\"align-horizontal\">";
+            this->respMessage.body += ("<p class=\"sp\"><a href=\"" + it->second.name + "\">" + it->second.name + "</a></p>\n");
+            if (time)
+                this->respMessage.body += "<p>"  + it->second.date +  "</p>\n";
+            if (size)
+                this->respMessage.body += "<p>"  + it->second.size +  "</p>\n";
+            this->respMessage.body += "<p class=\"sd\">"  + it->second.type +  "</p>\n";
+            this->respMessage.body += "</div>";
+            it++;
+        }
+        this->respMessage.body += "</div>\n";
+        this->respMessage.body += ("<center>" + this->respMessage.Server + "</center>\n");
+        this->respMessage.body += "</body>\n";
+        this->respMessage.body += "</html>";
+        this->respMessage.Content_Lenght = std::to_string(this->respMessage.body.length());
+    }
+    catch(int error)
+    {
+        return (error);
+    }
+    return (1);
+}
+
 int    Response::isDirectory(std::string path)
 {
     std::string index_;
     std::string fullPath;
     if (this->location.path.size())
     {
-        if (this->location.cgi_index.size() != 0)
+        if (this->location.internal == true)
+            return (403);
+        if (this->location.redirect.size() != 0)
+        {
+            redirect(this->location.redirect, 301);
+            return (1);
+        }
+        else if (this->location.cgi_index.size() != 0)
         {
             std::vector<std::string>::iterator it = this->location.cgi_index.begin();
             while (it != this->location.cgi_index.end())
@@ -243,10 +361,12 @@ int    Response::isDirectory(std::string path)
             }
         }
         else if (this->location.index.size() != 0)
-        {
             index_ = get_index(this->location, path, 0);
+        else if (this->location.autoindex == true)
+        {
+            return (generateAutoindexBody());
         }
-        else // befor this line we must check if there is an autoindex
+        else
         {
             if (this->server.index.size() != 0)
                 index_ = get_index(this->server, path, 0);
@@ -262,20 +382,17 @@ int    Response::isDirectory(std::string path)
         {
             this->path = "";
             if (this->req.method == "POST" || this->req.method == "DELETE")
-            {
                 return (0);
-            }
             return(403);
-            generateBodyError(403);
-            throw (403);
         }
     }
     else
     {
-        // befor this line we must check if there is an autoindex
         if (this->server.index.size() != 0)
             index_ = get_index(this->server, path, 0);
-        else 
+        else if (this->server.autoindex == true)
+            return (generateAutoindexBody());
+        else        
             index_ = get_index(this->server, path, 1);
         if (index_.length() != 0)
         {
@@ -287,11 +404,10 @@ int    Response::isDirectory(std::string path)
             if (this->req.method == "POST" || this->req.method == "DELETE")
                 return (0);
             this->path = "";
+
             return(403);
         }
     }
-
-    // check if there is an autoindex
     return (0);
 }
 
@@ -471,6 +587,8 @@ int    Response::generateBody(std::string path)
 {
     if (this->location.path.size() != 0)
     {
+        if (this->location.internal == true)
+            return (403);
         if (this->location.redirect.size() != 0)
         {
             redirect(this->location.redirect, 301);
@@ -729,6 +847,8 @@ void    Response::clearResponse()
     // this->location.proxy_set_header.clear();
     // this->location.redirect.clear();
     // this->location.autoindex.clear();
+    // this->location.cgi_pass.clear();
+
     // this->location.cgi_path.clear();
     // this->location.cgi_ext.clear();
     // this->location.cgi_index.clear();
@@ -736,7 +856,6 @@ void    Response::clearResponse()
     this->body.clear();
     this->server.clear();
 }
-
 
 std::vector<std::string>   cgi_env(request req, t_server server, char **env_system)
 {
@@ -887,7 +1006,7 @@ int	Response::urlRegenerate() // ->status_code & ->Location
             {
                 if (this->req.method == "DELETE")
                     return (403);
-                redirect(url, 302);
+                redirect((url + "/"), 302);
                 return (1);
             }
             else
@@ -1009,7 +1128,6 @@ void    Response::unchunkeBody()
 
 void    Response::generateResponse(Message* mes)
 {
-    // check if there is a body and handle it [!] ..................... [!]
     std::string line;
     int st;
     int state;
@@ -1068,6 +1186,8 @@ void    Response::generateResponse(Message* mes)
 
 Message* Response::checkHeader(std::string request_)
 {
+    std::cout << "request : " << std::endl;
+    std::cout << request_ << std::endl;
     Message *mes = new Message();
     request tmp_request = parseRequest(request_);
     int url = checkUrlSyntax(tmp_request);

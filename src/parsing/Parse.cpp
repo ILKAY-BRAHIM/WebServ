@@ -90,7 +90,6 @@ void Parse::fill_parts(vectstr_t vector, int &i, std::string &to_fill, std::stri
 		throw Parse::ServerError("needs a \';\'");
 }
 
-
 void Parse::fill_indexs(vectstr_t vector, int &i, vectstr_t &to_fill, std::string msg)
 {
 	int size = vector.size ();
@@ -105,7 +104,6 @@ void Parse::fill_indexs(vectstr_t vector, int &i, vectstr_t &to_fill, std::strin
 			std::cout << msg + to_fill[j++] + "\n";
 	}
 }
-
 
 void Parse::pass_comment(vectstr_t vector, int &i)
 {
@@ -282,7 +280,11 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 	else if (vector[i] == "redirect")
 		fill_parts(vector, i, location.redirect, "redirect : ");
 	else if (vector[i] == "autoindex")
-		fill_parts(vector, i, location.autoindex, "autoindex : ");
+		fill_autoindexs(vector, i, location.autoindex, "autoindex : ");
+	else if (vector[i] == "autoindex_exact_size")
+		fill_autoindexs(vector, i, location.autoindex_exact_size, "autoindex_exact_size : ");
+	else if (vector[i] == "autoindex_localtime")
+		fill_autoindexs(vector, i, location.autoindex_localtime, "autoindex_localtime : ");
 	else if (vector[i] == "cgi_path")
 		fill_cgi(vector, i, location.cgi_path, "cgi_path : ");
 	else if (vector[i] == "cgi_ext")
@@ -294,7 +296,7 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 			std::cout << "location is internal" << std::endl;
 	}
 	else
-		throw Parse::ServerError(std::string("not allowed or defined keyword -> " + vector[i]).c_str());
+		throw Parse::ServerError(std::string("not allowed or defined keyword -> " + vector[i] + " <- in location with path " + location.path).c_str());
 }
 
 	template <typename T>
@@ -325,22 +327,28 @@ void Parse::fill_error_page(vectstr_t &vector, int &i, t_server &server, int siz
 	{
 		tmp.push_back(vector[i]);
 	}
-	//if (Parse::isNumber(vector[++i]) && server.error_page.first.empty())
-	//{
-		server.error_page = std::make_pair(tmp, vector[i].substr(0, vector[i].size() - 1));
-		if (min_det)
-		{
-			std:: cout << "error_page : ";
-			size_t j = 0;
-			while (j < server.error_page.first.size())
-				std::cout << server.error_page.first[j++] << " ";
-			std::cout << server.error_page.second << "\n";
-		}
-		i++;
-	//}
-	//else 
+	server.error_page = std::make_pair(tmp, vector[i].substr(0, vector[i].size() - 1));
+	if (min_det)
+	{
+		std:: cout << "error_page : ";
+		size_t j = 0;
+		while (j < server.error_page.first.size())
+			std::cout << server.error_page.first[j++] << " ";
+		std::cout << server.error_page.second << "\n";
+	}
 	if (server.error_page.first.empty() || server.error_page.second.empty())
 		throw Parse::ServerError("check error_page");
+}
+
+void Parse::fill_autoindexs(vectstr_t &vector, int &i, bool &autoindex, std::string msg)
+{
+	i++;
+	if (!(vector[i] == "on;" || vector[i] ==  "off;"))
+		throw Parse::ServerError(std::string (msg.substr (0, msg.size () - 2) + " can only be true or false").c_str());
+	if (vector[i] == "on;")
+		autoindex = 1;
+	if (min_det)
+		std::cout << autoindex << (autoindex ? "on" : "off") << std::endl;
 }
 
 void Parse::fill_server()
@@ -358,10 +366,7 @@ void Parse::fill_server()
 	{
 		server.clear();
 		if (vector[i++] != "server")
-		{
-			std::cout << vector[i] << "\n";
 			throw Parse::ServerError("server keyword is needed");
-		}
 		if (i < size && vector[i] != "{")
 			throw Parse::ServerError("set begin point, should have a \'{\' after server keyword");
 		lock = 1;
@@ -385,7 +390,7 @@ void Parse::fill_server()
 					fill_parts(vector, i, server.timeout, "timeout : ");
 				else if (vector[i] == "index")
 					fill_indexs(vector, i, server.index, "index : ");
-				else if (vector[i] == "error_page"/* && i + 2 < size*/)
+				else if (vector[i] == "error_page")
 					fill_error_page(vector, i, server, size);
 				else if (vector[i] == "redirect")
 					fill_parts(vector, i, server.redirect, "redirect : ");
@@ -397,6 +402,12 @@ void Parse::fill_server()
 					if (min_det)
 						std::cout << "_____" << "inside type" << std::endl;
 				}
+				else if (vector[i] == "autoindex")
+					fill_autoindexs(vector, i, server.autoindex, "autoindex : ");
+				else if (vector[i] == "client_body_size")
+					fill_parts(vector, i, server.client_body_size, "client_body_size : ");
+				else
+					throw Parse::ServerError(std::string("not allowed or defined keyword -> " + vector[i]).c_str());
 			}
 			else if (i + 1 < size && lock == 2)
 			{
@@ -405,6 +416,8 @@ void Parse::fill_server()
 					fill_locations(vector, i, location);
 					if (vector[i+1] == "}")
 					{
+						lock--;
+						i++;
 						server.locations.push_back (location);
 						location.clear();
 						if (min_det)
@@ -416,6 +429,8 @@ void Parse::fill_server()
 					fill_types(vector, i, type);
 					if ( vector[i+1] == "}")
 					{
+						lock--;
+						i++;
 						server.types.push_back (type);
 						type.clear();
 						if (min_det)
@@ -527,8 +542,8 @@ void Parse::last_check()
 	}
 	if (servers.size() == 1 && !servers[0].full().first)
 	{
-			warning_message(i, servers[0].full().second);
-			servers.pop_back();
+		warning_message(i, servers[0].full().second);
+		servers.pop_back();
 	}
 }
 

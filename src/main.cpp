@@ -50,6 +50,8 @@ void	printServer(std::vector<t_server > serv)
 			for (size_t k = 0; k < serv[i].locations[j].cgi_index.size(); k++)
 				std::cout << serv[i].locations[j].cgi_index[k] << " ";
 			std::cout << std::endl;
+			std::cout << "		redirect: " << serv[i].locations[j].redirect << std::endl;
+
 		}
 		std::cout << std::endl;
 	}
