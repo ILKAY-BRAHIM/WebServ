@@ -283,6 +283,8 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 		fill_autoindexs(vector, i, location.autoindex, "autoindex : ");
 	else if (vector[i] == "autoindex_exact_size")
 		fill_autoindexs(vector, i, location.autoindex_exact_size, "autoindex_exact_size : ");
+	else if (vector[i] == "autoindex_format")
+		fill_autoindexs(vector, i, location.autoindex_format, "autoindex_format : ");
 	else if (vector[i] == "autoindex_localtime")
 		fill_autoindexs(vector, i, location.autoindex_localtime, "autoindex_localtime : ");
 	else if (vector[i] == "cgi_path")
@@ -348,7 +350,7 @@ void Parse::fill_autoindexs(vectstr_t &vector, int &i, bool &autoindex, std::str
 	if (vector[i] == "on;")
 		autoindex = 1;
 	if (min_det)
-		std::cout << autoindex << (autoindex ? "on" : "off") << std::endl;
+		std::cout << msg << (autoindex ? "on" : "off") << std::endl;
 }
 
 void Parse::fill_server()
@@ -404,6 +406,12 @@ void Parse::fill_server()
 				}
 				else if (vector[i] == "autoindex")
 					fill_autoindexs(vector, i, server.autoindex, "autoindex : ");
+				else if (vector[i] == "autoindex_exact_size")
+					fill_autoindexs(vector, i, server.autoindex_exact_size, "autoindex_exact_size : ");
+				else if (vector[i] == "autoindex_format")
+					fill_autoindexs(vector, i, server.autoindex_format, "autoindex_format : ");
+				else if (vector[i] == "autoindex_localtime")
+					fill_autoindexs(vector, i, server.autoindex_localtime, "autoindex_localtime : ");
 				else if (vector[i] == "client_body_size")
 					fill_parts(vector, i, server.client_body_size, "client_body_size : ");
 				else

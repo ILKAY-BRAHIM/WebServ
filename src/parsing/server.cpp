@@ -6,6 +6,7 @@ void t_location::clear()
 	autoindex = false;
 	autoindex_exact_size = false;
 	autoindex_localtime = false;
+	autoindex_format = false;
 	root.clear();
 	alias.clear();
 	index.clear();
@@ -35,6 +36,7 @@ void t_server::clear()
 	autoindex = false;
 	autoindex_exact_size = false;
 	autoindex_localtime = false;
+	autoindex_format = false;
 	host.clear();
 	root.clear();
 	index.clear();

@@ -23,8 +23,8 @@ class Parse
 		Parse(const Parse &other);
 		Parse& operator= (const Parse &other);
 
-		typedef std::vector<std::string> vectstr_t;
-		typedef std::map<std::string, std::vector<std::string> > map_vectstr_t;
+		typedef std::vector<std::string> 							vectstr_t;
+		typedef std::map<std::string, std::vector<std::string> >	map_vectstr_t;
 
 void fill_autoindexs(vectstr_t &vector, int &i, bool &autoindex, std::string msg);
 		void						fill_error_page(vectstr_t &vector, int &i, t_server &server, int size);
