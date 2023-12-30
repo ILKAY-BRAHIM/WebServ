@@ -289,7 +289,7 @@ void Parse::fill_locations(vectstr_t vector, int &i, t_location &location)
 		fill_cgi(vector, i, location.cgi_path, "cgi_path : ");
 	else if (vector[i] == "cgi_ext")
 		fill_cgi(vector, i, location.cgi_ext, "cgi_ext : ");
-	else if (vector[i] == "internal;" && ++i < (int)vector.size())
+	else if (vector[i] == "internal;" && i < (int)vector.size())
 	{
 		location.internal = true;
 		if (min_det)
