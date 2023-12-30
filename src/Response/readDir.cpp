@@ -39,7 +39,6 @@ t_Dir_Data   readDirectory(std::string path)
     dir = opendir(ini_dir.c_str());
     if (dir == NULL)
     {
-        std::cerr << "ERROR : OPEN" << std::endl;
         throw (501);
     }
     while (1)

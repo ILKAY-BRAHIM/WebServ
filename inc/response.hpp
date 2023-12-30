@@ -88,10 +88,10 @@ class Response
         void    checkUrl();
         // void    readPath();
         void        redirect(std::string path, int status);
-        void        uploadFile();
+        int        uploadFile();
         int        postMethod();
         int        deleteMethod();
-        int        specificErrorPage(std::string path);
+        int        specificErrorPage(int error_code);
         void        unchunkeBody();
         std::string getRoot();
         int        generateAutoindexBody();

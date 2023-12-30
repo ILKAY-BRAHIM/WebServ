@@ -227,7 +227,10 @@ int    Response::generateAutoindexBody()
     bool size, time, type;
     if (this->location.path.size() != 0)
     {
-        path = this->server.root + this->location.path;
+        if (this->location.root.size() == 0)
+            path = this->server.root + this->location.path;
+        else
+            path = this->location.root + this->location.path;
         size = this->location.autoindex_exact_size;
         time = this->location.autoindex_localtime;
         type = this->location.autoindex;
@@ -563,24 +566,55 @@ int checkMimeType(std::vector<t_types> types, std::string type)
     return (0);
 }
 
-void    Response::uploadFile() //Static File Serving
+std::string generateName()
 {
-    // if (checkMimeType(this->server.types, this->req.headers["Content-Type"]))
-    // {
-        //must generate a generator name
-        std::string tmpFile;
-        int found = this->req.headers["Content-Type"].find("/");
-        std::string ext = this->req.headers["Content-Type"].substr(found + 1);
-        tmpFile = "./upload/tmp." + ext;
-        int fd = open(tmpFile.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
+    std::string name;
+    std::string tmp;
+    int i = 0;
+    while (i < 10)
+    {
+        tmp = std::to_string(rand() % 10);
+        name += tmp;
+        i++;
+    }
+    return (name);
+}
+
+int    Response::uploadFile()
+{
+    std::string tmpFile;
+    std::string ext;
+    int found;
+    int fd;
+    t_location loc;
+    for (size_t i = 0; i < this->server.locations.size(); i++)
+    {
+        if (this->server.locations[i].path == "/properDataBase")
+        {
+            loc = this->server.locations[i];
+            if (loc.root.size() != 0)
+                tmpFile = loc.root + "/properDataBase";
+            else
+                tmpFile = this->server.root + "/properDataBase";
+            break;
+        }
+    }
+    if (tmpFile.size() == 0 || access(tmpFile.c_str(), F_OK | W_OK) != 0)
+        return (500);
+    if (checkMimeType(this->server.types, this->req.headers["Content-Type"]))
+    {
+        found = this->req.headers["Content-Type"].find("/");
+        ext = this->req.headers["Content-Type"].substr(found + 1);
+        tmpFile += '/' + generateName() + '.' + ext;
+        fd = open(tmpFile.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
+        if (fd == -1)
+            throw (500);
         write(fd, this->body.c_str(), this->body.length());
         close(fd);
-    // }
-    // else
-    // {
-    //     // generateBodyError(415);
-    //     throw (415);
-    // }
+    }
+    else
+        return (415);
+    return 0;
 }
 
 int    Response::generateBody(std::string path)
@@ -599,9 +633,7 @@ int    Response::generateBody(std::string path)
     this->respMessage.Content_Type = getType(this->server.types, ext);
     std::ifstream fd(path.c_str(), std::ios::binary);
     if (fd.is_open() == false)
-    {
         return (403);
-    }
     if (this->location.path.size() != 0 && this->location.cgi_index.size() != 0 && (this->respMessage.Content_Type == "py" || this->respMessage.Content_Type == "php"))
     {
         this->r_env.push_back("SCRIPT_FILENAME=" + path);
@@ -983,7 +1015,72 @@ std::string Response::getRoot()
     return "";
 }
 
-int	Response::urlRegenerate() // ->status_code & ->Location 
+int Response::specificErrorPage(int error_code)
+{
+    std::string tmp_root;
+    std::vector<std::string> error_page;
+    std::string page = std::to_string(error_code);
+    std::string error_path;
+    std::string tmp;
+    bool found = false;
+
+    if (this->server.error_page.first.size() != 0)
+    {
+        error_page = this->server.error_page.first;
+        for (size_t i = 0; i < error_page.size(); i++)
+        {
+            if (error_page[i] == page)
+            {
+                if (*this->server.error_page.second.begin() == '/')
+                    tmp = this->server.error_page.second.substr(1);
+                else
+                    tmp = this->server.error_page.second;
+                page = page + tmp;
+                found = true;
+                break;
+            }
+        }
+    }
+    else
+        return (1);
+    if (found == false)
+        return (1);
+    for(std::vector<t_location>::iterator it = this->server.locations.begin(); it != this->server.locations.end(); it++)
+    {
+        if (it->path.size() != 0 && it->path == "/error")
+        {
+            if (it->root.size() != 0)
+                tmp_root = it->root;
+            else
+                tmp_root = this->server.root;
+        }
+    }
+    if (tmp_root.size() == 0)
+        return (1);
+    if (access((tmp_root + "/error/").c_str(), F_OK | R_OK) == 0)
+    {
+        if (access((tmp_root + "/error/" + page).c_str(), F_OK | R_OK) == 0)
+            error_path = tmp_root + "/error/" + page;
+    }
+    if (error_path.size() == 0)
+        return (1);
+    else
+    {
+        if (get_extension(error_path) != "html")
+            return 1;
+        std::ifstream fd(error_path.c_str(), std::ios::binary);
+        if (fd.is_open() == false)
+            return (1);
+        std::string line(std::istreambuf_iterator<char>(fd), (std::istreambuf_iterator<char>()));
+        this->respMessage.body = line;
+        this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
+        fd.close();
+        return 0;
+    }
+    return 1;
+}
+
+int	Response::urlRegenerate()
 {
 	std::string path;
     std::string url;
@@ -1058,24 +1155,26 @@ int   Response::generateUploadDeleteBody(std::string method)
 int   Response::postMethod()
 {
     std::string tmp = this->req.headers["Content-Type"];
-    if (tmp.size() != 0 && checkMimeType(this->server.types, tmp) == 1 && this->location.cgi_index.size() == 0)
+    int status;
+    if (tmp.size() != 0 && this->location.cgi_index.size() == 0)
     {
         if (this->location.client_body_size.size() != 0)
         {
             size_t size = getSize(this->location.client_body_size);
             if (this->content_length > size)
-            {
                 return (413);
-            }
         }
         else 
         {
             return (403);
         }
-        uploadFile();
+        status = uploadFile();
+        if (status != 0)
+            return (status);
         if (this->path.size() == 0 && this->location.redirect.size() == 0)
             return (generateUploadDeleteBody("Upload"));
     }
+    std::cout << "path : " << this->path << std::endl;
     return (generateBody(this->path));
 }
 
@@ -1175,7 +1274,8 @@ void    Response::generateResponse(Message* mes)
 	catch(int m)
 	{
         mes->setStatus(-1);
-        generateBodyError(m);
+        if (specificErrorPage(m) == 1)
+            generateBodyError(m);
 		this->respMessage.statusCode = generateStatusCode(m);
 	}
     if (this->respMessage.Content_Lenght.size() == 0)
