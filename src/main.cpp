@@ -51,6 +51,10 @@ void	printServer(std::vector<t_server > serv)
 				std::cout << serv[i].locations[j].cgi_index[k] << " ";
 			std::cout << std::endl;
 			std::cout << "		redirect: " << serv[i].locations[j].redirect << std::endl;
+			if (serv[i].locations[j].internal == true)
+				std::cout << "		internal: on" << std::endl;
+			else
+				std::cout << "		internal: off" << std::endl;
 
 		}
 		std::cout << std::endl;
@@ -71,7 +75,7 @@ int main (int ac, char **av, char **env)
 	// Message *mes = resp.generateResponse(h);
 	// std::cout << mes->getResponse() << std::endl;
 	//continue above this line
-	// printServer(servers);
+	printServer(servers);
 	// pause();
 	try{
 

@@ -32,13 +32,10 @@
 # define ISFILE 1
 # define NOTFONDE 2
 # define CRLF "\r\n"
-# define CLIENT_MAX_BODY_SIZE 1048576 // equevalent of 10M
+# define CLIENT_MAX_BODY_SIZE 10485760 // equevalent of 10M
 # define KB 1000
 # define MB 1000000
 # define GB 1000000000
-# define T_KB 125
-# define T_MB T_KB * KB
-# define T_GB T_KB * MB
 
 class Message;
 
@@ -73,6 +70,7 @@ class Response
         std::string resp; // must delete it mabe
         std::string body;
         std::string path;
+        std::string uploadedFile;
         size_t      content_length;
         std::vector<std::string> r_env;
         t_server    fillServer(request req);

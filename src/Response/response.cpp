@@ -1,17 +1,6 @@
 
 #include "response.hpp"
 
-void    print_new_request(request req)
-{
-    std::cout << "Method: " << req.method << std::endl;
-    std::cout << "Path: " << req.path << std::endl;
-    std::cout << "HttpVertion: " << req.httpVertion << std::endl;
-    std::cout << "Headers: " << std::endl;
-    for (std::map<std::string, std::string>::iterator it=req.headers.begin(); it!=req.headers.end(); ++it)
-        std::cout << it->first << " => " << it->second << '\n';
-    // std::cout << "Body: " << req.body << std::endl;
-}
-
 void    getHeader(request &req, std::string line)
 {
     std::istringstream ss(line);
@@ -25,15 +14,12 @@ void    getHeader(request &req, std::string line)
 
 request parseRequest(std::string buffer)
 {
-    // std::cout << "-------------------------REQUEST-------------------------" << std::endl;
-    // std::cout << buffer << std::endl;
     request req;
     std::string line;
     std::string value(buffer);
     std::istringstream ss(value);
     std::getline(ss, line, '\n');
     
-    //get start line :
     std::istringstream st(line);
     std::getline(st, line, ' ');
     req.method = line;
@@ -47,7 +33,6 @@ request parseRequest(std::string buffer)
 	if (found != std::string::npos)
 	{
 		parameters = req.path.substr(found+1);
-        // std::cout << "parameters : " << parameters << std::endl;
 		url = req.path.substr(0, found);
 	}
 	else
@@ -63,7 +48,6 @@ request parseRequest(std::string buffer)
         else
             break;
     }
-    // print_new_request(req);
     return (req);
 }
 
@@ -132,11 +116,11 @@ std::string generateStatusCode(int status)
         case 413:
             message =  std::to_string(status) + " Content Too Large";
             break;
-        case 415:
-            message =  std::to_string(status) + " Unsupported Media Type";
-            break;
         case 414:
             message =  std::to_string(status) + " URI Too Long";
+            break;
+        case 415:
+            message =  std::to_string(status) + " Unsupported Media Type";
             break;
         }
     }
@@ -159,21 +143,19 @@ std::string generateStatusCode(int status)
     return (message);
 }
 
-void	Response::checkMethode() // it's ok now :)
+void	Response::checkMethode()
 {
     std::vector<std::string> tmp;
     if (!(this->req.method == "GET" || this->req.method == "POST" || this->req.method == "DELETE"))
         throw (501);
     if (this->req.httpVertion != "HTTP/1.1")
         throw (505);
-    this->respMessage.statusCode = "200 OK"; // is possible to chage
-	this->respMessage.Server = "Not nginx/0.0.0 (macOS)";
+    this->respMessage.statusCode = "200 OK";
+	this->respMessage.Server = "Nginx/1.3.3.7 (macOS)";
 }
 
 void    Response::redirect(std::string path, int status)
 {
-    // most send a response with redirect code status
-    std::cout << "redirection function : " << path << std::endl;
     this->respMessage.statusCode = generateStatusCode(status);
     this->respMessage.Location = path;
     this->respMessage.Content_Lenght = "0";
@@ -211,7 +193,15 @@ void     Response::generateBodyError(int error)
     this->respMessage.Content_Type = "text/html";
     this->respMessage.body += "<!DOCTYPE html>\n<html lang=\"en\">\n";
     this->respMessage.body += "<html>\n";
-    this->respMessage.body += ("<head><title>" + generateStatusCode(error) + "</title></head>\n");
+    this->respMessage.body += ("<head><title>" + generateStatusCode(error) + "</title>\n");
+    this->respMessage.body += "<style>\n";
+    this->respMessage.body += "  * { \n";
+    this->respMessage.body += "       font-family: 'Courier New', Courier, monospace;\n";
+    this->respMessage.body += "       font-size: 1.2rem;\n";
+    this->respMessage.body += "       background-color: rgb(246, 246, 246);\n";
+    this->respMessage.body += "   }\n";
+    this->respMessage.body += "</style>\n";
+    this->respMessage.body += "</head>\n";
     this->respMessage.body += "<body>\n";
     this->respMessage.body += ("<center><h1>" + generateStatusCode(error) + "</h1></center>\n");
     this->respMessage.body += ("<hr><center>" + this->respMessage.Server + "</center>\n");
@@ -385,7 +375,7 @@ int    Response::isDirectory(std::string path)
         {
             this->path = "";
             if (this->req.method == "POST" || this->req.method == "DELETE")
-                return (0);
+                return (0);            
             return(403);
         }
     }
@@ -407,7 +397,6 @@ int    Response::isDirectory(std::string path)
             if (this->req.method == "POST" || this->req.method == "DELETE")
                 return (0);
             this->path = "";
-
             return(403);
         }
     }
@@ -464,38 +453,26 @@ std::string file_type(std::vector<std::map<std::string, std::vector<std::string>
     return "";
 }
 
-std::string getType(std::vector<t_types> types, std::string ext)
+std::string get_cgi_ext(std::vector<std::string> cgi_ext, std::string ext)
 {
-    if (ext.size() == 0)
-        return ("application/octet-stream");
-    if (ext.size() != 0)
+    std::vector<std::string>::iterator it = cgi_ext.begin();
+    while (it != cgi_ext.end())
     {
-        if (ext == "php" || ext == "py")
+        if (*it == ext)
             return (ext);
+        it++;
     }
-    (void) types;
-    // std::vector<t_types>::iterator it = types.begin();
-    // std::vector<std::map<std::string, std::vector<std::string> > > media;
-    // std::string type ;
-    // while (it != types.end())
-    // {
-    //     media.push_back(it->text);
-    //     media.push_back(it->application);
-    //     media.push_back(it->image);
-    //     media.push_back(it->video);
-    //     media.push_back(it->audio);
-    //     type = file_type(media, ext);
-    //     if (type.size() != 0)
-    //         return (type);
-    //     it++;    
-    //     media.clear();
-    // }
+    return ("");
+}
+
+std::string defaultType(std::string ext)
+{
     if (ext == "html")
         return ("text/html");
     else if (ext == "css")
         return ("text/css");
-    else if (ext == "js")
-        return ("application/javascript");
+    else if (ext == "txt")
+        return ("text/plain");
     else if (ext == "jpg" || ext == "jpeg")
         return ("image/jpeg");
     else if (ext == "png")
@@ -508,12 +485,8 @@ std::string getType(std::vector<t_types> types, std::string ext)
         return ("video/mp4");
     else if (ext == "mp3")
         return ("audio/mpeg");
-    else if (ext == "wav")
-        return ("audio/wav");
-    else if (ext == "avi")
-        return ("video/x-msvideo");
-    else if (ext == "mpeg")
-        return ("video/mpeg");
+    else if (ext == "js")
+        return ("application/javascript");
     else if (ext == "pdf")
         return ("application/pdf");
     else if (ext == "zip")
@@ -526,11 +499,32 @@ std::string getType(std::vector<t_types> types, std::string ext)
         return ("application/xml");
     else if (ext == "json")
         return ("application/json");
-    else if (ext == "txt")
-        return ("text/plain");
-    else if (ext == "php" || ext == "py")
-        return (ext);
-    
+    else
+        return ("application/octet-stream");
+}
+
+std::string getType(std::vector<t_types> types, std::string ext)
+{
+    if (ext.size() == 0)
+        return ("application/octet-stream");
+    std::vector<t_types>::iterator it = types.begin();
+    std::vector<std::map<std::string, std::vector<std::string> > > media;
+    std::string type ;
+    if (types.size() == 0)
+        return (defaultType(ext));
+    while (it != types.end())
+    {
+        media.push_back(it->text);
+        media.push_back(it->application);
+        media.push_back(it->image);
+        media.push_back(it->video);
+        media.push_back(it->audio);
+        type = file_type(media, ext);
+        if (type.size() != 0)
+            return (type);
+        it++;    
+        media.clear();
+    }
     return "application/octet-stream";
 }
 
@@ -593,23 +587,38 @@ int    Response::uploadFile()
         {
             loc = this->server.locations[i];
             if (loc.root.size() != 0)
-                tmpFile = loc.root + "/properDataBase";
+            {
+                if (loc.root[loc.root.size() - 1] == '/')
+                    tmpFile = loc.root + "properDataBase";
+                else
+                    tmpFile = loc.root + "/properDataBase";
+            }
             else
-                tmpFile = this->server.root + "/properDataBase";
+            {
+                if (this->server.root[this->server.root.size() - 1] == '/')
+                    tmpFile = this->server.root + "properDataBase";
+                else
+                    tmpFile = this->server.root + "/properDataBase";
+            }
             break;
         }
     }
     if (tmpFile.size() == 0 || access(tmpFile.c_str(), F_OK | W_OK) != 0)
         return (500);
-    if (checkMimeType(this->server.types, this->req.headers["Content-Type"]))
+    found = this->req.headers["Content-Type"].find("/");
+    ext = this->req.headers["Content-Type"].substr(found + 1);
+    if (checkMimeType(this->server.types, this->req.headers["Content-Type"])  || defaultType(ext) != "application/octet-stream")
     {
-        found = this->req.headers["Content-Type"].find("/");
-        ext = this->req.headers["Content-Type"].substr(found + 1);
         tmpFile += '/' + generateName() + '.' + ext;
         fd = open(tmpFile.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
         if (fd == -1)
             throw (500);
-        write(fd, this->body.c_str(), this->body.length());
+        if (write(fd, this->body.c_str(), this->body.length()) == -1)
+        {
+            close(fd);
+            return (500);
+        }
+        this->uploadedFile = tmpFile;
         close(fd);
     }
     else
@@ -619,6 +628,7 @@ int    Response::uploadFile()
 
 int    Response::generateBody(std::string path)
 {
+    bool cgi = false;
     if (this->location.path.size() != 0)
     {
         if (this->location.internal == true)
@@ -631,10 +641,21 @@ int    Response::generateBody(std::string path)
     }
     std::string ext = get_extension(path);
     this->respMessage.Content_Type = getType(this->server.types, ext);
+    if (this->respMessage.Content_Type == "application/octet-stream")
+    {
+        if (this->location.path.size() != 0 && this->location.cgi_ext.size() != 0)
+        {
+            this->respMessage.Content_Type = get_cgi_ext(this->location.cgi_ext, ext);
+            if (this->respMessage.Content_Type == "")
+                this->respMessage.Content_Type = "application/octet-stream";
+            else
+                cgi = true;
+        }
+    }
     std::ifstream fd(path.c_str(), std::ios::binary);
     if (fd.is_open() == false)
         return (403);
-    if (this->location.path.size() != 0 && this->location.cgi_index.size() != 0 && (this->respMessage.Content_Type == "py" || this->respMessage.Content_Type == "php"))
+    if (this->location.path.size() != 0 && this->location.cgi_index.size() != 0 && cgi == true)
     {
         this->r_env.push_back("SCRIPT_FILENAME=" + path);
         char **envp = new char*[this->r_env.size() + 1];
@@ -647,7 +668,8 @@ int    Response::generateBody(std::string path)
         }
         envp[i] = NULL;
         Cgi cgi_(envp, this->body);
-        cgi_.runCgi();
+        if (cgi_.runCgi() == -1)
+            return (500);
         this->respMessage.body = cgi_.get_response();
         this->respMessage.Content_Type = "text/html";
         this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
@@ -661,7 +683,7 @@ int    Response::generateBody(std::string path)
     }
     else
     {
-        if (this->respMessage.Content_Type == "py" || this->respMessage.Content_Type == "php")
+        if (cgi == true)
             this->respMessage.Content_Type = "application/octet-stream";
         std::string line(std::istreambuf_iterator<char>(fd), (std::istreambuf_iterator<char>()));
         this->respMessage.body = line;
@@ -703,53 +725,6 @@ std::string extractLocation(std::string url, std::string root)
         }
     }
     return ("");
-}
-
-void    printServerData(t_server serv)
-{
-    std::cout << "server " << std::endl;
-    std::cout << "	name: " << serv.name << std::endl;
-    std::cout << "	host: " << serv.host << std::endl;
-    std::cout << "	root: " << serv.root << std::endl;
-    std::cout << "	port: ";
-    for (size_t j = 0; j < serv.port.size(); j++)
-        std::cout << serv.port[j] << " ";
-    std::cout << std::endl;
-    std::cout << "	index: ";
-    for (size_t j = 0; j < serv.index.size(); j++)
-        std::cout << serv.index[j] << " ";
-    std::cout << std::endl;
-	{
-		std::cout << "	error_page: ";
-		size_t h = 0;
-		while (h < serv.error_page.first.size())
-			std::cout << serv.error_page.first[h++] << " ";
-		std::cout << serv.error_page.second << std::endl;
-	}
-    std::cout << "	redirect: " << serv.redirect << std::endl;
-    std::cout << "	timeout: " << serv.timeout << std::endl;
-    std::cout << "	allow_methods: ";
-    for (size_t j = 0; j < serv.allow_methods.size(); j++)
-        std::cout << serv.allow_methods[j] << " ";
-    std::cout << std::endl;
-    std::cout << "	location: " << std::endl;
-    for (size_t j = 0; j < serv.locations.size(); j++)
-    {
-        std::cout << "	location " << j << std::endl;
-        std::cout << "		path: " << serv.locations[j].path << std::endl;
-        std::cout << "		root: " << serv.locations[j].root << std::endl;
-        std::cout << "		alias: " << serv.locations[j].alias << std::endl;
-        std::cout << "		index: ";
-        for (size_t k = 0; k < serv.locations[j].index.size(); k++)
-            std::cout << serv.locations[j].index[k] << " ";
-        std::cout << std::endl;
-        std::cout << "      cgi_index: ";
-        for (size_t k = 0; k < serv.locations[j].cgi_index.size(); k++)
-            std::cout << serv.locations[j].cgi_index[k] << " ";
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-
 }
 
 t_server    Response:: fillServer(request req)
@@ -796,7 +771,8 @@ t_server    Response:: fillServer(request req)
 		}
 		it++;
 	}
-    // printServerData(tmp_server);
+    if (tmp_server.port.size() == 0)
+        tmp_server = this->servS[0];
     return (tmp_server);
 }
 
@@ -862,28 +838,6 @@ void    Response::clearResponse()
     this->req.headers.clear();
     this->req.body.clear();
 
-    // this->location.path.clear();
-    // this->location.root.clear();
-    // this->location.alias.clear();
-    // this->location.index.clear();
-    // this->location.proxy_pass.clear();
-    // this->location.rewrite.clear();
-    // this->location.allow_methods.clear();
-    // this->location.denny.clear();
-    // this->location.try_files.clear();
-    // this->location.expires.clear();
-    // this->location.access_log.clear();
-    // this->location.limite_rate.clear();
-    // this->location.limite_except.clear();
-    // this->location.client_body_size.clear();
-    // this->location.proxy_set_header.clear();
-    // this->location.redirect.clear();
-    // this->location.autoindex.clear();
-    // this->location.cgi_pass.clear();
-
-    // this->location.cgi_path.clear();
-    // this->location.cgi_ext.clear();
-    // this->location.cgi_index.clear();
     this->location.clear();
     this->body.clear();
     this->server.clear();
@@ -1140,9 +1094,22 @@ int   Response::generateUploadDeleteBody(std::string method)
     this->respMessage.Content_Type = "text/html";
     this->respMessage.body += "<!DOCTYPE html>\n<html lang=\"en\">\n";
     this->respMessage.body += "<html>\n";
-    this->respMessage.body += ("<head><title> "+ method +" is succesful </title></head>\n");
-    this->respMessage.body += "<body>\n";
+    this->respMessage.body += ("<head><title> "+ method +" is succesful </title>\n");
+    this->respMessage.body += "<style>\n";
+    this->respMessage.body += "  * { \n";
+    this->respMessage.body += "       font-family: 'Courier New', Courier, monospace;\n";
+    this->respMessage.body += "       font-size: 1.2rem;\n";
+    this->respMessage.body += "       background-color: rgb(246, 246, 246);\n";
+    this->respMessage.body += "   }\n";
+    this->respMessage.body += "   center {\n";
+    this->respMessage.body += "       margin: 1.2rem;\n";
+    this->respMessage.body += "   }\n";
+    this->respMessage.body += "</style>\n";
+    this->respMessage.body += "</head>\n";
+    this->respMessage.body += "<body >\n";
     this->respMessage.body += ("<center><h1> "+ method +" is succesful </h1></center>\n");
+    if (method == "Upload")
+        this->respMessage.body += "<center><a href=\"" + this->uploadedFile + "\" download=\""+ this->uploadedFile + "\"> " +" FILE</a></center>";
     if (this->server.index.size() != 0)
         this->respMessage.body += ("<center><a href=\"./" + this->server.index[0] + "\">" + " back to home" + "</a></center>\n");
     this->respMessage.body += "</body>\n";
@@ -1174,7 +1141,6 @@ int   Response::postMethod()
         if (this->path.size() == 0 && this->location.redirect.size() == 0)
             return (generateUploadDeleteBody("Upload"));
     }
-    std::cout << "path : " << this->path << std::endl;
     return (generateBody(this->path));
 }
 
@@ -1286,8 +1252,6 @@ void    Response::generateResponse(Message* mes)
 
 Message* Response::checkHeader(std::string request_)
 {
-    std::cout << "request : " << std::endl;
-    std::cout << request_ << std::endl;
     Message *mes = new Message();
     request tmp_request = parseRequest(request_);
     int url = checkUrlSyntax(tmp_request);
@@ -1322,9 +1286,7 @@ Message* Response::checkHeader(std::string request_)
             if (ss >> content_length)
             {
                 if (content_length > (CLIENT_MAX_BODY_SIZE))
-                {
                     mes->setStatus(413);
-                }
                 mes->setContentLength(content_length);
             }
             else

@@ -3,25 +3,25 @@
 void    get_size(t_info &info, size_t size)
 {
     double s;
-    if (size < KB)
+    if (size >= GB)
+    {
+        s = size / GB;
+        info.unity = "GB";
+    }
+    else if (size >= MB)
+    {
+        s = size / MB;
+        info.unity = "MB";
+    }
+    else if (size >= KB)
+    {
+        s = size / KB;
+        info.unity = "KB";
+    }
+    else 
     {
         s = size;
         info.unity = "B";
-    }
-    else if (size >= KB && size < MB)
-    {
-        s = size / T_KB;
-        info.unity = "KB";
-    }
-    else if (size >= MB && size < GB)
-    {
-        s = size / T_MB;
-        info.unity = "MB";
-    }
-    else
-    {
-        s = size / T_GB;
-        info.unity = "GB";
     }
     std::ostringstream ss;
     ss << s;
@@ -34,13 +34,10 @@ t_Dir_Data   readDirectory(std::string path)
     t_Dir_Data   data;
     DIR *dir;
     struct dirent *r;
-    std::cout << "path : " << path << std::endl;
     std::string ini_dir(path);
     dir = opendir(ini_dir.c_str());
     if (dir == NULL)
-    {
-        throw (501);
-    }
+        throw (500);
     while (1)
     {
         r = readdir(dir);
@@ -48,12 +45,13 @@ t_Dir_Data   readDirectory(std::string path)
         {
             t_info tmp;
             tmp.name = r->d_name;
+            if (tmp.name == "." || tmp.name == "..")
+                continue;
             std::string tmp_f;
             tmp_f = ini_dir ;
             if (tmp_f[tmp_f.size() - 1] != '/')
                 tmp_f += '/';
             tmp_f += tmp.name;
-            std::cout << tmp_f << std::endl;
             struct stat tmp_st;
             if (stat(tmp_f.c_str(), &tmp_st) == 0)
             {
@@ -89,5 +87,6 @@ t_Dir_Data   readDirectory(std::string path)
         else 
             break ;
     }
+    closedir(dir);
     return (data);
 }

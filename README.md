@@ -4,9 +4,8 @@
 ### redirect keyword                    // solved
 ### internal keyword                    // solved
 ### Aotoindex                           // solved
-### Default ERROR Page at Location
+### Default ERROR Page at Location      // solved
 ### Cookis
+### sessions
+### Encoding URL
 
-
-
-### internal keyword in diffrent location

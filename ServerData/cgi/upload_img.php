@@ -43,10 +43,10 @@
    <form action="uplud.php" method="POST" enctype="multipart/form-data">
          <input type="file" name="image" />
          <input type="submit"/>
-      </form>
+   </form>
 
 
-   <?php
+<?php
    if(isset($_FILES['image']))
    {
       $errors= array();
