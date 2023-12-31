@@ -5,7 +5,7 @@
 #include <map>
 #include "colors.h"
 
-# define min_det	0
+# define min_det	1
 
 typedef struct s_types
 {
@@ -44,6 +44,7 @@ typedef struct s_location
 	bool						internal;
 	bool						autoindex;
 	bool						autoindex_exact_size;
+	bool						autoindex_format;
 	bool						autoindex_localtime;
 	//method
 	void		clear();
@@ -64,6 +65,7 @@ typedef struct s_server
 	std::string											timeout;
 	bool												autoindex;
 	bool												autoindex_exact_size;
+	bool												autoindex_format;
 	bool												autoindex_localtime;
 	std::string 										client_body_size;
 
