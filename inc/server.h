@@ -5,7 +5,7 @@
 #include <map>
 #include "colors.h"
 
-# define min_det	1
+# define min_det	0
 
 typedef struct s_types
 {

@@ -1,40 +1,57 @@
-body {
-    font-family: Arial, sans-serif;
+* {
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f4;
+    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
+    /* background-color: #f4f4f4; */
 }
 
-.welcome-container {
-    text-align: center;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+body {
+    background-color: #d7d3d3;
+    margin: 1.2rem 20%;
 }
 
 h1 {
-    font-size: 2em;
-    margin: 0;
-    color: #333;
+    text-align: center;
+    margin: 1.5em;
 }
 
-.button {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 10px 20px;
+p {
+    margin: 1.2em;
+    word-wrap: break-word;
+    width: 400px;
+    text-align: center;
+
+
+}
+
+img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 4em;
+}
+
+a {
     text-decoration: none;
-    color: #fff;
-    background-color: #3498db;
-    border: none;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
+    font-weight: bold;
+    font-size: medium;
+    color: #2c2a2a;
+    background-color: #e3e1e1;
+    padding: 0.5em 1.5em;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5em;
+    
 }
 
-.button:hover {
-    background-color: #2980b9;
+a:hover {
+    background-color: #c7c5c5;
 }
+
+.c {
+    margin : 15%;
+    padding: 3em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
