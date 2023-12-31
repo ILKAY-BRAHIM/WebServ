@@ -75,7 +75,7 @@ int main (int ac, char **av, char **env)
 	// Message *mes = resp.generateResponse(h);
 	// std::cout << mes->getResponse() << std::endl;
 	//continue above this line
-	printServer(servers);
+	// printServer(servers);
 	// pause();
 	try{
 
