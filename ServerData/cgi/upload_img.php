@@ -40,7 +40,7 @@
 
 <div class="c1">
 
-   <form action="uplud.php" method="POST" enctype="multipart/form-data">
+   <form action="upload_img.php" method="POST" enctype="multipart/form-data">
          <input type="file" name="image" />
          <input type="submit"/>
    </form>

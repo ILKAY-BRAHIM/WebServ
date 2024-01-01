@@ -886,11 +886,6 @@ std::vector<std::string>   cgi_env(request req, t_server server, char **env_syst
     return (env);
 }
 
-void    Response::checkUrl()
-{
-    ;
-}
-
 t_location  fillLocation(t_server &serv, request& req)
 {
     t_location loc;
@@ -924,29 +919,43 @@ size_t  getSize(std::string size)
     return(CLIENT_MAX_BODY_SIZE);
 }
 
+void encodingPath(std::string &str)
+{
+    std::string temp;
+    for(size_t i = 0; i < str.length(); i++)
+    {
+        if (str[i] == '%')
+        {
+            if (i + 2 >= str.length())
+                break;
+            else
+            {
+                temp = str.substr(i, 3);
+                if (temp == "%20")
+                    str.replace(i, 3, " ");
+            }
+        }
+    }
+}
+
 int    checkUrlSyntax(request &req)
 {
     std::string path = req.path;
+    std::string tmp = req.headers["Query-String"];
+    int tmp_size = 0;
+
+    if (tmp.size() != 0)
+        tmp_size = tmp.size() + 1;
+
     std::string transfer_encoding = req.headers["Transfer-Encoding"];
     if (transfer_encoding.size() != 0 && transfer_encoding != "chunked")
-    {
         return 501;
-    }
     std::string content_length = req.headers["Content-Length"];
     if (req.method == "POST" && (content_length == "0") && (req.headers["Transfer-Encoding"].size() == 0))
-    {
         return 400;
-    }
-    if (req.path.length() > 2048)
+    if ((req.path.length() + tmp_size) > 2048)
         return 414;
-    // int i = 0;
-    
-    // while (i < (int)(path.length() - 2))
-    // {
-    //     if (path[i] == '%' && !(path[i + 1] >= '1' && path[i + 1] <= '9') && !(path[i] >= 'a' && path[i] <= 'f'))
-    //         return 400;
-    //     i++;
-    // }
+    encodingPath(req.path);
     return 0;
 }
 

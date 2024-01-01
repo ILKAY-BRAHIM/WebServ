@@ -132,3 +132,4 @@ std::string get_index(T& location, std::string path, int noIndex)
 
 std::string  get_extension(std::string path);
 t_Dir_Data   readDirectory(std::string path);
+// bool encodingPath(std::string &str, std::vector<std::pair<std::string, std::string> > urlEncoding);
