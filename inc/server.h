@@ -5,7 +5,7 @@
 #include <map>
 #include "colors.h"
 
-# define min_det	0
+# define min_det	1
 
 typedef struct s_types
 {
@@ -17,6 +17,7 @@ typedef struct s_types
 	mapper_t	video;
 	mapper_t	audio;
 	void		clear();
+	s_types();
 }				t_types;
 
 typedef struct s_location
@@ -48,6 +49,7 @@ typedef struct s_location
 	bool						autoindex_localtime;
 	//method
 	void		clear();
+	s_location();
 }	t_location;
 
 typedef struct s_server
@@ -70,6 +72,7 @@ typedef struct s_server
 	std::string 										client_body_size;
 
 	//method
+	s_server();
 	void								clear();
 	std::pair<bool, std::string>		full();
 }	t_server;

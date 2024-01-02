@@ -435,10 +435,11 @@ void Parse::fill_server()
 				else if (type.on)
 				{
 					fill_types(vector, i, type);
-					if ( vector[i+1] == "}")
+					if (vector[i+1] == "}")
 					{
 						lock--;
 						i++;
+
 						server.types.push_back (type);
 						type.clear();
 						if (min_det)
