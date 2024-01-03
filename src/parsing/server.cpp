@@ -1,5 +1,46 @@
 #include "server.h"
 
+/*server methods*/
+
+s_server::s_server()
+{
+	this->clear();
+}
+
+void t_server::clear()
+{
+	name.clear();
+	port.clear();
+	autoindex = false;
+	autoindex_exact_size = false;
+	autoindex_localtime = false;
+	autoindex_format = false;
+	host.clear();
+	root.clear();
+	index.clear();
+	timeout.clear();
+	allow_methods.clear();
+	error_page = std::make_pair(allow_methods, ""); 
+	client_body_size.clear();
+	locations.clear();
+}
+
+std::pair<bool, std::string> t_server::full()
+{
+	if (name.empty() || port.empty() || host.empty() || root.empty())
+		return (std::make_pair(0, "name"));
+	if (error_page.first.empty() || error_page.second.empty())
+		return (std::make_pair(0, "error_page"));
+	return (std::make_pair(1, ""));
+}
+
+/*location methods*/
+
+s_location::s_location()
+{
+	this->clear();
+}
+
 void t_location::clear()
 {
 	path.clear();
@@ -29,22 +70,11 @@ void t_location::clear()
 	internal = false;
 }
 
-void t_server::clear()
+/*types methods*/
+
+s_types::s_types()
 {
-	name.clear();
-	port.clear();
-	autoindex = false;
-	autoindex_exact_size = false;
-	autoindex_localtime = false;
-	autoindex_format = false;
-	host.clear();
-	root.clear();
-	index.clear();
-	timeout.clear();
-	allow_methods.clear();
-	error_page = std::make_pair(allow_methods, ""); 
-	client_body_size.clear();
-	locations.clear();
+	this->clear();
 }
 
 void t_types::clear()
@@ -55,14 +85,4 @@ void t_types::clear()
 	video.clear();
 	audio.clear();
 	application.clear();
-
-}
-
-std::pair<bool, std::string> t_server::full()
-{
-	if (name.empty() || port.empty() || host.empty() || root.empty())
-		return (std::make_pair(0, "name"));
-	if (error_page.first.empty() || error_page.second.empty())
-		return (std::make_pair(0, "error_page"));
-	return (std::make_pair(1, ""));
 }
