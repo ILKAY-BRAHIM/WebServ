@@ -52,7 +52,7 @@ void Server::start_server()
             this->address.sin_addr.s_addr = INADDR_ANY;
             // this->address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
             this->address.sin_port = htons(*it);
-            memset(address.sin_zero, '\0', sizeof this->address.sin_zero);
+            std::memset(address.sin_zero, '\0', sizeof this->address.sin_zero);
 
             if (valid == 0 && bind(server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
             {
@@ -98,8 +98,8 @@ void Server::run()
     FD_ZERO(&this->write_set2);
     while(1)
     {
-        memcpy(&this->working_set, &this->master_set, sizeof(this->master_set));
-        memcpy(&this->write_set2, &this->write_set1, sizeof(this->write_set1));
+        std::memcpy(&this->working_set, &this->master_set, sizeof(this->master_set));
+        std::memcpy(&this->write_set2, &this->write_set1, sizeof(this->write_set1));
         int activity = select(max_fd + 1, &this->working_set, &this->write_set2, NULL, &this->timeout);
         if (activity < 0)
         {
