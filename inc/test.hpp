@@ -29,3 +29,20 @@ typedef struct t_request
     std::map<std::string, std::string> headers;
     std::string body;
 }        request;
+
+typedef struct s_info
+{
+    std::string name;
+    std::string type;
+    std::string size;
+    std::string unity;
+    std::string date;
+}       t_info;
+
+typedef struct s_Dir_Data
+{
+    // typedef std::multimap<std::string, t_info> f_map;
+    // typedef std::multimap<std::string, t_info> d_map;
+    std::multimap<std::string, t_info> file;
+    std::multimap<std::string, t_info> directory;
+}    t_Dir_Data;

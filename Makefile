@@ -3,7 +3,7 @@ NAME = webserv
 SRC = $(addprefix src/,  main.cpp) \
       $(addprefix src/parsing/, Parse.cpp server.cpp) \
 	  $(addprefix src/The_server/, Server_.cpp servers.cpp cgi.cpp) \
-	  $(addprefix src/Response/, response.cpp Message.cpp)
+	  $(addprefix src/Response/, response.cpp Message.cpp readDir.cpp)
 
 INCLUDE_DIR = inc/ # zido hna b / f lakhr
 

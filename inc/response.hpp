@@ -13,6 +13,9 @@
 # include <fcntl.h>
 # include <map>
 # include <sstream>
+# include <ctime>
+#include <dirent.h>
+# include <sstream>
 # include "Parse.hpp"
 # include <sys/stat.h>
 # include <sys/types.h>
@@ -29,7 +32,10 @@
 # define ISFILE 1
 # define NOTFONDE 2
 # define CRLF "\r\n"
-# define CLIENT_MAX_BODY_SIZE 1048576 // equevalent of 10M
+# define CLIENT_MAX_BODY_SIZE 10485760 // equevalent of 10M
+# define KB 1000
+# define MB 1000000
+# define GB 1000000000
 
 class Message;
 
@@ -64,6 +70,7 @@ class Response
         std::string resp; // must delete it mabe
         std::string body;
         std::string path;
+        std::string uploadedFile;
         size_t      content_length;
         std::vector<std::string> r_env;
         t_server    fillServer(request req);
@@ -79,10 +86,13 @@ class Response
         void    checkUrl();
         // void    readPath();
         void        redirect(std::string path, int status);
-        void        uploadFile();
+        int        uploadFile();
         int        postMethod();
         int        deleteMethod();
-        int        specificErrorPage(std::string path);
+        int        specificErrorPage(int error_code);
+        void        unchunkeBody();
+        std::string getRoot();
+        int        generateAutoindexBody();
     public :
         Response();
         Response(std::vector<t_server> servS, char **env);
@@ -120,4 +130,6 @@ std::string get_index(T& location, std::string path, int noIndex)
     return "";
 }
 
-std::string get_extension(std::string path);
+std::string  get_extension(std::string path);
+t_Dir_Data   readDirectory(std::string path);
+// bool encodingPath(std::string &str, std::vector<std::pair<std::string, std::string> > urlEncoding);

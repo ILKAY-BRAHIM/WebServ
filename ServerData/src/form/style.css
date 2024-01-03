@@ -33,6 +33,7 @@ h1 {
 /* Form styles */
 form {
     max-width: 600px;
+    width: 40%;
     margin: 0 auto;
     background-color: #e3e1e1;
     padding: 20px;
@@ -49,7 +50,7 @@ input[type="text"],
 input[type="email"],
 textarea,
 input[type="file"] {
-    width: calc(100% - 24px); /* Adjusted width to accommodate for padding and borders */
+    width:100%; /* Adjusted width to accommodate for padding and borders */
     padding: 8px;
     margin-bottom: 15px;
     border: 1px solid #756b6b;
@@ -86,7 +87,6 @@ button.delete-button {
 }
 
 a{
-    
     text-align: center;
     margin-bottom: 20px;
     color: rgb(23, 55, 45);
@@ -113,6 +113,6 @@ button.delete-button:hover {
   font-size: 1.2em; /* Adjust font size */
   font-weight: bold; /* Set font weight */
   color: #333; /* Set text color */
-  padding-bottom: 1.2em;
+  padding-bottom: 0.5em;
   /* Additional styles */
 }

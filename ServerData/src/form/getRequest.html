@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/x-icon" href="../assets/logo.png">
+    <link rel="stylesheet" href="style.css">
+    <title>Webserv</title>
+</head>
+<body>
+    <h1>Hello world</h1>
+    <div class="container">
+        <form action="../../cgi/getRequest.php" method="get" enctype = "application/x-www-form-urlencoded" >
+            <legend class="form-legend">Get Form</legend>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" ><br><br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" ><br><br>
+            <label for="message">Message:</label><br>
+            <textarea id="message" name="message" rows="4" cols="50" ></textarea><br><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <div class="container">
+        <a href="../../index.html" class="centered-link">back to home</a>
+    </div>
+</body>
+</html>

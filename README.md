@@ -1,7 +1,11 @@
-### Accept header [!] : must resulve
-### Default ERROR Page at Location
-### Aotoindex
-### Transfer-Encoding : chunked
+### Transfer-Encoding : chunked         // solved
+### return of CGI                       // solved 
+### proper root in a directory          // solved
+### redirect keyword                    // solved
+### internal keyword                    // solved
+### Aotoindex                           // solved
+### Default ERROR Page at Location      // solved
 ### Cookis
-### Encoding url
-### return of CGI // solved 
+### sessions
+### Encoding URL
+

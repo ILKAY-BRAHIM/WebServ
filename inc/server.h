@@ -5,7 +5,7 @@
 #include <map>
 #include "colors.h"
 
-# define min_det	0
+# define min_det	1
 
 typedef struct s_types
 {
@@ -17,6 +17,7 @@ typedef struct s_types
 	mapper_t	video;
 	mapper_t	audio;
 	void		clear();
+	s_types();
 }				t_types;
 
 typedef struct s_location
@@ -37,14 +38,18 @@ typedef struct s_location
 	std::string 				client_body_size;		//sets the buffer size for the client request body
 	std::string 				proxy_set_header;		//sets header fields to be passed to the proxied server
 	std::string 				redirect;				//performs url redirection (return or rewrite)
-	std::string					autoindex;
 	std::vector<std::string>	cgi_path;
 	std::vector<std::string>	cgi_ext;
 	std::vector<std::string>	cgi_index;
 	std::vector<std::string>	cgi_script;
 	bool						internal;
+	bool						autoindex;
+	bool						autoindex_exact_size;
+	bool						autoindex_format;
+	bool						autoindex_localtime;
 	//method
 	void		clear();
+	s_location();
 }	t_location;
 
 typedef struct s_server
@@ -60,9 +65,14 @@ typedef struct s_server
 	std::vector<t_location>								locations;
 	std::vector<t_types>								types;
 	std::string											timeout;
-
+	bool												autoindex;
+	bool												autoindex_exact_size;
+	bool												autoindex_format;
+	bool												autoindex_localtime;
+	std::string 										client_body_size;
 
 	//method
+	s_server();
 	void								clear();
 	std::pair<bool, std::string>		full();
 }	t_server;
