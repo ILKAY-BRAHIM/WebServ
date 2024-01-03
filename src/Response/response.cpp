@@ -96,6 +96,16 @@ std::string generateStatusCode(int status)
             break;
         case 302:
             message =  std::to_string(status) + " Found";
+            break;
+        case 304:
+            message =  std::to_string(status) + " Not Modified";
+            break;
+        case 307:
+            message =  std::to_string(status) + " Temporary Redirect";
+            break;
+        case 308:
+            message =  std::to_string(status) + " Permanent Redirect";
+            break;
         }
     }
     else if(status >= 400 && status < 500)
@@ -333,7 +343,10 @@ int    Response::isDirectory(std::string path)
     if (this->location.path.size())
     {
         if (this->location.internal == true)
+        {
+            
             return (403);
+        }
         if (this->location.redirect.size() != 0)
         {
             redirect(this->location.redirect, 301);
@@ -375,7 +388,7 @@ int    Response::isDirectory(std::string path)
         {
             this->path = "";
             if (this->req.method == "POST" || this->req.method == "DELETE")
-                return (0);            
+                return (0);
             return(403);
         }
     }
@@ -1066,7 +1079,7 @@ int	Response::urlRegenerate()
             {
                 if (this->req.method == "DELETE")
                     return (403);
-                redirect((url + "/"), 302);
+                redirect((url + "/"), 307);
                 return (1);
             }
             else
@@ -1130,6 +1143,7 @@ int   Response::generateUploadDeleteBody(std::string method)
 
 int   Response::postMethod()
 {
+
     std::string tmp = this->req.headers["Content-Type"];
     int status;
     if (tmp.size() != 0 && this->location.cgi_index.size() == 0)
@@ -1238,7 +1252,9 @@ void    Response::generateResponse(Message* mes)
             if (this->req.method == "GET")
                 st = generateBody(this->path);
             else if (this->req.method == "POST")
+            {
                 st = postMethod();
+            }
             else
                 st = deleteMethod();
             if (st != 0 && st != 1)

@@ -269,6 +269,7 @@ void Server::run()
                                 static int count = 1;
                                 print_log("recive " + std::to_string(it->second.get_total_body()) + " bytes from client " + std::to_string(it->first), "\033[92m", ++count, it->second.get_total_body(), it->second.get_responce_class()->getContentLength());
                             }
+                            std::cout << "+++++++++ " << a << std::endl;
                             if(it->second.get_responce_class()->getTransfer_Encoding() == false && it->second.get_total_body() == (unsigned long)it->second.get_responce_class()->getContentLength()) // i need  indicate of chunked or not
                             {
                                 it->second.get_responce_class()->setBody(it->second.get_body());
