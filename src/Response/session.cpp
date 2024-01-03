@@ -2,7 +2,7 @@
 
 void    Response::setSession(int fd)
 {
-    int i = 0;
+    size_t i = 0;
 
     while (i < this->sessions.size())
     {
@@ -15,7 +15,7 @@ void    Response::setSession(int fd)
 
 void    Response::unsetSession(int fd)
 {
-    int i = 0;
+    size_t i = 0;
 
     while (i < this->sessions.size())
     {
