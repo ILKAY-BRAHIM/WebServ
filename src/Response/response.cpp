@@ -368,10 +368,10 @@ int    Response::isDirectory(std::string path)
         }
         else if (this->location.index.size() != 0)
             index_ = get_index(this->location, path, 0);
-        // else if (this->location.autoindex == true)
-        // {
-        //     return (generateAutoindexBody());
-        // }
+        else if (this->location.autoindex == true)
+        {
+            return (generateAutoindexBody());
+        }
         else
         {
             if (this->server.index.size() != 0)

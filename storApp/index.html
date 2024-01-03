@@ -2,10 +2,11 @@
 <html>
 <head>
     <title>Login Page</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link id="stylesheet" rel="stylesheet" type="text/css" href="styles.css">
 </head>
-<body>
-    <div class="login-container">
+<body class="light-mode">
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <div class="login-container" id="loginContainer">
         <form id="loginForm" action="login/login.php" method="post">
             <h2>Login</h2>
             <input type="text" name="username" placeholder="Username" required>
@@ -13,5 +14,6 @@
             <button type="submit">Login</button>
         </form>
     </div>
+    <script src="script.js"></script>
 </body>
 </html>
