@@ -63,6 +63,7 @@ class Response
     private :
         char **env;
         std::vector<t_server> servS;
+        std::vector<std::pair<int, std::string> > sessions;
         t_server    server;
         t_location  location;
         resp		respMessage;
@@ -83,8 +84,6 @@ class Response
         std::string generateMessage();
         int     generateUploadDeleteBody(std::string method);
         void    clearResponse();
-        void    checkUrl();
-        // void    readPath();
         void        redirect(std::string path, int status);
         int        uploadFile();
         int        postMethod();
@@ -98,6 +97,8 @@ class Response
         Response(std::vector<t_server> servS, char **env);
         void	generateResponse(Message* mes);
         Message*    checkHeader(std::string req);
+        void       setSession(int fd);
+        void       unsetSession(int fd);
         // Response(const Response &copy);
         // Response& operator=(Response& asignement);
         ~Response();

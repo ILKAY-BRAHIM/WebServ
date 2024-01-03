@@ -1,0 +1,30 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.login-container {
+    width: 300px;
+    margin: 0 auto;
+    margin-top: 100px;
+    text-align: center;
+}
+
+input[type="text"],
+input[type="password"],
+button {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+    padding: 8px;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

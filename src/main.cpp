@@ -55,7 +55,12 @@ void	printServer(std::vector<t_server > serv)
 				std::cout << "		internal: on" << std::endl;
 			else
 				std::cout << "		internal: off" << std::endl;
-
+			if (serv[i].locations[j].autoindex == true)
+				std::cout << "		autoindex: on" << std::endl;
+			else
+				std::cout << "		autoindex: off" << std::endl;
+			if (serv[i].locations[j].client_body_size.size())
+				std::cout << "		client_body_size: " << serv[i].locations[j].client_body_size << std::endl;
 		}
 		std::cout << std::endl;
 	}
