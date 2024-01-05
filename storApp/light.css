@@ -1,0 +1,19 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
+    /* background-color: #f4f4f4; */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: rgb(209, 197, 181);
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin: 1.5em;
+    color: rgb(40, 28, 10);
+}

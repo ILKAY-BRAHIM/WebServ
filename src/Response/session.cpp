@@ -27,3 +27,13 @@ void    Response::unsetSession(int fd)
         i++;
     }
 }
+
+void    Response::printSession()
+{
+    size_t i = 0;
+
+    while (i < this->sessions.size())
+    {
+        i++;
+    }
+}

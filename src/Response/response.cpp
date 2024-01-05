@@ -160,7 +160,7 @@ void	Response::checkMethode()
         throw (501);
     if (this->req.httpVertion != "HTTP/1.1")
         throw (505);
-    this->respMessage.statusCode = "200 OK";
+    // this->respMessage.statusCode = "200 OK";
 	this->respMessage.Server = "Nginx/1.3.3.7 (macOS)";
 }
 
@@ -233,14 +233,14 @@ int    Response::generateAutoindexBody()
             path = this->location.root + this->location.path;
         size = this->location.autoindex_exact_size;
         time = this->location.autoindex_localtime;
-        type = this->location.autoindex;
+        type = this->location.autoindex_format;
     }
     else
     {
         path = this->server.root + '/';
         size = this->server.autoindex_exact_size;
         time = this->server.autoindex_localtime;
-        type = this->server.autoindex;
+        type = this->server.autoindex_format;
     }
     try 
     {
@@ -306,7 +306,8 @@ int    Response::generateAutoindexBody()
                 this->respMessage.body += "<p>"  + it->second.date +  "</p>\n";
             if(size)
                 this->respMessage.body += "<p>"  + it->second.size +  "</p>\n";
-            this->respMessage.body += "<p class=\"sd\">"  + it->second.type +  "</p>\n";
+            if (type)
+                this->respMessage.body += "<p class=\"sd\">"  + it->second.type +  "</p>\n";
             this->respMessage.body += "</div>";
             it++;
         }
@@ -319,7 +320,8 @@ int    Response::generateAutoindexBody()
                 this->respMessage.body += "<p>"  + it->second.date +  "</p>\n";
             if (size)
                 this->respMessage.body += "<p>"  + it->second.size +  "</p>\n";
-            this->respMessage.body += "<p class=\"sd\">"  + it->second.type +  "</p>\n";
+            if (type)
+                this->respMessage.body += "<p class=\"sd\">"  + it->second.type +  "</p>\n";
             this->respMessage.body += "</div>";
             it++;
         }
@@ -587,6 +589,24 @@ std::string generateName()
     return (name);
 }
 
+std::string generateSessionID()
+{
+    std::string id;
+    std::string tmp;
+    char t;
+    int i = 0;
+    while (i < 12)
+    {
+        tmp = std::to_string(rand() % 10);
+        if (rand() % 3 == 0)
+            t = rand() % 26 + 97;
+        tmp += t;
+        id += tmp;
+        i++;
+    }
+    return (id);
+}
+
 int    Response::uploadFile()
 {
     std::string tmpFile;
@@ -639,6 +659,54 @@ int    Response::uploadFile()
     return 0;
 }
 
+void    Response::parseCGI_body(std::string body)
+{
+    std::string line;
+    std::istringstream ss(body);
+    std::string tmp_body;
+    std::vector<std::string> tmp_header;
+    while (1)
+    {
+        std::getline(ss, line, '\n');
+        if (line.find('\r') != std::string::npos)
+        {
+            line.erase(line.find('\r'));
+            if (line.size() != 0)
+                tmp_header.push_back(line);
+        }
+        else
+        {
+            tmp_body = line;
+            while (std::getline(ss, line, '\n'))
+            {
+                tmp_body += '\n';
+                tmp_body += line;
+            }
+            break;
+        }
+    }
+    for (std::vector<std::string>::iterator it = tmp_header.begin(); it != tmp_header.end(); it++)
+        this->cgi_headers.push_back(std::make_pair(it->substr(0, it->find(':')), it->substr(it->find(':') + 1)));
+
+    for (std::vector<std::pair<std::string, std::string> >::iterator it = this->cgi_headers.begin(); it != this->cgi_headers.end(); it++)
+    {
+        std::string tmp_key = it->first;
+        for (size_t i = 0; i < tmp_key.size(); i++)
+            tmp_key[i] = std::tolower(tmp_key[i]);
+        if (tmp_key == "content-type")
+            this->respMessage.Content_Type = it->second;
+        else if (tmp_key == "cache-control")
+            this->respMessage.Cache_Control = it->second;
+        else if (tmp_key == "connection")
+            this->respMessage.Connection = it->second;
+        else if (tmp_key == "status")
+            this->respMessage.statusCode = it->second;
+        else
+            this->header.push_back(it->first + ": " + it->second);
+    }
+    this->respMessage.body = tmp_body;
+}
+
 int    Response::generateBody(std::string path)
 {
     bool cgi = false;
@@ -684,9 +752,12 @@ int    Response::generateBody(std::string path)
         if (cgi_.runCgi() == -1)
             return (500);
         this->respMessage.body = cgi_.get_response();
-        this->respMessage.Content_Type = "text/html";
+        parseCGI_body(this->respMessage.body);
+        if (this->respMessage.Content_Type == "application/octet-stream" || this->respMessage.Content_Type.size() == 0)
+            this->respMessage.Content_Type = "text/html";
         this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
-        this->respMessage.statusCode = generateStatusCode(200);
+        if (this->respMessage.statusCode.size() == 0)
+            this->respMessage.statusCode = generateStatusCode(200);
         while (envp[i] != NULL)
         {
             delete envp[i];
@@ -701,7 +772,8 @@ int    Response::generateBody(std::string path)
         std::string line(std::istreambuf_iterator<char>(fd), (std::istreambuf_iterator<char>()));
         this->respMessage.body = line;
         this->respMessage.Content_Lenght = std::to_string((this->respMessage.body).length());
-        this->respMessage.statusCode = generateStatusCode(200);
+        if (this->respMessage.statusCode.size() == 0)
+            this->respMessage.statusCode = generateStatusCode(200);
     }
     fd.close();
     return (0);
@@ -710,7 +782,6 @@ int    Response::generateBody(std::string path)
 std::string extractLocation(std::string url, std::string root)
 {
     std::string path = url;
-            
     if (access(path.c_str(), F_OK) == 0)
     {
         struct stat fileStat;
@@ -728,12 +799,16 @@ std::string extractLocation(std::string url, std::string root)
             while (it != url.begin())
             {
                 if (*it == '/')
+                {
                     break;
+                }
                 it--;
             }
             original_url = url.substr(0, it - url.begin() + 1);
             if (original_url != "/")
                 original_url.erase(original_url.end() - 1);
+            if (root == original_url)
+                return ("/");
             return (original_url.substr(root.length() , original_url.length() - 1));
         }
     }
@@ -805,6 +880,7 @@ std::string Response::generateMessage()
     }
     if (this->respMessage.Content_Lenght.size() != 0)
     {
+        
         mess += std::string("Content-Length: ");
         mess += this->respMessage.Content_Lenght;
         mess += std::string(CRLF);
@@ -819,6 +895,23 @@ std::string Response::generateMessage()
     {
         mess += std::string("Connection: ");
         mess += this->respMessage.Connection;
+        mess += std::string(CRLF);
+    }
+    if (this->respMessage.Cache_Control.size() != 0)
+    {
+        mess += std::string("Cache-Control: ");
+        mess += this->respMessage.Cache_Control;
+        mess += std::string(CRLF);
+    }
+    if (this->respMessage.Set_Cookie.size() != 0)
+    {
+        mess += std::string("Set-Cookie: ");
+        mess += this->respMessage.Set_Cookie;
+        mess += std::string(CRLF);
+    }
+    for (std::vector<std::string>::iterator it = this->header.begin(); it != this->header.end(); it++)
+    {
+        mess += *it;
         mess += std::string(CRLF);
     }
     // add other headrs 
@@ -851,6 +944,11 @@ void    Response::clearResponse()
     this->req.headers.clear();
     this->req.body.clear();
 
+    this->cgi_headers.clear();
+    this->header.clear();
+    this->r_env.clear();
+
+    this->location.path.clear();
     this->location.clear();
     this->body.clear();
     this->server.clear();
@@ -878,6 +976,7 @@ std::vector<std::string>   cgi_env(request req, t_server server, char **env_syst
     env.push_back("SERVER_PROTOCOL=" + req.httpVertion); // OK ----------------
     env.push_back("SERVER_SOFTWARE=" + std::string("webserv/1.0")); // OK ----------------
     env.push_back("REDIRECT_STATUS=" + std::to_string(200)); // -------------------- MOST BE CHANGED ---------------- [!]
+    env.push_back("HTTP_COOKIE=" + req.headers["Cookie"]); // OK ----------------
     if (env_system != NULL && env_system[0] != NULL)
     {
         std::string tmp;
@@ -1079,7 +1178,7 @@ int	Response::urlRegenerate()
             {
                 if (this->req.method == "DELETE")
                     return (403);
-                redirect((url + "/"), 307);
+                redirect((url + "/"), 308);
                 return (1);
             }
             else
@@ -1271,6 +1370,7 @@ void    Response::generateResponse(Message* mes)
 	}
     if (this->respMessage.Content_Lenght.size() == 0)
         this->respMessage.Content_Lenght = "0";
+    this->respMessage.Cache_Control = "no-cache";
     mes->setResponse(generateMessage());
     clearResponse();
 }
@@ -1278,6 +1378,7 @@ void    Response::generateResponse(Message* mes)
 Message* Response::checkHeader(std::string request_)
 {
     Message *mes = new Message();
+
     request tmp_request = parseRequest(request_);
     int url = checkUrlSyntax(tmp_request);
     mes->setStatus(0);
