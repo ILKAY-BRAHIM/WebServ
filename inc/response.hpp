@@ -25,12 +25,7 @@
 #include "test.hpp"
 #include "cgi.hpp"
 
-// class   Message ;
-#define PORT 81
 
-#define ISDIR 0
-#define ISFILE 1
-#define NOTFONDE 2
 #define CRLF "\r\n"
 #define CLIENT_MAX_BODY_SIZE 10485760 // equevalent of 10M
 #define KB 1000
@@ -57,19 +52,19 @@ typedef struct t_response
     std::string body;
 } resp;
 
+
+
 class Response
 {
 private:
     char **env;
     std::vector<t_server> servS;
-    std::vector<std::pair<int, std::string> > sessions;
-    std::vector<std::pair<std::string, std::string> > cgi_headers;
+    // std::vector<std::pair<int, std::string> > sessions;
     std::vector<std::string> header;
     t_server server;
     t_location location;
     resp respMessage;
     request req;
-    std::string resp; // must delete it mabe
     std::string body;
     std::string path;
     std::string uploadedFile;
@@ -95,14 +90,12 @@ private:
     int generateAutoindexBody();
     void printSession();
     void parseCGI_body(std::string body);
-
+    void collectSession(std::string session);
 public:
     Response();
     Response(std::vector<t_server> servS, char **env);
     void generateResponse(Message *mes);
     Message *checkHeader(std::string req);
-    void setSession(int fd);
-    void unsetSession(int fd);
     // Response(const Response &copy);
     // Response& operator=(Response& asignement);
     ~Response();
@@ -137,4 +130,4 @@ std::string get_index(T &location, std::string path, int noIndex)
 
 std::string get_extension(std::string path);
 t_Dir_Data readDirectory(std::string path);
-// bool encodingPath(std::string &str, std::vector<std::pair<std::string, std::string> > urlEncoding);
+std::string generateStatusCode(int status);

@@ -116,7 +116,6 @@ void Server::run()
                 if (std::clock() -  it->second.get_start() >= 6000)
                 {
                     std::cout << "\033[91mconnection close by server... \033[39m" << std::endl;
-                    this->resp.unsetSession(it->first);
                     close(it->first);
                     FD_CLR(it->first, &this->master_set);
                     if (it->first == max_fd)
@@ -179,7 +178,6 @@ void Server::run()
                             s.set_start(std::clock());
                             s.set_redirection(0);
                             this->serv2.push_back(std::pair<int, Servers>(new_socket, s));
-                            this->resp.setSession(new_socket);
                         }
                     }
                     else if (valid == 0)
@@ -191,7 +189,6 @@ void Server::run()
                         s.set_redirection(0);
                         s.set_start(std::clock());
                         this->serv2.push_back(std::pair<int, Servers>(new_socket, s));
-                        this->resp.setSession(new_socket);
                     }
                 }
                 else
@@ -209,7 +206,6 @@ void Server::run()
                                 std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
                                 if (a == 0)
                                     std::cout << "socket " << i << " hung up" << std::endl;
-                                this->resp.unsetSession(i);
                                 close(i);
                                 FD_CLR(i, &this->master_set);
                                 if (i == max_fd)
@@ -252,7 +248,6 @@ void Server::run()
                                 std::cout << "\033[91mconnection close by peer... \033[39m" << std::endl;
                                 if (a == 0)
                                     std::cout << "socket " << i << " hung up" << std::endl;
-                                this->resp.unsetSession(i);
                                 close(i);
                                 FD_CLR(i, &this->master_set);
                                 if (i == max_fd)
@@ -312,7 +307,6 @@ void Server::run()
                             {
                                 std::cout << std::endl;
                                 std::cout << "\033[91mconnection close by peer2... \033[39m" << std::endl;
-                                this->resp.unsetSession(i);
                                 close(i);
                                 FD_CLR(i, &this->write_set1);
                                 if (i == max_fd)
@@ -333,7 +327,6 @@ void Server::run()
                             {
                                 std::cout << std::endl;
                                 std::cout << "\033[91mconnection close by peer1... \033[39m" << std::endl;
-                                this->resp.unsetSession(i);
                                 close(i);
                                 FD_CLR(i, &this->write_set1);
                                 if (i == max_fd)
