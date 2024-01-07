@@ -28,6 +28,7 @@
 
 #define CRLF "\r\n"
 #define CLIENT_MAX_BODY_SIZE 10485760 // equevalent of 10M
+#define MEGABYTE 1048576
 #define KB 1000
 #define MB 1000000
 #define GB 1000000000
@@ -56,50 +57,47 @@ typedef struct t_response
 void    clearDirectory(std::string ini_dir);
 class Response
 {
-private:
-    char **env;
-    std::vector<t_server> servS;
-    // std::vector<std::pair<int, std::string> > sessions;
-    std::vector<std::string> header;
-    t_server server;
-    t_location location;
-    resp respMessage;
-    request req;
-    std::string body;
-    std::string path;
-    std::string uploadedFile;
-    size_t content_length;
-    std::vector<std::string> r_env;
-    t_server fillServer(request req);
-    void checkMethode();
-    int urlRegenerate();
-    int generateBody(std::string path);
-    int isDirectory(std::string path);
-    int getLocation(std::string url);
-    void generateBodyError(int error);
-    std::string generateMessage();
-    int generateUploadDeleteBody(std::string method);
-    void clearResponse();
-    void redirect(std::string path, int status);
-    int uploadFile();
-    int postMethod();
-    int deleteMethod();
-    int specificErrorPage(int error_code);
-    void unchunkeBody();
-    std::string getRoot();
-    int generateAutoindexBody();
-    void printSession();
-    void parseCGI_body(std::string body);
-    void collectSession(std::string session);
-public:
-    Response();
-    Response(std::vector<t_server> servS, char **env);
-    void generateResponse(Message *mes);
-    Message *checkHeader(std::string req);
-    void removeSession_Database(){clearDirectory("./session/"); clearDirectory("./properDataBase/");}
-    // Response(const Response &copy);
-    // Response& operator=(Response& asignement);
-    ~Response();
+    private:
+        char **env;
+        std::vector<t_server> servS;
+        std::vector<std::string> header;
+        t_server server;
+        t_location location;
+        resp respMessage;
+        request req;
+        std::string body;
+        std::string path;
+        std::string uploadedFile;
+        size_t content_length;
+        std::vector<std::string> r_env;
+        t_server fillServer(request req);
+        void checkMethode();
+        int urlRegenerate();
+        int generateBody(std::string path);
+        int isDirectory(std::string path);
+        int getLocation(std::string url);
+        void generateBodyError(int error);
+        std::string generateMessage();
+        int generateUploadDeleteBody(std::string method);
+        void clearResponse();
+        void redirect(std::string path, int status);
+        int uploadFile();
+        int postMethod();
+        int deleteMethod();
+        int specificErrorPage(int error_code);
+        void unchunkeBody();
+        std::string getRoot();
+        int generateAutoindexBody();
+        void printSession();
+        void parseCGI_body(std::string body);
+        void collectSession(std::string session);
+    public:
+        Response();
+        Response(std::vector<t_server> servS, char **env);
+        void generateResponse(Message *mes);
+        Message *checkHeader(std::string req);
+        void removeSession_Database();
+        ~Response();
 };
 
 
