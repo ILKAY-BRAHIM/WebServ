@@ -1022,4 +1022,10 @@ void    Response::generateResponse(Message* mes)
     removeSession_Database();
 }
 
+void    Response::removeSession_Database()
+{
+    clearDirectory("./session/");
+    clearDirectory("./properDataBase/");
+}
+
 Response::~Response(){};

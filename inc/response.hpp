@@ -96,7 +96,7 @@ class Response
         Response(std::vector<t_server> servS, char **env);
         void generateResponse(Message *mes);
         Message *checkHeader(std::string req);
-        void removeSession_Database(){clearDirectory("./session/"); clearDirectory("./properDataBase/");}
+        void removeSession_Database();
         ~Response();
 };
 
