@@ -29,6 +29,7 @@ class Parse
 void fill_autoindexs(vectstr_t &vector, int &i, bool &autoindex, std::string msg);
 		void						fill_error_page(vectstr_t &vector, int &i, t_server &server, int size);
 		void						fill_parts(vectstr_t vector, int &i, std::string &to_fill, std::string msg);
+		void						fill_cbz(vectstr_t vector, int &i, std::string &to_fill, std::string msg);
 		void						fill_server();
 		void						last_check();
 		void						handle_location(vectstr_t vector, int &i, t_location &location);
