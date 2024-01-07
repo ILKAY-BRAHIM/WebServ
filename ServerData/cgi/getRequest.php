@@ -1,4 +1,4 @@
-#!./ServerData/cgi/php-cgi
+#!./php-cgi/php-cgi
 <html lang="en">
 <head>
 <style>

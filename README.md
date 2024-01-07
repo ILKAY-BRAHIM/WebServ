@@ -5,7 +5,7 @@
 ### internal keyword                    // solved
 ### Aotoindex                           // solved
 ### Default ERROR Page at Location      // solved
-### Cookis
+### Cookis                              // solved
+### Encoding URL                        // solved
 ### sessions
-### Encoding URL
 

@@ -1,0 +1,43 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.light-mode {
+    background-color: #ebe7db; /* Light mode background color */
+    color: #333; /* Light mode text color */
+}
+
+.dark-mode {
+    background-color: #333; /* Dark mode background color */
+    color: #ebe7db; /* Dark mode text color */
+}
+
+.login-container {
+    width: 300px;
+    margin: 0 auto;
+    margin-top: 100px;
+    text-align: center;
+}
+
+input[type="text"],
+input[type="password"],
+button {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+    padding: 8px;
+    background-color: inherit;
+    color: inherit;
+    border: 1px solid #ccc;
+}
+
+button {
+    background-color: #c7b9a0;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #c7b9a0;
+}
