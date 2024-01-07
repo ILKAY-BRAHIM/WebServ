@@ -21,13 +21,16 @@ SRC_DIR = src
 
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98  -fsanitize=address -g -I$(INCLUDE_DIR)
 
+EXTRA_NEEDED_FILES = properDataBase session
+
 all : $(OBJ_DIR) $(NAME)
 
 $(OBJ_DIR) :
 	mkdir -p $(OBJ_DIR)
 	@mkdir -p $(dir $(OBJ))
-	@mkdir -p properDataBase
-	@mkdir -p session
+	@rm -rf $(EXTRA_NEEDED_FILES)
+	@mkdir -p $(EXTRA_NEEDED_FILES)
+
 
 $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp $(INCLUDES)
 	$(CC) $(CPPFLAGS) -c $< -o $@
@@ -41,8 +44,7 @@ clean :
 
 fclean : clean
 	rm -f $(NAME)
-	@rm -rf session
-	@rm -rf properDataBase 
+	@rm -rf $(EXTRA_NEEDED_FILES)
 
 re : fclean all
 
