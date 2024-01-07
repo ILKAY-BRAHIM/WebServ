@@ -1025,6 +1025,9 @@ void    Response::generateResponse(Message* mes)
         this->respMessage.Content_Lenght = "0";
     mes->setResponse(generateMessage());
     clearResponse();
+    removeSession_Database();
+    // clearDirectory("./session/");
+    // clearDirectory("./properDataBase/");
 }
 
 Response::~Response(){};

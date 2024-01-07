@@ -53,7 +53,7 @@ typedef struct t_response
 } resp;
 
 
-
+void    clearDirectory(std::string ini_dir);
 class Response
 {
 private:
@@ -96,10 +96,12 @@ public:
     Response(std::vector<t_server> servS, char **env);
     void generateResponse(Message *mes);
     Message *checkHeader(std::string req);
+    void removeSession_Database(){clearDirectory("./session/"); clearDirectory("./properDataBase/");}
     // Response(const Response &copy);
     // Response& operator=(Response& asignement);
     ~Response();
 };
+
 
 template <typename T>
 std::string get_index(T &location, std::string path, int noIndex)
