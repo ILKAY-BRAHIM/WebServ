@@ -133,7 +133,7 @@ void Server::run()
             }
         }
         int i = 0;
-        while(i++ <= 1024 && activity > 0)
+        while(i++ <= (max_fd + 1)  && activity > 0)
         {
             if (FD_ISSET(i, &this->working_set))
             {
@@ -142,6 +142,7 @@ void Server::run()
                 if (y < fds.size() && i == this->fds[y])
                 {
                     int new_socket = accept(this->fds[y], (struct sockaddr *)&this->address, (socklen_t*)&addrlen);
+                    std:: cout << "new connection" << new_socket << std::endl;
                     int valid = 0;
                     if (new_socket < 0)
                     {
@@ -225,7 +226,7 @@ void Server::run()
                             }
                             if (it->first == i &&  it->second.get_request().find(  "\r\n\r\n") != std::string::npos)
                             {
-                                // std::cout <<"hi ... "<< it->second.get_request() << std::endl;
+                                // std::cout <<"hi ... "<< i  <<  " " << it->second.get_request() << std::endl;
                                 Message *resw =  this->resp.checkHeader(it->second.get_request()); // incoming changed..
                                 it->second.set_responce_class(resw);
                                 if(it->second.get_responce_class()->getContentLength() != 0 || it->second.get_responce_class()->getTransfer_Encoding() == true)
