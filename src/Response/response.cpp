@@ -391,9 +391,7 @@ int checkMimeType(std::vector<t_types> types, std::string type)
             while (itt != type_->end())
             {
                 if (itt->first == type)
-                {
                     return (1);
-                }
                 itt++;
             }
             type_++;
@@ -618,9 +616,7 @@ std::string extractLocation(std::string url, std::string root)
             while (it != url.begin())
             {
                 if (*it == '/')
-                {
                     break;
-                }
                 it--;
             }
             original_url = url.substr(0, it - url.begin() + 1);
@@ -685,8 +681,6 @@ std::string Response::generateMessage()
         mess += *it;
         mess += std::string(CRLF);
     }
-    // add other headrs 
-    //  ...
     mess += std::string(CRLF);
     if (this->respMessage.body.size() != 0)
         mess += this->respMessage.body;
@@ -988,7 +982,7 @@ void    Response::generateResponse(Message* mes)
         this->r_env = mes->getEnv();
         this->content_length = mes->getContentLength();
 		checkMethode();
-        state = urlRegenerate(); // the location is filled here
+        state = urlRegenerate();
         if (state != 0 && state != 1)
             throw (state);
         if (state == 0)

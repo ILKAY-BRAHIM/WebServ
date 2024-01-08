@@ -12,24 +12,8 @@
 #include <vector>
 #include <fcntl.h>
 #include <cstring>
-
-#include <stdio.h>
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <errno.h>
 #include <arpa/inet.h>
-#include <string>
-#include <stdlib.h>
 #include <cstdbool>
-#include <signal.h>
-#include <sys/wait.h>
-#include <sys/socket.h>
-// #include "cgi.hpp"
 
 
 class Server
