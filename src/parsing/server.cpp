@@ -27,8 +27,14 @@ void t_server::clear()
 
 std::pair<bool, std::string> t_server::full()
 {
-	if (name.empty() || port.empty() || host.empty() || root.empty())
+	if (name.empty())
 		return (std::make_pair(0, "name"));
+	if (port.empty())
+		return (std::make_pair(0, "port"));
+	if (host.empty() || bind.size () != 4 || !std::isdigit (host[host.size () - 1]))
+		return (std::make_pair(0, "host"));
+	if (root.empty())
+		return (std::make_pair(0, "root"));
 	if (error_page.first.empty() || error_page.second.empty())
 		return (std::make_pair(0, "error_page"));
 	return (std::make_pair(1, ""));
