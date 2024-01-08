@@ -16,6 +16,7 @@ void t_server::clear()
 	autoindex_localtime = false;
 	autoindex_format = false;
 	host.clear();
+	bind.clear();
 	root.clear();
 	index.clear();
 	timeout.clear();
