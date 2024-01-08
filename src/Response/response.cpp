@@ -691,11 +691,9 @@ void    Response::clearResponse()
 {
     this->respMessage.http_version.clear();
     this->respMessage.statusCode.clear();
-    this->respMessage.Access_Controle_Allow_Origin.clear();
     this->respMessage.Cache_Control.clear();
     this->respMessage.Content_Type.clear();
     this->respMessage.Content_Lenght.clear();
-    this->respMessage.ETag.clear();
     this->respMessage.Last_Modified.clear();
     this->respMessage.Location.clear();
     this->respMessage.Set_Cookie.clear();

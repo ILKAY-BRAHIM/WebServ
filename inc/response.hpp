@@ -1,36 +1,28 @@
 #pragma once
 
-// #include <algorithm>
-#include "server.h"
-// #include <stdio.h>
-#include <iostream>
-// #include <sys/socket.h>
-// #include <unistd.h>
-#include <fstream>
-// #include <stdlib.h>
-// #include <netinet/in.h>
-#include <string.h>
-#include <fcntl.h>
-#include <map>
-#include <sstream>
-#include <ctime>
-#include <dirent.h>
-#include <sstream>
-#include "Parse.hpp"
-// #include <sys/stat.h>
-// #include <sys/types.h>
-// #include <utility>
-#include "Message.hpp"
-#include "dataType.hpp"
-#include "cgi.hpp"
+# include <algorithm>
+# include "server.h"
+# include <fstream>
+# include <fcntl.h>
+# include <sstream>
+# include <ctime>
+# include <dirent.h>
+# include <sstream>
+# include "Parse.hpp"
+# include <sys/stat.h>
+# include <sys/types.h>
+# include <utility>
+# include "Message.hpp"
+# include "dataType.hpp"
+# include "cgi.hpp"
 
 
-#define CRLF "\r\n"
-#define CLIENT_MAX_BODY_SIZE 10485760 // equevalent of 10M
-#define MEGABYTE 1048576
-#define KB 1000
-#define MB 1000000
-#define GB 1000000000
+# define CRLF "\r\n"
+# define CLIENT_MAX_BODY_SIZE 10485760 // equevalent of 10M
+# define MEGABYTE 1048576
+# define KB 1000
+# define MB 1000000
+# define GB 1000000000
 
 class Message;
 
@@ -38,16 +30,14 @@ typedef struct t_response
 {
     std::string http_version;
     std::string statusCode;
-    std::string Access_Controle_Allow_Origin;
     std::string Cache_Control;
     std::string Set_Cookie;
     std::string Content_Type;
     std::string Content_Lenght;
-    std::string ETag;
     std::string Last_Modified;
-    std::string Location; //+
+    std::string Location;
     std::string Server;
-    std::string query_String; //+
+    std::string query_String;
     std::string Connection;
     std::string body;
 } resp;
@@ -56,47 +46,45 @@ typedef struct t_response
 void    clearDirectory(std::string ini_dir);
 class Response
 {
-    private:
-        char **env;
-        std::vector<t_server> servS;
-        std::vector<std::string> header;
-        t_server server;
-        t_location location;
-        resp respMessage;
-        request req;
-        std::string body;
-        std::string path;
-        std::string uploadedFile;
-        size_t content_length;
-        std::vector<std::string> r_env;
-        t_server fillServer(request req);
-        void checkMethode();
-        int urlRegenerate();
-        int generateBody(std::string path);
-        int isDirectory(std::string path);
-        int getLocation(std::string url);
-        void generateBodyError(int error);
-        std::string generateMessage();
-        int generateUploadDeleteBody(std::string method);
-        void clearResponse();
-        void redirect(std::string path, int status);
-        int uploadFile();
-        int postMethod();
-        int deleteMethod();
-        int specificErrorPage(int error_code);
-        void unchunkeBody();
-        std::string getRoot();
-        int generateAutoindexBody();
-        void printSession();
-        void parseCGI_body(std::string body);
-        void collectSession(std::string session);
-    public:
-        Response();
-        Response(std::vector<t_server> servS, char **env);
-        void generateResponse(Message *mes);
-        Message *checkHeader(std::string req);
-        void removeSession_Database();
-        ~Response();
+	private:
+		char						**env;
+		std::vector<t_server>		servS;
+		std::vector<std::string>	header;
+		t_server					server;
+		t_location					location;
+		resp						respMessage;
+		request						req;
+		std::string					body;
+		std::string					path;
+		std::string					uploadedFile;
+		size_t						content_length;
+		std::vector<std::string>	r_env;
+		t_server fillServer(request req);
+		void checkMethode();
+		int urlRegenerate();
+		int generateBody(std::string path);
+		int isDirectory(std::string path);
+		int getLocation(std::string url);
+		void generateBodyError(int error);
+		std::string generateMessage();
+		int generateUploadDeleteBody(std::string method);
+		void clearResponse();
+		void redirect(std::string path, int status);
+		int uploadFile();
+		int postMethod();
+		int deleteMethod();
+		int specificErrorPage(int error_code);
+		void unchunkeBody();
+		std::string getRoot();
+		int generateAutoindexBody();
+		void parseCGI_body(std::string body);
+	public:
+		Response();
+		Response(std::vector<t_server> servS, char **env);
+		void generateResponse(Message *mes);
+		Message *checkHeader(std::string req);
+		void removeSession_Database();
+		~Response();
 };
 
 
@@ -127,6 +115,6 @@ std::string get_index(T &location, std::string path, int noIndex)
     return "";
 }
 
-std::string get_extension(std::string path);
-t_Dir_Data readDirectory(std::string path);
-std::string generateStatusCode(int status);
+std::string	get_extension(std::string path);
+t_Dir_Data	readDirectory(std::string path);
+std::string	generateStatusCode(int status);
