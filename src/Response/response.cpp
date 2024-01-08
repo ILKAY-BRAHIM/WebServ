@@ -1,4 +1,3 @@
-
 #include "response.hpp"
 
 Response::Response(void){};
@@ -8,8 +7,6 @@ Response::Response(std::vector<t_server> servS, char **env)
     this->servS = servS;
     this->env = env;
 }
-
-// Response::Response(const Response& copy){};
 
 bool    allowedMethod(std::vector<std::string> methods, std::string method)
 {
@@ -752,7 +749,7 @@ size_t  getSize(std::string size)
     if (size.size() != 0)
     {
         s = atoi(size.c_str());
-        s *= CLIENT_MAX_BODY_SIZE;
+        s *= MEGABYTE;
         if (s != 0 && s <= (CLIENT_MAX_BODY_SIZE))
             return (s);
     }
@@ -922,7 +919,7 @@ int   Response::postMethod()
 int   Response::deleteMethod()
 {
     if (this->req.headers["Content-Type"].size() != 0)
-        return (415);
+        return (501);
     if (remove(this->path.c_str()) != 0)
         return (403);
     if (this->location.redirect.size() == 0)
@@ -992,7 +989,6 @@ void    Response::generateResponse(Message* mes)
             throw (state);
         if (state == 0)
         {
-
             std::vector<std::string> tmp;
             if (this->location.path.size() && this->location.allow_methods.size())
                 tmp = this->location.allow_methods;
@@ -1004,9 +1000,7 @@ void    Response::generateResponse(Message* mes)
             if (this->req.method == "GET")
                 st = generateBody(this->path);
             else if (this->req.method == "POST")
-            {
                 st = postMethod();
-            }
             else
                 st = deleteMethod();
             if (st != 0 && st != 1)
@@ -1025,6 +1019,13 @@ void    Response::generateResponse(Message* mes)
         this->respMessage.Content_Lenght = "0";
     mes->setResponse(generateMessage());
     clearResponse();
+    removeSession_Database();
+}
+
+void    Response::removeSession_Database()
+{
+    clearDirectory("./session/");
+    clearDirectory("./properDataBase/");
 }
 
 Response::~Response(){};
