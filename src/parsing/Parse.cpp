@@ -75,6 +75,100 @@ bool semi_colone(std::string str)
 	return (str[str.size() - 1] == ';');
 }
 
+static std::string print_s(std::string &file, size_t i)
+{
+	size_t j = i;
+	
+	while (j < file.size() && file[j] != ';')
+	{
+		std::cout << file[j];
+		j++;
+	}
+	return ("");
+}
+
+bool is_valid_number_type(std::string &file)
+{
+	size_t i = 0;
+	size_t size = file.size();
+	while (i < size)
+	{
+		if (std::isdigit(file[i]))
+			i++;
+		else
+			break;
+	}
+	if (i == size - 1)
+		return (1);
+	else if ((file[i] == 'm' || file[i] == 'M') && i + 1 <= size && file[i + 1] == ';')
+		return (file = file.substr(0, i) + ";", 1);
+	else
+		std::cout << YELLOW << "Warning : \"" << print_s(file, i) << "\" is not a type to use in client_body_size, " << "client_body_size can just be used by adding \'m\' or \'M\' at the end of the number, in case if there is no m or M, the size will be used in megabyts\n" << WHITE;
+	return (0);
+}
+
+void Parse::fill_cbz(vectstr_t vector, int &i, std::string &to_fill, std::string msg)
+{
+	if (!to_fill.empty())
+		throw Parse::ServerError(std::string("duplicated " + msg.substr(0, msg.size() - 2)).c_str());
+	int size = vector.size ();
+	if (++i < size && semi_colone(vector[i]))
+	{
+		if (is_valid_number_type (vector[i]))
+		{
+			to_fill = vector[i].substr(0, vector[i].size() - 1);
+			if (min_det)
+				std::cout << msg + to_fill + "\n";
+		}
+	}
+	else
+		throw Parse::ServerError("needs a \';\'");
+}
+
+std::vector<int> extracting (std::string &host)
+{
+	std::vector<int> re;
+	size_t i;
+	size_t size = host.size ();
+	size_t start;
+
+	i = 0;
+	while (i < size)
+	{
+		start = i;
+		while (i < size && std::isdigit(host[i]))
+			i++;
+		re.push_back (std::atoi(host.substr (start, i).c_str()));
+		if (host[i] == '.')
+			i++;
+		else
+			break ;
+	}
+	if (min_det)
+	{
+		size_t j = -1;
+		while (++j < re.size())
+			std::cout << ">>bind[" << j << "] = " << re[j] << "\n";
+	}
+	return (re);
+}
+
+void Parse::fill_host(vectstr_t vector, int &i, t_server &server, std::string msg)
+{
+	if (!server.host.empty())
+		throw Parse::ServerError(std::string("duplicated " + msg.substr(0, msg.size() - 2)).c_str());
+	int size = vector.size ();
+	if (++i < size && semi_colone(vector[i]))
+	{
+		server.host = vector[i].substr(0, vector[i].size() - 1);
+		server.bind = extracting (server.host);
+		if (min_det)
+			std::cout << msg + server.host + "\n";
+	}
+	else
+		throw Parse::ServerError("needs a \';\'");
+}
+
 void Parse::fill_parts(vectstr_t vector, int &i, std::string &to_fill, std::string msg)
 {
 	if (!to_fill.empty())
@@ -385,7 +479,7 @@ void Parse::fill_server()
 				else if (vector[i] == "listen")
 					fill_listen_port(vector, i, server.port);
 				else if (vector[i] == "host")
-					fill_parts(vector, i, server.host, "host : ");
+					fill_host(vector, i, server, "host : ");
 				else if (vector[i] == "root")
 					fill_parts(vector, i, server.root, "root : ");
 				else if (vector[i] == "timeout")
@@ -413,7 +507,8 @@ void Parse::fill_server()
 				else if (vector[i] == "autoindex_localtime")
 					fill_autoindexs(vector, i, server.autoindex_localtime, "autoindex_localtime : ");
 				else if (vector[i] == "client_body_size")
-					fill_parts(vector, i, server.client_body_size, "client_body_size : ");
+					fill_cbz (vector, i, server.client_body_size, "client_body_size : ");
+					//fill_parts(vector, i, server.client_body_size, "client_body_size : ");
 				else
 					throw Parse::ServerError(std::string("not allowed or defined keyword -> " + vector[i]).c_str());
 			}

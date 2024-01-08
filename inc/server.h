@@ -57,6 +57,7 @@ typedef struct s_server
 	std::string 										name;
 	std::vector<int>									port;
 	std::string 										host;
+	std::vector<int>									bind;
 	std::string 										root;
 	std::vector<std::string>							allow_methods;
 	std::string											redirect;
