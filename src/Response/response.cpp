@@ -574,6 +574,7 @@ int    Response::generateBody(std::string path)
             if (this->respMessage.statusCode.size() == 0)
                 this->respMessage.statusCode = generateStatusCode(200);
         }
+        i = 0;
         while (envp[i] != NULL)
         {
             delete envp[i];
@@ -717,10 +718,13 @@ void    Response::clearResponse()
     this->header.clear();
     this->r_env.clear();
 
-    this->location.path.clear();
     this->location.clear();
+
     this->body.clear();
     this->server.clear();
+    this->path.clear();
+    this->uploadedFile.clear();
+    this->content_length = 0;
 }
 
 t_location  fillLocation(t_server &serv, request& req)
@@ -1019,7 +1023,6 @@ void    Response::generateResponse(Message* mes)
         this->respMessage.Content_Lenght = "0";
     mes->setResponse(generateMessage());
     clearResponse();
-    removeSession_Database();
 }
 
 void    Response::removeSession_Database()

@@ -90,8 +90,6 @@ int main (int ac, char **av, char **env)
 	}
 	catch(const char *e)
 	{
-		// std::cout << "Error: " << e << std::endl;
-
 		std::cerr << "\nErrorr: " << e << std::endl;
 		return (1);
 	}
