@@ -7,18 +7,6 @@ Server::Server(std::vector<t_server> &server, Response &resp)
     this->resp = resp;
 }
 
-Server::Server(const Server &other)
-{
-    *this = other;
-}
-
-Server &Server::operator=(const Server &other)
-{
-    if (this != &other)
-        this->server = other.server;
-    return (*this);
-}
-
 void Server::start_server()
 {
     int server_fd;
