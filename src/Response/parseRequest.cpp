@@ -160,7 +160,7 @@ std::vector<std::string>   cgi_env(request req, t_server server, char **env_syst
     env.push_back("SERVER_PORT=" + std::to_string(server.port[0])); 
     env.push_back("SERVER_PROTOCOL=" + req.httpVertion);
     env.push_back("SERVER_SOFTWARE=" + std::string("webserv/1.0"));
-    env.push_back("REDIRECT_STATUS=" + std::to_string(200)); // -------------------- MOST BE CHANGED ---------------- [!]
+    env.push_back("REDIRECT_STATUS=" + std::to_string(200));
     env.push_back("HTTP_COOKIE=" + req.headers["Cookie"]);
     if (env_system != NULL && env_system[0] != NULL)
     {
@@ -169,15 +169,15 @@ std::vector<std::string>   cgi_env(request req, t_server server, char **env_syst
         {
             tmp = env_system[i];
             if (tmp.find("PATH=") != std::string::npos)
-                env.push_back("PATH=" + std::string(env_system[i] + 5));
+                env.push_back(std::string(env_system[i]));
             else if (tmp.find("LANG=") != std::string::npos)
-                env.push_back("LANG=" + std::string(env_system[i] + 5));
+                env.push_back(std::string(env_system[i]));
             else if (tmp.find("HOME=") != std::string::npos)
-                env.push_back("HOME=" + std::string(env_system[i] + 5));
+                env.push_back(std::string(env_system[i]));
             else if (tmp.find("LOGNAME=") != std::string::npos)
-                env.push_back("LOGNAME=" + std::string(env_system[i] + 8));
+                env.push_back(std::string(env_system[i]));
             else if (tmp.find("USER=") != std::string::npos)
-                env.push_back("USER=" + std::string(env_system[i] + 5));
+                env.push_back(std::string(env_system[i]));
         }
     }
     return (env);
@@ -186,9 +186,9 @@ std::vector<std::string>   cgi_env(request req, t_server server, char **env_syst
 Message* Response::checkHeader(std::string request_)
 {
     Message *mes = new Message();
-
     request tmp_request = parseRequest(request_);
     int url = checkUrlSyntax(tmp_request);
+
     mes->setStatus(0);
     mes->setContentLength(0);
     if (url != 0)

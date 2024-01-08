@@ -19,7 +19,7 @@ CC = c++
 
 SRC_DIR = src
 
-CPPFLAGS = -Wall -Wextra -Werror -std=c++98  -I$(INCLUDE_DIR)
+CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -I$(INCLUDE_DIR)
 
 EXTRA_NEEDED_FILES = properDataBase session
 

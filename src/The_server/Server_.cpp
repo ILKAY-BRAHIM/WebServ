@@ -48,9 +48,13 @@ void Server::start_server()
                 std::cerr << "fcntl failed" << std::endl;
                 valid = 1;
             }
-            this->address.sin_family = AF_INET;
-            this->address.sin_addr.s_addr = INADDR_ANY;
+            this->address.sin_family = AF_INET; 
             this->address.sin_port = htons(*it);
+            if (inet_pton(AF_INET, server[i].host.c_str(), &this->address.sin_addr) <= 0)
+            {
+                std::cerr << "Can't assign requested address" << std::endl;
+                valid = 1;
+            }
             std::memset(address.sin_zero, '\0', sizeof this->address.sin_zero);
 
             if (valid == 0 && bind(server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
@@ -100,7 +104,7 @@ void Server::run()
         std::memcpy(&this->working_set, &this->master_set, sizeof(this->master_set));
         std::memcpy(&this->write_set2, &this->write_set1, sizeof(this->write_set1));
         int activity = select(max_fd + 1, &this->working_set, &this->write_set2, NULL, &this->timeout);
-        // this->resp.removeSession_DataBase();
+        this->resp.removeSession_Database();
         if (activity < 0)
         {
             std::cerr << "select error" << std::endl;

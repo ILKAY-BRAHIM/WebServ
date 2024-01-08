@@ -125,6 +125,49 @@ void Parse::fill_cbz(vectstr_t vector, int &i, std::string &to_fill, std::string
 		throw Parse::ServerError("needs a \';\'");
 }
 
+std::vector<int> extracting (std::string &host)
+{
+	std::vector<int> re;
+	size_t i;
+	size_t size = host.size ();
+	size_t start;
+
+	i = 0;
+	while (i < size)
+	{
+		start = i;
+		while (i < size && std::isdigit(host[i]))
+			i++;
+		re.push_back (std::atoi(host.substr (start, i).c_str()));
+		if (host[i] == '.')
+			i++;
+		else
+			break ;
+	}
+	if (min_det)
+	{
+		size_t j = -1;
+		while (++j < re.size())
+			std::cout << ">>bind[" << j << "] = " << re[j] << "\n";
+	}
+	return (re);
+}
+
+void Parse::fill_host(vectstr_t vector, int &i, t_server &server, std::string msg)
+{
+	if (!server.host.empty())
+		throw Parse::ServerError(std::string("duplicated " + msg.substr(0, msg.size() - 2)).c_str());
+	int size = vector.size ();
+	if (++i < size && semi_colone(vector[i]))
+	{
+		server.host = vector[i].substr(0, vector[i].size() - 1);
+		server.bind = extracting (server.host);
+		if (min_det)
+			std::cout << msg + server.host + "\n";
+	}
+	else
+		throw Parse::ServerError("needs a \';\'");
+}
 
 void Parse::fill_parts(vectstr_t vector, int &i, std::string &to_fill, std::string msg)
 {
@@ -436,7 +479,7 @@ void Parse::fill_server()
 				else if (vector[i] == "listen")
 					fill_listen_port(vector, i, server.port);
 				else if (vector[i] == "host")
-					fill_parts(vector, i, server.host, "host : ");
+					fill_host(vector, i, server, "host : ");
 				else if (vector[i] == "root")
 					fill_parts(vector, i, server.root, "root : ");
 				else if (vector[i] == "timeout")
