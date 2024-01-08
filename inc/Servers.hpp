@@ -15,7 +15,6 @@ class Servers
         std::string body;
         int partis;
         std::clock_t start;
-        // std::clock_t end;
         unsigned long  total;
         unsigned long  total_body;
         Message *responce;
@@ -25,7 +24,6 @@ class Servers
         unsigned long content_length;
 
     public:
-        // Servers();
         Servers(std::string request);
         void collect_req(char* request, int size);
         void collect_body(char* body, int size) {this->body.append(body, size);}
@@ -60,10 +58,4 @@ class Servers
         void set_bypass(int bypass) {this->bypass = bypass;}
         void set_pass_total(int total_pass) {this->pass_total += total_pass;}
         void set_content_length(unsigned long len) {this->content_length = len;}
-        // Servers(const Responce &responce);
-        // Servers(const Servers &other);
-        // is_ready();
-        // check_crlf();
-
-
 };

@@ -23,19 +23,15 @@ class Server
         Response resp;
         struct sockaddr_in address;
         struct timeval      timeout;
-        fd_set master_set, working_set, write_set1, write_set2, status1, status2;
+        fd_set master_set, working_set, write_set1, write_set2;
         std::vector<int> fds;
         std::map<int,Servers> serv;
         std::vector<std::pair<int, Servers> > serv2;
         std::map<int,Servers> msg;
         // std::vector<std::pair<int, Servers> > timeout_client;
         std::map<int,Servers> timeout_client;
-
-        Server();
     public:
         Server(std::vector<t_server> &server, Response &resp);
-        Server(const Server &other);
-        Server &operator=(const Server &other);
         void run();
         void start_server();
         void print_log(const std::string& str, const std::string& color, int count, unsigned long total, int content_length);
