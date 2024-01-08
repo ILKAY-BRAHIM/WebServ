@@ -116,7 +116,7 @@ t_server    Response:: fillServer(request req)
 	it = this->servS.begin();
 	while (it != this->servS.end() && found != 1)
 	{
-		if (it->name == server)
+		if (it->host == server || (it->name == server && it->name == "localhost"))
 		{
 			itt = it->port.begin();
 			while (itt != it->port.end())
