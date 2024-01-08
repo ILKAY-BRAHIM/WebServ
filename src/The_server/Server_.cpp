@@ -208,6 +208,8 @@ void Server::run()
                                     while (FD_ISSET(max_fd, &this->master_set) == 0)
                                         max_fd -= 1;
                                 }
+                                this->serv2.erase(it);
+                                break;
                             }
                             if (a > 0)
                             {
@@ -247,6 +249,8 @@ void Server::run()
                                     while (FD_ISSET(max_fd, &this->master_set) == 0)
                                         max_fd -= 1;
                                 }
+                                this->serv2.erase(it);
+                                break;
                             }
                             it->second.set_start(std::clock());
                             it->second.set_total_body(a);

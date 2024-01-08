@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <fstream>
+#include <signal.h>
 
 
 class Cgi {

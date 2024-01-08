@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <arpa/inet.h>
 #include <string>

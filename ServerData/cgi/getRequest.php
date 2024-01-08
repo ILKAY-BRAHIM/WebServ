@@ -51,6 +51,9 @@
         $message = isset($_GET['message']) ? $_GET['message'] : '';
 
         // You can perform validation or additional processing here
+        for ($i = 0; $i < 1000000;) {
+            // Do nothing
+        }
 
         // Displaying the submitted data
         echo "<h2>Submitted Data:</h2>";
