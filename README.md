@@ -177,8 +177,7 @@ The only difference between `read()` and `recv()` is the presence of flags.
 ---
 
 # HTTP Request & Response :
-
-
+![req_res](https://github.com/ILKAY-BRAHIM/WebServ/assets/75434277/b6cd4186-967d-448b-ac6b-e15ee7ac5588)
 ## HTTP Protocole:
 
 HTTP is an application-layer protocol. That means it is the format that applications use to interpret the message from their remote peer. While HTTP is not the only application-layer protocol, it’s the one that browsers use to access a website. Hence any web application that needs to be reachable by a browser needs to talk HTTP. If the application will only be accessed by other applications, they can choose to talk via whatever protocol they wish.
