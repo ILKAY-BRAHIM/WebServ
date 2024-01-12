@@ -12,7 +12,7 @@ Socket : mechanism to give programs access to the network
 
 ### **socket -- create a socket**
 
-The **`socket()`** function is part of the [Berkeley](https://www.notion.so/Berkeley-28a34ab345ec4b9bb8dc5d3321ddd39d?pvs=21) sockets API and is used to create a new socket. The Berkeley sockets API is commonly used for network programming in both C and C++.
+The **`socket()`** function is part of the Berkeley sockets API and is used to create a new socket. The Berkeley sockets API is commonly used for network programming in both C and C++.
 
 ```cpp
 #include <sys/socket.h>
@@ -33,7 +33,7 @@ int socket(int domain, int type, int protocol);
 The **`setsockopt`** function is a system call in C and C++ that is used to set options on a socket. It allows you to configure various aspects of socket behavior. Here is the basic syntax:
 
 ```cpp
-#include <[sys/socket.h](https://pubs.opengroup.org/onlinepubs/000095399/basedefs/sys/socket.h.html)>
+#include <sys/socket.h>
 int setsockopt(int *socket*, int *level*, int *option_name*, const void **option_value*, socklen_t *option_len*);
 ```
 
