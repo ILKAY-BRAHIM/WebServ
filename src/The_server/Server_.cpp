@@ -147,6 +147,14 @@ void Server::run()
                         std::cerr << "setsockopt error" << std::endl;
                         valid = 1;
                     }
+                    struct linger sl;
+                    sl.l_onoff = 1;
+                    sl.l_linger = 0;
+                    if(valid == 0 && setsockopt(new_socket, SOL_SOCKET, SO_LINGER, &sl, sizeof(sl)) < 0)
+                    {
+                        std::cerr << "setsockopt error" << std::endl;
+                        valid = 1;
+                    }
                     if (valid == 0 && this->serv.size() >= 1)
                     {
                         std::vector<std::pair<int, Servers> >::iterator ittt = this->serv2.end();
