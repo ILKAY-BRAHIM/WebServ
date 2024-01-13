@@ -1,26 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <link rel="icon" type="image/x-icon" href="../assets/logo.png">
-    <link rel="stylesheet" href="style.css">
-    <title>Webserv</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="./src/assets/logo.png">
+  <!-- Add a link to the Google Fonts API to import the Roboto font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <style>
+    body {
+      /* margin: 180; */
+      padding: 0;
+      margin-top: 10%;
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      transition: background-color 0.5s, color 0.5s;
+    }
+
+    h1 {
+      color: #020b12;
+      transition: color 1.5s;
+    }
+
+    a {
+      background-color: #ffffff;
+      color: #30575B;
+      width: 200px;
+      height: 40px;
+      border: 2px solid #3498db;
+      border-radius: 800px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    a:hover {
+      text-decoration: none;
+      background-color: #3498db;
+      color: #fff;
+    }
+
+    .container {
+      text-align: center;
+      background-color: #fff;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      /* margin-top: 180px; */
+      transition: background-color 0.5s, color 0.2s;
+    }
+
+    form {
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 80%;
+    }
+
+    .form-legend {
+      font-size: 24px;
+      color: #3498db;
+      margin-bottom: 10px;
+      margin: 15px 0;
+      font-size: 18px;
+      color: #333;
+      transition: color 1.5s;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 2px solid #3498db;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+      background-color: #ffffff;
+      color: #30575B;
+      width: 250px;
+      height: 40px;
+      border: 2px solid #3498db;
+      border-radius: 80px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #30575B;
+      color: #fff;
+    }
+
+    .centered-link {
+      text-decoration: none;
+      color: #3498db;
+      font-weight: bold;
+      transition: color 0.5s;
+      display: inline-block;
+      padding: 10px;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      margin: 5px;
+    }
+
+    .centered-link:hover {
+      text-decoration: none;
+      background-color: #3498db;
+      color: #fff;
+    }
+  </style>
+  <title>Webserv</title>
 </head>
+
 <body>
-    <h1>Hello world</h1>
-    <div class="container">
-        <form action="../../cgi/getRequest.php" method="get" enctype = "application/x-www-form-urlencoded" >
-            <legend class="form-legend">Get Form</legend>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" ><br><br>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" ><br><br>
-            <label for="message">Message:</label><br>
-            <textarea id="message" name="message" rows="4" cols="50" ></textarea><br><br>
-            <input type="submit" value="Submit">
-        </form>
-    </div>
-    <div class="container">
-        <a href="../../index.html" class="centered-link">back to home</a>
-    </div>
+  <h1>GET Method</h1>
+  <div class="container">
+    <form action="../../cgi/getRequest.php" method="get" enctype="application/x-www-form-urlencoded">
+      <legend class="form-legend">Get Form</legend>
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name"><br><br>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email"><br><br>
+      <label for="message">Message:</label><br>
+      <textarea id="message" name="message" rows="4" cols="50"></textarea><br><br>
+      <input type="submit" value="Submit">
+      <!-- <a href="../../index.html" class="centered-link">Back to Home</a> -->
+    </form>
+  </div>
+
+  <script>
+    const darkTheme = {
+      backgroundColor: "#f4f9f9",
+      secondBackground: "#ffffff",
+      borderColor: "#a6d3d1",
+      navBackground: "rgba(244, 249, 249, 0.85)",
+      headerColor: "#20504f",
+      textColor: "#30575B",
+      mainColor: "#338073",
+      secondColor: "#cae4e0",
+      gradientColor: "linear-gradient(45deg, #338073, #a6d3d1)",
+      boxShadow: "0px 4px 6px rgba(51, 128, 115, 0.3)",
+      keyword: "#276D6D",
+      className: "#3D9A8C"
+    };
+
+    document.body.style.backgroundColor = darkTheme.backgroundColor;
+    document.body.style.color = darkTheme.textColor;
+    document.querySelector('.container').style.backgroundColor = darkTheme.secondBackground;
+    document.querySelector('h1').style.color = darkTheme.headerColor;
+
+    const links = document.querySelectorAll('a');
+    links.forEach(link => {
+      link.style.color = darkTheme.textColor;
+      link.addEventListener('mouseover', () => {
+        link.style.textDecoration = 'none';
+        link.style.backgroundColor = darkTheme.textColor;
+        link.style.color = darkTheme.backgroundColor;
+      });
+      link.addEventListener('mouseout', () => {
+        link.style.textDecoration = 'none';
+        link.style.backgroundColor = '';
+        link.style.color = darkTheme.textColor;
+      });
+    });
+  </script>
 </body>
+
 </html>

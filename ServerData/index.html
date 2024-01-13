@@ -1,18 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="style.css">
-	<link rel="icon" type="image/x-icon" href="./src/assets/logo.png">
-	<title>Webserv</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="./src/assets/bchifou.jpeg">
+  <!-- Add a link to the Google Fonts API to import the Roboto font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <style>
+    body {
+      margin: 00;
+      padding: 0;
+      font-family: 'Roboto', sans-serif; /* Change the font-family to Roboto */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      transition: background-color 0.5s, color 0.5s;
+    }
+
+    .c {
+      text-align: center;
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 180px;
+      transition: background-color 0.5s, color 0.2s;
+    }
+
+    h1 {
+      color: #020b12;
+      transition: color 1.5s;
+    }
+
+    img {
+      width: 100px;
+      height: 100px;
+      margin-top: 10px;
+      border-radius: 50%;
+    }
+
+    .logo-container {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+
+    .logo-container img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    p {
+      margin: 15px 0;
+      font-size: 18px;
+      color: #333;
+      transition: color 1.5s;
+    }
+
+    a {
+	 width: 200px;
+      height: 40px;
+      text-decoration: none;
+      color: #3498db;
+      font-weight: bold;
+      transition: color 1.9s;
+      display: inline-block;
+      padding: 10px;
+      border: 2px solid #3498db;
+      border-radius: 80px;
+      margin: 5px;
+    }
+
+    a:hover {
+      text-decoration: none;
+      background-color: #3498db;
+      color: #fff;
+    }
+
+    .aside-logo img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-top: 20px;
+    }
+  </style>
+  <title>Webserv</title>
 </head>
+
 <body>
-	<div class="c">
-		<h1>Webserv</h1>
-		<img src="./src/assets/logo.png" alt="logo" style="width: 100px; height: 100px;">
-		<p><a href="src/form/getRequest.html">Send us a message</a></p>
-		<p><a href="src/form/postRequest.html">Upload your files</a></p>
-	</div>
+  <div class="c">
+    <h1>Team Collaboration in Webserv</h1>
+    <div class="logo-container">
+      <img src="./src/assets/bchifou.jpeg" alt="Logo 2">
+      <img src="./src/assets/admansar.jpeg" alt="Logo 4">
+      <img src="./src/assets/rrasezin.jpeg" alt="Logo 3">
+    </div>
+    <p><a href="src/form/getRequest.html"> Get method  </a></p>
+    <p><a href="src/form/postRequest.html">POST method</a></p>
+    <p><a href="src/form/postRequest.html">DELETE method</a></p>
+    <p><a href="src/form/postRequest.html">Upload in CGI</a></p>
+    <p><a href="./login_session/welcome.php">COOKIES & SESSION</a></p>
+  </div>
+
+  <script>
+    const darkTheme = {
+  backgroundColor: "#f4f9f9", // A very light teal, almost white, for the background
+  secondBackground: "#ffffff", // Pure white for cards and modal backgrounds for contrast
+  borderColor: "#a6d3d1", // A softened version of the teal color for subtle borders
+  navBackground: "rgba(244, 249, 249, 0.85)", // Translucent navigation background, harmonious with the main background
+  headerColor: "#20504f", // A darker version of the teal for a contrasting header text
+  textColor: "#30575B", // A slightly desaturated and darker teal for readable body text
+  mainColor: "#338073", // The provided calming teal color for primary buttons and highlights
+  secondColor: "#cae4e0", // A pastel version of the teal for secondary accents and UI elements
+  gradientColor: "linear-gradient(45deg, #338073, #a6d3d1)", // A soft gradient using the main and lightened teal
+  boxShadow: "0px 4px 6px rgba(51, 128, 115, 0.3)", // A subtle shadow that enhances elements without stark contrast
+  keyword: "#276D6D", // Slightly more saturated teal for programming keywords, call to actions, or important information
+  className: "#3D9A8C" // A harmonious yet distinct teal variant for class names and categorical tags
+};
+
+    // Apply dark theme styles
+    document.body.style.backgroundColor = darkTheme.backgroundColor;
+    document.body.style.color = darkTheme.textColor;
+    document.querySelector('.c').style.backgroundColor = darkTheme.secondBackground;
+    document.querySelector('h1').style.color = darkTheme.headerColor;
+
+    const paragraphs = document.querySelectorAll('p');
+    paragraphs.forEach(p => p.style.color = darkTheme.textColor);
+
+    const links = document.querySelectorAll('a');
+    links.forEach(link => {
+      link.style.color = darkTheme.textColor;
+      link.addEventListener('mouseover', () => {
+        link.style.textDecoration = 'none';
+        link.style.backgroundColor = darkTheme.textColor;
+        link.style.color = darkTheme.backgroundColor;
+      });
+      link.addEventListener('mouseout', () => {
+        link.style.textDecoration = 'none';
+        link.style.backgroundColor = '';
+        link.style.color = darkTheme.textColor;
+      });
+    });
+  </script>
 </body>
+
 </html>

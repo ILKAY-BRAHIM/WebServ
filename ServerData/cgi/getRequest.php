@@ -5,55 +5,50 @@
    * {
     margin: 0;
     padding: 0;
+    margin-top: 10%;
     box-sizing: border-box;
     font-family: 'Courier New', Courier, monospace;
-    /* background-color: #f4f4f4; */
    }
    body {
-         background-color: #d7d3d3;
-         margin: 1.2rem 20%;
+        /* margin-top: 20%; */
+         background-color: #f4f9f9;
+         margin: 1.2rem 10%; /* Adjusted margin to center content */
    }
    h1 {
     text-align: center;
-    /* margin: 1.5em; */
+    margin: 1em 0;
    }
    h2 {
     margin: 1em 0;
    }
    p {
-    margin: 0.5em;
+    margin: 2.5em;
     word-wrap: break-word;
-
    }
     .c {
-     margin : 15%;
-     padding: 3em;
+     margin: 5%; /* Adjusted margin for better visibility */
+     padding: 1em; /* Reduced padding */
      border-radius: 0.5em;
      box-shadow: 0 0 0.5em #ccc;
     }
     .m {
-        background-color: #cdc8c8;
-        padding : 1em;
-        margin-top : 2em;
-         border-radius: 0.5em;
-
+        background-color: #fff; /* Changed background color */
+        padding: 1em;
+        margin-top: 1em; /* Adjusted margin-top */
+        border-radius: 0.5em;
+        box-shadow: 0 0 0.5em #ccc; /* Added box shadow */
     }
 </style>
 </head>
-<body >
+<body>
 <div class="c">
-	<h1>Test GET Request</h1>
+    <h1>GET Request</h1>
     <?php
     if ($_SERVER["REQUEST_METHOD"] == "GET") {
         // Retrieving form data
         $name = isset($_GET['name']) ? $_GET['name'] : '';
         $email = isset($_GET['email']) ? $_GET['email'] : '';
         $message = isset($_GET['message']) ? $_GET['message'] : '';
-
-        // You can perform validation or additional processing here
-        for ($i = 0; $i < 1000000;) {
-            // Do nothing
-        }
 
         // Displaying the submitted data
         echo "<h2>Submitted Data:</h2>";
